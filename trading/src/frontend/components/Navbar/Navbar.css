@@ -1,0 +1,427 @@
+* {
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   NAVBAR
+========================================= */
+
+.navbar {
+    width: 100%;
+    height: 66px;
+
+    background: #050c1b;
+
+    position: sticky;
+    top: 0;
+    left: 0;
+
+    z-index: 1000;
+}
+
+
+/* =========================================
+   NAVBAR CONTAINER
+========================================= */
+
+.navbar-container {
+    width: 100%;
+    height: 100%;
+
+    margin: 0;
+    padding: 0 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+/* =========================================
+   LOGO
+========================================= */
+
+.navbar-logo {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    letter-spacing: -0.3px;
+
+    white-space: nowrap;
+}
+
+.logo-box {
+    width: 14px;
+    height: 14px;
+
+    background: #4285f4;
+
+    display: block;
+}
+
+
+/* =========================================
+   MENU
+========================================= */
+
+.navbar-menu {
+    display: flex;
+    align-items: center;
+
+    gap: 30px;
+
+    margin-left: auto;
+    margin-right: 34px;
+}
+
+.navbar-menu a {
+    position: relative;
+
+    color: #8d99ad;
+
+    text-decoration: none;
+
+    font-size: 16px;
+    font-weight: 400;
+
+    transition: all 0.3s ease;
+}
+
+
+/* Hover */
+
+.navbar-menu a:hover {
+    color: #ffffff;
+}
+
+
+/* React Router active link */
+
+.navbar-menu a.active {
+    color: #4285f4;
+}
+
+
+/* =========================================
+   GET STARTED
+========================================= */
+
+.get-started {
+    height: 32px;
+    min-width: 100px;
+
+    padding: 0 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #ffffff;
+
+    border-radius: 20px;
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    transition: all 0.3s ease;
+}
+
+.get-started:hover {
+    background: #ffffff;
+
+    color: #050c1b;
+}
+
+
+/* Mobile button hidden */
+
+.mobile-get-started {
+    display: none !important;
+}
+
+
+/* =========================================
+   MOBILE MENU BUTTON
+========================================= */
+
+.menu-toggle {
+    display: none;
+
+    width: 35px;
+    height: 35px;
+
+    padding: 7px;
+
+    background: transparent;
+
+    border: none;
+
+    cursor: pointer;
+}
+
+.menu-toggle span {
+    display: block;
+
+    width: 21px;
+    height: 2px;
+
+    margin: 5px auto;
+
+    background: #ffffff;
+
+    transition: all 0.3s ease;
+}
+
+
+/* =========================================
+   HAMBURGER ANIMATION
+========================================= */
+
+.menu-toggle.open span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.menu-toggle.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle.open span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+
+/* =========================================
+   LAPTOP
+========================================= */
+
+@media (max-width: 1100px) {
+
+    .navbar-container {
+        padding: 0 30px;
+    }
+
+    .navbar-menu {
+        gap: 22px;
+
+        margin-right: 25px;
+    }
+
+    .navbar-menu a {
+        font-size: 14px;
+    }
+
+    .get-started {
+        min-width: 90px;
+
+        font-size: 13px;
+    }
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 850px) {
+
+    .navbar-container {
+        padding: 0 20px;
+    }
+
+    .navbar-menu {
+        gap: 15px;
+
+        margin-right: 15px;
+    }
+
+    .navbar-menu a {
+        font-size: 13px;
+    }
+
+    .get-started {
+        min-width: 80px;
+
+        padding: 0 12px;
+    }
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 700px) {
+
+    .navbar {
+        height: 62px;
+    }
+
+    .navbar-container {
+        padding: 0 18px;
+    }
+
+
+    /* Hide desktop button */
+
+    .get-started {
+        display: none;
+    }
+
+
+    /* Show hamburger */
+
+    .menu-toggle {
+        display: block;
+    }
+
+
+    /* Mobile menu */
+
+    .navbar-menu {
+        position: absolute;
+
+        top: 62px;
+        left: 0;
+
+        width: 100%;
+
+        margin: 0;
+
+        padding: 20px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+
+        gap: 0;
+
+        background: #050c1b;
+
+        border-top: 1px solid #1d2533;
+        border-bottom: 1px solid #1d2533;
+
+        opacity: 0;
+
+        visibility: hidden;
+
+        transform: translateY(-10px);
+
+        transition: all 0.3s ease;
+    }
+
+
+    /* Open menu */
+
+    .navbar-menu.active {
+        opacity: 1;
+
+        visibility: visible;
+
+        transform: translateY(0);
+    }
+
+
+    /* Mobile links */
+
+    .navbar-menu a {
+        width: 100%;
+
+        padding: 14px 5px;
+
+        font-size: 16px;
+
+        border-bottom: 1px solid #151e2d;
+    }
+
+
+    /* Don't add border to Get Started */
+
+    .navbar-menu a.mobile-get-started {
+        border-bottom: none;
+    }
+
+
+    /* Mobile Get Started */
+
+    .mobile-get-started {
+        display: flex !important;
+
+        align-items: center;
+
+        justify-content: center;
+
+        margin-top: 12px;
+
+        border: 1px solid #ffffff !important;
+
+        border-radius: 20px;
+
+        color: #ffffff !important;
+    }
+
+
+    /* Active mobile link */
+
+    .navbar-menu a.active {
+        color: #4285f4;
+    }
+}
+
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 400px) {
+
+    .navbar {
+        height: 58px;
+    }
+
+    .navbar-container {
+        padding: 0 14px;
+    }
+
+    .navbar-logo {
+        font-size: 14px;
+    }
+
+    .logo-box {
+        width: 12px;
+        height: 12px;
+    }
+
+    .navbar-menu {
+        top: 58px;
+    }
+}
+
+
+/* =========================================
+   VERY SMALL MOBILE
+========================================= */
+
+@media (max-width: 320px) {
+
+    .navbar-logo {
+        font-size: 13px;
+    }
+
+    .menu-toggle {
+        width: 32px;
+    }
+}

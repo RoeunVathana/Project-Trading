@@ -1,0 +1,475 @@
+/* =====================================================
+   ENGINEERING SECTION
+===================================================== */
+
+.engineering-section {
+    width: 100%;
+
+    background: #080d18;
+
+    color: #fff;
+}
+
+
+/* =====================================================
+   ENGINEERING CONSULTATION
+===================================================== */
+
+.engineering-consultation {
+    width: calc(100% - 100px);
+
+    min-height: 251px;
+
+    margin: 0 auto;
+
+    padding: 45px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 50px;
+
+    background: #151515;
+
+    border: 1px solid #282828;
+}
+
+.engineering-consultation-content {
+    min-width: 0;
+}
+
+.engineering-label {
+    margin-bottom: 15px;
+
+    color: #287eff;
+
+    font-size: 8px;
+    font-weight: 700;
+
+    letter-spacing: 1.2px;
+}
+
+.engineering-label span {
+    margin-right: 5px;
+}
+
+.engineering-consultation h2 {
+    margin: 0 0 14px;
+
+    color: #f2f2f2;
+
+    font-size: 28px;
+    font-weight: 400;
+
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+}
+
+.engineering-consultation p {
+    width: 500px;
+    max-width: 100%;
+
+    margin: 0;
+
+    color: #85878b;
+
+    font-size: 11px;
+    font-weight: 400;
+
+    line-height: 1.65;
+}
+
+
+/* =====================================================
+   CONSULTATION ACTION
+===================================================== */
+
+.engineering-consultation-action {
+    flex-shrink: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+
+    width: 225px;
+}
+
+.engineering-primary-button {
+    width: 176px;
+    height: 37px;
+
+    border: 1px solid #287eff;
+
+    background: #287eff;
+
+    color: #fff;
+
+    font-family: inherit;
+
+    font-size: 8px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+}
+
+.engineering-primary-button:hover {
+    background: #1265d6;
+
+    border-color: #1265d6;
+}
+
+.engineering-primary-button:active {
+    transform: scale(0.98);
+}
+
+.engineering-consultation-action span {
+    margin-top: 11px;
+
+    color: #666a70;
+
+    font-size: 7px;
+}
+
+
+/* =====================================================
+   CUSTOM STRUCTURAL AUDIT
+===================================================== */
+
+.structural-audit {
+    width: 100%;
+
+    min-height: 213px;
+
+    margin-top: 91px;
+
+    padding: 50px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 40px;
+
+    background: #151515;
+
+    border-top: 1px solid #222;
+    border-bottom: 1px solid #222;
+}
+
+.structural-audit-content {
+    max-width: 520px;
+}
+
+.structural-audit h2 {
+    margin: 0 0 13px;
+
+    color: #f1f1f1;
+
+    font-size: 23px;
+    font-weight: 400;
+
+    line-height: 1.2;
+}
+
+.structural-audit p {
+    width: 500px;
+    max-width: 100%;
+
+    margin: 0;
+
+    color: #85878b;
+
+    font-size: 10px;
+    line-height: 1.65;
+}
+
+.engineering-outline-button {
+    flex-shrink: 0;
+
+    width: 134px;
+    height: 39px;
+
+    border: 1px solid #287eff;
+
+    background: transparent;
+
+    color: #fff;
+
+    font-family: inherit;
+
+    font-size: 7px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+}
+
+.engineering-outline-button:hover {
+    background: #287eff;
+
+    color: #fff;
+}
+
+.engineering-outline-button:active {
+    transform: scale(0.98);
+}
+
+
+/* =====================================================
+   LARGE DESKTOP
+===================================================== */
+
+@media (min-width: 1400px) {
+
+    .engineering-consultation {
+        width: calc(100% - 100px);
+
+        min-height: 251px;
+
+        padding: 45px;
+    }
+
+    .engineering-consultation h2 {
+        font-size: 29px;
+    }
+
+    .structural-audit {
+        padding: 50px;
+    }
+}
+
+
+/* =====================================================
+   LAPTOP
+===================================================== */
+
+@media (max-width: 1200px) {
+
+    .engineering-consultation {
+        width: calc(100% - 80px);
+
+        padding: 40px;
+    }
+
+    .engineering-consultation h2 {
+        font-size: 25px;
+    }
+
+    .engineering-consultation p {
+        width: 450px;
+    }
+
+    .structural-audit {
+        padding: 45px 40px;
+    }
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 850px) {
+
+    .engineering-consultation {
+        width: calc(100% - 60px);
+
+        min-height: auto;
+
+        padding: 40px 30px;
+
+        gap: 30px;
+    }
+
+    .engineering-consultation h2 {
+        font-size: 23px;
+    }
+
+    .engineering-consultation p {
+        width: 100%;
+
+        font-size: 10px;
+    }
+
+    .engineering-consultation-action {
+        width: 190px;
+    }
+
+    .engineering-primary-button {
+        width: 165px;
+    }
+
+    .structural-audit {
+        min-height: 190px;
+
+        margin-top: 70px;
+
+        padding: 40px 30px;
+    }
+
+    .structural-audit h2 {
+        font-size: 21px;
+    }
+
+    .structural-audit p {
+        width: 100%;
+    }
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 650px) {
+
+    .engineering-consultation {
+        width: calc(100% - 40px);
+
+        padding: 35px 25px;
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 30px;
+    }
+
+    .engineering-label {
+        font-size: 8px;
+    }
+
+    .engineering-consultation h2 {
+        font-size: 23px;
+
+        line-height: 1.25;
+    }
+
+    .engineering-consultation h2 br {
+        display: none;
+    }
+
+    .engineering-consultation p {
+        width: 100%;
+
+        font-size: 10px;
+    }
+
+    .engineering-consultation-action {
+        width: 100%;
+
+        align-items: flex-start;
+    }
+
+    .engineering-primary-button {
+        width: 100%;
+
+        height: 40px;
+
+        font-size: 8px;
+    }
+
+    .engineering-consultation-action span {
+        font-size: 7px;
+    }
+
+
+    /* STRUCTURAL AUDIT */
+
+    .structural-audit {
+        min-height: auto;
+
+        margin-top: 50px;
+
+        padding: 40px 25px;
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 25px;
+    }
+
+    .structural-audit h2 {
+        font-size: 21px;
+    }
+
+    .structural-audit p {
+        font-size: 10px;
+    }
+
+    .engineering-outline-button {
+        width: 100%;
+
+        height: 40px;
+
+        font-size: 8px;
+    }
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media (max-width: 400px) {
+
+    .engineering-consultation {
+        width: calc(100% - 30px);
+
+        padding: 30px 20px;
+    }
+
+    .engineering-consultation h2 {
+        font-size: 20px;
+    }
+
+    .engineering-consultation p {
+        font-size: 9px;
+    }
+
+    .structural-audit {
+        margin-top: 40px;
+
+        padding: 35px 20px;
+    }
+
+    .structural-audit h2 {
+        font-size: 19px;
+    }
+
+    .structural-audit p {
+        font-size: 9px;
+    }
+}
+
+
+/* =====================================================
+   VERY SMALL MOBILE
+===================================================== */
+
+@media (max-width: 320px) {
+
+    .engineering-consultation {
+        width: calc(100% - 24px);
+
+        padding: 25px 16px;
+    }
+
+    .engineering-consultation h2 {
+        font-size: 18px;
+    }
+
+    .structural-audit {
+        padding: 30px 16px;
+    }
+
+    .structural-audit h2 {
+        font-size: 17px;
+    }
+}
