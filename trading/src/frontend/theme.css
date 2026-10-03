@@ -1,0 +1,149 @@
+:root {
+  color-scheme: dark;
+  --theme-surface-0: #0b0b0b;
+  --theme-surface-1: #121212;
+  --theme-surface-2: #1b1b1b;
+  --theme-surface-3: #252525;
+  --theme-text-strong: #f5f5f5;
+  --theme-text-primary: #d6d6d6;
+  --theme-text-muted: #a3a3a3;
+  --theme-accent-text: #72b0ff;
+  --theme-success-text: #3cdaa0;
+  --theme-cyan-text: #00d9e8;
+  --theme-text-on-accent: #ffffff;
+  --theme-text-on-bright: #10233c;
+  --theme-border: #303030;
+  --theme-focus: #63a6ff;
+  background: var(--theme-surface-0);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --theme-surface-0: #f4f7fb;
+  --theme-surface-1: #ffffff;
+  --theme-surface-2: #edf2f8;
+  --theme-surface-3: #e3ebf4;
+  --theme-text-strong: #152238;
+  --theme-text-primary: #34445b;
+  --theme-text-muted: #5b6b80;
+  --theme-accent-text: #075bbb;
+  --theme-success-text: #007a4b;
+  --theme-cyan-text: #007783;
+  --theme-text-on-accent: #ffffff;
+  --theme-text-on-bright: #10233c;
+  --theme-border: #d3deea;
+  --theme-focus: #1769cf;
+}
+
+html {
+  min-width: 320px;
+  background: var(--theme-surface-0);
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--theme-surface-0);
+  color: var(--theme-text-strong);
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+::selection {
+  background: rgba(37, 135, 255, 0.25);
+}
+
+:focus-visible {
+  outline: 2px solid var(--theme-focus);
+  outline-offset: 3px;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+:root[data-theme="light"] .distribution-hero {
+  background: linear-gradient(110deg, #ffffff 0%, #f1f5fa 60%, #e8eef6 100%);
+}
+
+:root[data-theme="light"] .distribution-hero::after {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.34));
+}
+
+:root[data-theme="light"] .reference-hero {
+  background-image:
+    linear-gradient(90deg, rgba(247, 249, 252, 0.97), rgba(247, 249, 252, 0.93) 48%, rgba(247, 249, 252, 0.82)),
+    url("https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=1600&q=80");
+}
+
+:root[data-theme="light"] .product-hero-overlay {
+  background: linear-gradient(90deg, rgba(247, 249, 252, 0.97) 0%, rgba(247, 249, 252, 0.91) 38%, rgba(247, 249, 252, 0.68) 72%, rgba(247, 249, 252, 0.8) 100%);
+}
+
+:root[data-theme="dark"] .distribution-hero {
+  background: linear-gradient(110deg, #0b0b0b 0%, #151515 60%, #202020 100%);
+}
+
+:root[data-theme="dark"] .distribution-hero::after {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.3));
+}
+
+:root[data-theme="dark"] .reference-hero {
+  background-image:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0.75) 48%, rgba(0, 0, 0, 0.68)),
+    url("https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=1600&q=80");
+}
+
+:root[data-theme="dark"] .product-hero-overlay {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.75) 45%, rgba(0, 0, 0, 0.68) 100%);
+}
+
+:root[data-theme="light"] .menu-toggle span {
+  background: var(--theme-text-strong);
+}
+
+:root[data-theme="light"] .reference-hero::before {
+  background-image:
+    linear-gradient(rgba(35, 67, 108, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(35, 67, 108, 0.07) 1px, transparent 1px);
+}
+
+.dashboard-btn,
+.metric-switch button.active,
+.footer-logo-icon,
+.lifecycle-number,
+.compliance-page .configure-button,
+.reference-filter-btn,
+.no-projects button,
+.product-badge,
+.product-page .configure-button,
+.product-pagination .pagination-active,
+.product-detail-not-found button,
+.engineering-primary-button,
+.engineering-outline-button:hover {
+  color: var(--theme-text-on-accent);
+}
+
+.get-started:hover,
+.compliance-page .configure-button:hover,
+.product-detail-contact:hover {
+  color: var(--theme-text-on-bright);
+}
+
+.filter-group input:checked::after {
+  border-color: var(--theme-text-on-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

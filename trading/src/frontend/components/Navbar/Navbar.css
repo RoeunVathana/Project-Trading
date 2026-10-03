@@ -11,7 +11,7 @@
     width: 100%;
     height: 66px;
 
-    background: #050c1b;
+    background: var(--theme-surface-0);
 
     position: sticky;
     top: 0;
@@ -37,6 +37,39 @@
     justify-content: space-between;
 }
 
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.theme-toggle {
+    min-height: 34px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid var(--theme-border);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--theme-text-strong);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.theme-toggle:hover {
+    border-color: #4285f4;
+    background: rgba(66, 133, 244, 0.12);
+}
+
+.theme-toggle-icon {
+    font-size: 16px;
+    line-height: 1;
+}
+
 
 /* =========================================
    LOGO
@@ -48,7 +81,7 @@
 
     gap: 8px;
 
-    color: #ffffff;
+    color: var(--theme-text-strong);
 
     text-decoration: none;
 
@@ -70,6 +103,8 @@
 }
 
 
+
+
 /* =========================================
    MENU
 ========================================= */
@@ -87,7 +122,7 @@
 .navbar-menu a {
     position: relative;
 
-    color: #8d99ad;
+    color: var(--theme-text-primary);
 
     text-decoration: none;
 
@@ -101,14 +136,14 @@
 /* Hover */
 
 .navbar-menu a:hover {
-    color: #ffffff;
+    color: var(--theme-text-strong);
 }
 
 
 /* React Router active link */
 
 .navbar-menu a.active {
-    color: #4285f4;
+    color: var(--theme-accent-text);
 }
 
 
@@ -126,11 +161,11 @@
     align-items: center;
     justify-content: center;
 
-    border: 1px solid #ffffff;
+    border: 1px solid var(--theme-border);
 
     border-radius: 20px;
 
-    color: #ffffff;
+    color: var(--theme-text-strong);
 
     text-decoration: none;
 
@@ -143,7 +178,7 @@
 .get-started:hover {
     background: #ffffff;
 
-    color: #050c1b;
+    color: var(--theme-text-strong);
 }
 
 
@@ -257,6 +292,36 @@
 
         padding: 0 12px;
     }
+
+    .navbar-actions {
+        gap: 8px;
+    }
+
+    .theme-toggle {
+        padding: 0 9px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 850px) {
+
+    .theme-toggle {
+        width: 36px;
+        padding: 0;
+        border-radius: 50%;
+    }
+
+    .theme-toggle-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
 }
 
 
@@ -264,7 +329,7 @@
    MOBILE
 ========================================= */
 
-@media (max-width: 700px) {
+@media (max-width: 760px) {
 
     .navbar {
         height: 62px;
@@ -288,6 +353,16 @@
         display: block;
     }
 
+    .navbar-actions {
+        gap: 6px;
+    }
+
+    .theme-toggle {
+        width: 36px;
+        min-height: 36px;
+        padding: 0;
+        border-radius: 50%;
+    }
 
     /* Mobile menu */
 
@@ -309,10 +384,10 @@
 
         gap: 0;
 
-        background: #050c1b;
+        background: var(--theme-surface-0);
 
-        border-top: 1px solid #1d2533;
-        border-bottom: 1px solid #1d2533;
+        border-top: 1px solid var(--theme-border);
+        border-bottom: 1px solid var(--theme-border);
 
         opacity: 0;
 
@@ -344,7 +419,7 @@
 
         font-size: 16px;
 
-        border-bottom: 1px solid #151e2d;
+        border-bottom: 1px solid var(--theme-border);
     }
 
 
@@ -366,18 +441,18 @@
 
         margin-top: 12px;
 
-        border: 1px solid #ffffff !important;
+        border: 1px solid var(--theme-border) !important;
 
         border-radius: 20px;
 
-        color: #ffffff !important;
+        color: var(--theme-text-strong) !important;
     }
 
 
     /* Active mobile link */
 
     .navbar-menu a.active {
-        color: #4285f4;
+        color: var(--theme-accent-text);
     }
 }
 
@@ -423,5 +498,10 @@
 
     .menu-toggle {
         width: 32px;
+    }
+
+    .theme-toggle {
+        width: 32px;
+        min-height: 32px;
     }
 }

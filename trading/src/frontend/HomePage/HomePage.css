@@ -15,8 +15,8 @@
     width: 100%;
     min-height: 100vh;
 
-    background: #07152a;
-    color: #ffffff;
+    background: var(--theme-surface-1);
+    color: var(--theme-text-strong);
 
     overflow: hidden;
 }
@@ -44,8 +44,8 @@
     width: 100%;
     min-height: 610px;
 
-    background: #08182d;
-    border-top: 1px solid #16243a;
+    background: var(--theme-surface-1);
+    border-top: 1px solid var(--theme-border);
 
     display: flex;
     align-items: center;
@@ -83,8 +83,8 @@
     margin-bottom: 28px;
     padding: 5px 10px;
 
-    background: #152744;
-    color: #1680ff;
+    background: var(--theme-surface-2);
+    color: var(--theme-accent-text);
 
     border-left: 3px solid #1680ff;
 
@@ -109,7 +109,7 @@
 
 .hero-content h1 span {
     display: block;
-    color: #388cff;
+    color: var(--theme-accent-text);
 }
 
 .hero-content p {
@@ -117,7 +117,7 @@
 
     margin-top: 30px;
 
-    color: #8999ae;
+    color: var(--theme-text-primary);
 
     font-size: 16px;
     line-height: 1.7;
@@ -139,9 +139,9 @@
     width: 100%;
     max-width: 540px;
 
-    background: #0c172b;
+    background: var(--theme-surface-1);
 
-    border: 1px solid #1d2b40;
+    border: 1px solid var(--theme-border);
     border-radius: 8px;
 
     overflow: hidden;
@@ -168,7 +168,7 @@
     align-items: center;
     justify-content: space-between;
 
-    color: #687a93;
+    color: var(--theme-text-muted);
 
     font-size: 12px;
     font-weight: 600;
@@ -188,7 +188,7 @@
 }
 
 .machine-status {
-    color: #2487ff;
+    color: var(--theme-accent-text);
     font-weight: 700;
 }
 
@@ -200,7 +200,7 @@
 .machine-section {
     width: 100%;
 
-    background: #08182d;
+    background: var(--theme-surface-1);
 
     padding-top: 110px;
     padding-bottom: 75px;
@@ -209,7 +209,7 @@
 .section-label {
     margin-bottom: 14px;
 
-    color: #2587ff;
+    color: var(--theme-accent-text);
 
     font-size: 13px;
     font-weight: 700;
@@ -219,7 +219,7 @@
 .section-container h2 {
     margin: 0 0 40px;
 
-    color: #ffffff;
+    color: var(--theme-text-strong);
 
     font-size: clamp(34px, 4vw, 50px);
     line-height: 1;
@@ -250,12 +250,12 @@
     display: flex;
     align-items: center;
 
-    background: #0d192e;
+    background: var(--theme-surface-1);
 
-    border: 1px solid #1c2b42;
+    border: 1px solid var(--theme-border);
     border-radius: 7px;
 
-    color: #7e8da2;
+    color: var(--theme-text-primary);
 
     font-size: 13px;
     font-weight: 500;
@@ -266,7 +266,7 @@
 
 .hardware-card:hover {
     border-color: #2787ff;
-    color: #ffffff;
+    color: var(--theme-text-strong);
 
     transform: translateY(-2px);
 }
@@ -279,7 +279,7 @@
 .spec-section {
     width: 100%;
 
-    background: #030a17;
+    background: var(--theme-surface-0);
 
     padding-top: 85px;
     padding-bottom: 100px;
@@ -311,7 +311,7 @@
 .spec-content h3 {
     margin: 0 0 24px;
 
-    color: #ffffff;
+    color: var(--theme-text-strong);
 
     font-size: 27px;
     line-height: 1.1;
@@ -324,7 +324,7 @@
 
     margin: 0 0 30px;
 
-    color: #7f8da2;
+    color: var(--theme-text-primary);
 
     font-size: 16px;
     line-height: 1.7;
@@ -353,19 +353,19 @@
 
     gap: 15px;
 
-    background: #101c31;
+    background: var(--theme-surface-1);
 
-    border: 1px solid #1e2d44;
+    border: 1px solid var(--theme-border);
     border-radius: 6px;
 
-    color: #ffffff;
+    color: var(--theme-text-strong);
 
     font-size: 13px;
     font-weight: 600;
 }
 
 .spec-tag strong {
-    color: #2587ff;
+    color: var(--theme-accent-text);
 
     white-space: nowrap;
 
@@ -383,9 +383,9 @@
 
     overflow: hidden;
 
-    background: #0b1629;
+    background: var(--theme-surface-1);
 
-    border: 1px solid #1d2b42;
+    border: 1px solid var(--theme-border);
     border-radius: 8px;
 }
 
@@ -398,9 +398,9 @@
     align-items: center;
     justify-content: space-between;
 
-    background: #202d42;
+    background: var(--theme-surface-2);
 
-    color: #ffffff;
+    color: var(--theme-text-strong);
 
     font-size: 13px;
     font-weight: 700;
@@ -408,7 +408,7 @@
 }
 
 .table-header span:last-child {
-    color: #398dff;
+    color: var(--theme-accent-text);
 }
 
 .table-row {
@@ -422,15 +422,15 @@
 
     gap: 20px;
 
-    border-top: 1px solid #1a2940;
+    border-top: 1px solid var(--theme-border);
 
-    color: #8090a7;
+    color: var(--theme-text-primary);
 
     font-size: 14px;
 }
 
 .table-row strong {
-    color: #ffffff;
+    color: var(--theme-text-strong);
 
     text-align: right;
     white-space: nowrap;

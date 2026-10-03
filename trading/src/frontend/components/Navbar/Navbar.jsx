@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { useTheme } from "../ThemeContext";
 import "./Navbar.css";
-
+import SNTT from "../../../assets/SNTT.png";
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const nextTheme = theme === "dark" ? "light" : "dark";
 
   // Close mobile menu
   const closeMenu = () => {
@@ -15,8 +18,8 @@ const Navbar = () => {
       <div className="navbar-container">
         {/* Logo */}
         <NavLink to="/" className="navbar-logo" onClick={closeMenu}>
-          <span className="logo-box"></span>
-          <span>EFSAN MACHINE</span>
+          {/* <span className="logo-box"></span> */}
+          <span><img src={SNTT} alt="SNTT Logo" width="100px" /></span>
         </NavLink>
 
         {/* Menu */}
@@ -55,23 +58,37 @@ const Navbar = () => {
           </NavLink>
         </div>
 
-        {/* Desktop Get Started */}
-        <NavLink to="/get-started" className="get-started">
-          Get Started
-        </NavLink>
+        <div className="navbar-actions">
+          <NavLink to="/get-started" className="get-started">
+            Get Started
+          </NavLink>
 
-        {/* Mobile Menu Button */}
-        <button
-          type="button"
-          className={`menu-toggle ${open ? "open" : ""}`}
-          onClick={() => setOpen(!open)}
-          aria-label="Toggle navigation"
-          aria-expanded={open}
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${nextTheme} mode`}
+            aria-pressed={theme === "dark"}
+            title={`Switch to ${nextTheme} mode`}
+          >
+            <span className="theme-toggle-icon" aria-hidden="true">
+              {theme === "dark" ? "☀" : "☾"}
+            </span>
+            <span className="theme-toggle-label">{nextTheme} mode</span>
+          </button>
+
+          <button
+            type="button"
+            className={`menu-toggle ${open ? "open" : ""}`}
+            onClick={() => setOpen(!open)}
+            aria-label="Toggle navigation"
+            aria-expanded={open}
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
       </div>
     </nav>
   );

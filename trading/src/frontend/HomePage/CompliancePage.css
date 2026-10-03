@@ -14,8 +14,8 @@
 .compliance-page {
     width: 100%;
     min-height: 100vh;
-    background: #07152a;
-    color: #ffffff;
+    background: var(--theme-surface-1);
+    color: var(--theme-text-strong);
     overflow: hidden;
 }
 
@@ -41,7 +41,7 @@
 
 .compliance-section {
     width: 100%;
-    background: #08182d;
+    background: var(--theme-surface-1);
     padding-top: 80px;
     padding-bottom: 80px;
 }
@@ -49,7 +49,7 @@
 .compliance-label,
 .lifecycle-label {
     margin-bottom: 14px;
-    color: #328cff;
+    color: var(--theme-accent-text);
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 2px;
@@ -58,7 +58,7 @@
 .compliance-section h1,
 .lifecycle-section h1 {
     margin: 0;
-    color: #ffffff;
+    color: var(--theme-text-strong);
     font-size: clamp(36px, 4vw, 50px);
     line-height: 1;
     font-weight: 900;
@@ -89,8 +89,8 @@
     min-height: 175px;
     padding: 28px 29px;
 
-    background: #101b30;
-    border: 1px solid #1e2d44;
+    background: var(--theme-surface-1);
+    border: 1px solid var(--theme-border);
     border-radius: 11px;
 
     overflow: hidden;
@@ -108,7 +108,7 @@
     right: -75px;
     top: -80px;
 
-    background: #172541;
+    background: var(--theme-surface-2);
     border-radius: 50%;
 
     pointer-events: none;
@@ -135,7 +135,7 @@
 
 .card-top h2 {
     margin: 0;
-    color: #ffffff;
+    color: var(--theme-text-strong);
     font-size: 18px;
     font-weight: 700;
 }
@@ -161,7 +161,7 @@
 
     margin: 22px 0 15px;
 
-    color: #318aff;
+    color: var(--theme-accent-text);
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 1px;
@@ -174,7 +174,7 @@
     max-width: 340px;
     margin: 0;
 
-    color: #8290a5;
+    color: var(--theme-text-primary);
     font-size: 15px;
     line-height: 1.55;
 }
@@ -187,7 +187,7 @@
 
 .lifecycle-section {
     width: 100%;
-    background: #030a17;
+    background: var(--theme-surface-0);
     padding-top: 80px;
     padding-bottom: 80px;
 }
@@ -210,8 +210,8 @@
     min-height: 180px;
     padding: 18px;
 
-    background: #101a2e;
-    border: 1px solid #1d2c43;
+    background: var(--theme-surface-1);
+    border: 1px solid var(--theme-border);
     border-radius: 7px;
 
     transition: all 0.3s ease;
@@ -244,13 +244,13 @@
     border-radius: 50%;
     background: #3887fa;
 
-    color: #ffffff;
+    color: var(--theme-text-strong);
     font-size: 13px;
     font-weight: 700;
 }
 
 .lifecycle-period {
-    color: #718097;
+    color: var(--theme-text-primary);
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.7px;
@@ -264,7 +264,7 @@
 .lifecycle-card h2 {
     margin: 23px 0 14px;
 
-    color: #ffffff;
+    color: var(--theme-text-strong);
     font-size: 16px;
     font-weight: 700;
 }
@@ -272,7 +272,7 @@
 .lifecycle-card p {
     margin: 0;
 
-    color: #7d8ca3;
+    color: var(--theme-text-primary);
     font-size: 14px;
     line-height: 1.65;
 }
@@ -287,13 +287,13 @@
     width: 100%;
     min-height: 465px;
 
-    background: #08182d;
+    background: var(--theme-surface-1);
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    border-bottom: 1px solid #1b2a40;
+    border-bottom: 1px solid var(--theme-border);
 }
 
 .configure-container {
@@ -313,7 +313,7 @@
     max-width: 850px;
     margin: 0;
 
-    color: #ffffff;
+    color: var(--theme-text-strong);
     font-size: clamp(42px, 5vw, 62px);
     line-height: 1.05;
     font-weight: 900;
@@ -322,7 +322,7 @@
 
 .configure-container h1 span {
     display: block;
-    color: #388cff;
+    color: var(--theme-accent-text);
 }
 
 
@@ -334,7 +334,7 @@
     max-width: 620px;
     margin: 30px 0 38px;
 
-    color: #8493a9;
+    color: var(--theme-text-primary);
     font-size: 18px;
     line-height: 1.65;
 }
@@ -358,7 +358,7 @@
     background: #3c87f5;
     border-radius: 5px;
 
-    color: #ffffff;
+    color: var(--theme-text-strong);
     text-decoration: none;
 
     font-size: 16px;
@@ -375,7 +375,7 @@
 
 .configure-button:hover {
     background: #ffffff;
-    color: #07152a;
+    color: var(--theme-text-strong);
 }
 
 .configure-button:hover span {

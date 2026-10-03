@@ -5,9 +5,9 @@
 .engineering-section {
     width: 100%;
 
-    background: #080d18;
+    background: var(--theme-surface-0);
 
-    color: #fff;
+    color: var(--theme-text-strong);
 }
 
 
@@ -30,9 +30,9 @@
 
     gap: 50px;
 
-    background: #151515;
+    background: var(--theme-surface-1);
 
-    border: 1px solid #282828;
+    border: 1px solid var(--theme-border);
 }
 
 .engineering-consultation-content {
@@ -42,7 +42,7 @@
 .engineering-label {
     margin-bottom: 15px;
 
-    color: #287eff;
+    color: var(--theme-accent-text);
 
     font-size: 8px;
     font-weight: 700;
@@ -57,7 +57,7 @@
 .engineering-consultation h2 {
     margin: 0 0 14px;
 
-    color: #f2f2f2;
+    color: var(--theme-text-strong);
 
     font-size: 28px;
     font-weight: 400;
@@ -72,7 +72,7 @@
 
     margin: 0;
 
-    color: #85878b;
+    color: var(--theme-text-primary);
 
     font-size: 11px;
     font-weight: 400;
@@ -104,7 +104,7 @@
 
     background: #287eff;
 
-    color: #fff;
+    color: var(--theme-text-strong);
 
     font-family: inherit;
 
@@ -129,7 +129,7 @@
 .engineering-consultation-action span {
     margin-top: 11px;
 
-    color: #666a70;
+    color: var(--theme-text-muted);
 
     font-size: 7px;
 }
@@ -154,10 +154,10 @@
 
     gap: 40px;
 
-    background: #151515;
+    background: var(--theme-surface-1);
 
-    border-top: 1px solid #222;
-    border-bottom: 1px solid #222;
+    border-top: 1px solid var(--theme-border);
+    border-bottom: 1px solid var(--theme-border);
 }
 
 .structural-audit-content {
@@ -167,7 +167,7 @@
 .structural-audit h2 {
     margin: 0 0 13px;
 
-    color: #f1f1f1;
+    color: var(--theme-text-strong);
 
     font-size: 23px;
     font-weight: 400;
@@ -181,7 +181,7 @@
 
     margin: 0;
 
-    color: #85878b;
+    color: var(--theme-text-primary);
 
     font-size: 10px;
     line-height: 1.65;
@@ -197,7 +197,7 @@
 
     background: transparent;
 
-    color: #fff;
+    color: var(--theme-text-strong);
 
     font-family: inherit;
 
@@ -212,7 +212,7 @@
 .engineering-outline-button:hover {
     background: #287eff;
 
-    color: #fff;
+    color: var(--theme-text-strong);
 }
 
 .engineering-outline-button:active {
