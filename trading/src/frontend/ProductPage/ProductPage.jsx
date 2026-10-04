@@ -1,11 +1,116 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "./style/ProductPage.css";
 
-import products from "./DataProduct";
+import fallbackProducts from "./DataProduct";
 import EngineeringSection from "./EngineeringSection";
 import { useNavigate } from "react-router-dom";
+
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000")
+  .replace(/\/$/, "");
+
+const toMediaUrl = (path) => {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+};
+
+const toProduct = (machine) => {
+  const categoryName = machine.category?.name || "Uncategorized";
+  const machineTypeValue = `${machine.machineType || ""} ${categoryName}`.toLowerCase();
+  const powerValue = String(machine.power || "").toLowerCase();
+  const powerNumber = Number.parseFloat(powerValue);
+  const precisionValue = String(machine.precision || "").toLowerCase();
+  const precisionNumber = Number.parseFloat(precisionValue);
+  const availabilityValue = String(machine.availability || "").toLowerCase();
+  const specs = (machine.specs || []).map((spec) => [spec.specName, spec.specValue]);
+
+  if (specs.length === 0) {
+    [
+      ["MACHINE TYPE", machine.machineType],
+      ["POWER", machine.power],
+      ["PRECISION", machine.precision],
+      ["AVAILABILITY", machine.availability],
+    ].forEach(([label, value]) => {
+      if (value) specs.push([label, value]);
+    });
+  }
+
+  return {
+    ...machine,
+    image: toMediaUrl(machine.image) || fallbackProducts[0]?.image || "",
+    gallery: (machine.gallery || []).map((image) => toMediaUrl(image.imageUrl)),
+    category: categoryName.toUpperCase(),
+    specs,
+    machineType: /turn|lathe/.test(machineTypeValue)
+      ? "turning"
+      : /5[ -]?axis|five[ -]?axis|universal/.test(machineTypeValue)
+        ? "fiveAxis"
+        : /mill|cnc/.test(machineTypeValue)
+          ? "milling"
+          : "",
+    power: powerValue.includes("heavy") || (Number.isFinite(powerNumber) && powerNumber > 60)
+      ? "heavyDuty"
+      : powerValue.includes("high") || (Number.isFinite(powerNumber) && powerNumber >= 25)
+        ? "highPower"
+        : powerValue
+          ? "standard"
+          : "",
+    precision: precisionValue.includes("sub-micron") || precisionValue.includes("submicron") || (Number.isFinite(precisionNumber) && precisionNumber <= 0.001)
+      ? "subMicron"
+      : precisionValue
+        ? "standardPrecision"
+        : "",
+    availability: /stock|ready/.test(availabilityValue)
+      ? "inStock"
+      : /custom|order|lead/.test(availabilityValue)
+        ? "customOrder"
+        : "",
+  };
+};
+
 const ProductPage = () => {
   const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+  const [nextPage, setNextPage] = useState(1);
+  const [totalMachines, setTotalMachines] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+
+  const loadMachines = useCallback(async (pageToLoad) => {
+    setLoading(true);
+    setLoadError("");
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/machines?page=${pageToLoad}`,
+      );
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || "Unable to load machines.");
+      }
+
+      const newMachines = (result.data || []).map(toProduct);
+      setProducts((current) => {
+        const loadedIds = new Set(current.map((machine) => machine.id));
+        return [
+          ...current,
+          ...newMachines.filter((machine) => !loadedIds.has(machine.id)),
+        ];
+      });
+      setTotalMachines(result.pagination?.totalItems ?? newMachines.length);
+      setNextPage(pageToLoad + 1);
+      setHasMore(pageToLoad < (result.pagination?.totalPages ?? 0));
+    } catch (error) {
+      setLoadError(error.message || "Unable to connect to the machine server.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadMachines(1);
+  }, [loadMachines]);
   /* =================================================
        FILTER STATE
     ================================================= */
@@ -27,14 +132,6 @@ const ProductPage = () => {
   });
 
   /* =================================================
-       PAGINATION STATE
-    ================================================= */
-
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const productsPerPage = 8;
-
-  /* =================================================
        HANDLE FILTER
     ================================================= */
 
@@ -44,8 +141,6 @@ const ProductPage = () => {
       [name]: !prev[name],
     }));
 
-    // Go back to page 1 after changing filter
-    setCurrentPage(1);
   };
 
   /* =================================================
@@ -69,7 +164,6 @@ const ProductPage = () => {
       customOrder: false,
     });
 
-    setCurrentPage(1);
   };
 
   /* =================================================
@@ -120,72 +214,13 @@ const ProductPage = () => {
       return machineMatch && powerMatch && precisionMatch && availabilityMatch;
     });
   }, [
+    products,
     filters,
     hasMachineFilter,
     hasPowerFilter,
     hasPrecisionFilter,
     hasAvailabilityFilter,
   ]);
-
-  /* =================================================
-       PAGINATION
-    ================================================= */
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredProducts.length / productsPerPage),
-  );
-
-  /*
-   * If current page becomes larger than
-   * available pages after filtering.
-   */
-  if (currentPage > totalPages) {
-    setCurrentPage(totalPages);
-  }
-
-  const startIndex = (currentPage - 1) * productsPerPage;
-
-  const endIndex = startIndex + productsPerPage;
-
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
-
-  /* =================================================
-       PAGINATION FUNCTIONS
-    ================================================= */
-
-  const goToPage = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-
-      window.scrollTo({
-        top: 450,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const goToPrevious = () => {
-    if (currentPage > 1) {
-      goToPage(currentPage - 1);
-    }
-  };
-
-  const goToNext = () => {
-    if (currentPage < totalPages) {
-      goToPage(currentPage + 1);
-    }
-  };
-
-  /* =================================================
-       PAGE NUMBERS
-    ================================================= */
-
-  const pageNumbers = [];
-
-  for (let i = 1; i <= totalPages; i++) {
-    pageNumbers.push(i);
-  }
 
   /* =================================================
        RETURN
@@ -389,18 +424,20 @@ const ProductPage = () => {
 
             <div className="product-result-header">
               <span>
-                SHOWING {filteredProducts.length === 0 ? 0 : startIndex + 1}
-                {" - "}
-                {Math.min(endIndex, filteredProducts.length)} OF{" "}
-                {filteredProducts.length} PRODUCTS
+                SHOWING {filteredProducts.length} MATCHING MACHINES OF {totalMachines}
               </span>
             </div>
 
             {/* PRODUCT GRID */}
 
-            {currentProducts.length > 0 ? (
+            {loading && products.length === 0 ? (
+              <div className="no-products">
+                <h3>LOADING MACHINES</h3>
+                <p>Fetching machines from the catalog...</p>
+              </div>
+            ) : filteredProducts.length > 0 ? (
               <div className="product-grid">
-                {currentProducts.map((product) => (
+                {filteredProducts.map((product) => (
                   <article className="product-card" key={product.id}>
                     {/* IMAGE */}
 
@@ -426,7 +463,7 @@ const ProductPage = () => {
                       <h2>{product.name}</h2>
 
                       <div className="product-specs">
-                        {product.specs.map(([label, value]) => (
+                        {(product.specs || []).slice(0, 2).map(([label, value]) => (
                           <div className="product-spec" key={label}>
                             <span>{label}</span>
 
@@ -438,7 +475,7 @@ const ProductPage = () => {
                       <button
                         type="button"
                         className="configure-button"
-                        onClick={() => navigate(`/product/${product.id}`)}
+                        onClick={() => navigate(`/product/${product.id}`, { state: { product } })}
                       >
                         CONFIGURE SPECIFICATION
                       </button>
@@ -468,45 +505,20 @@ const ProductPage = () => {
               </div>
             )}
 
-            {/* =================================================
-                            PAGINATION
-                        ================================================= */}
+            {loadError && (
+              <p className="product-load-error" role="alert">
+                {loadError}
+              </p>
+            )}
 
-            {filteredProducts.length > 0 && (
-              <div className="product-pagination">
-                {/* PREVIOUS */}
-
+            {(hasMore || loadError) && (
+              <div className="product-load-more">
                 <button
                   type="button"
-                  onClick={goToPrevious}
-                  disabled={currentPage === 1}
-                  aria-label="Previous page"
+                  onClick={() => loadMachines(nextPage)}
+                  disabled={loading}
                 >
-                  ‹
-                </button>
-
-                {/* PAGE NUMBERS */}
-
-                {pageNumbers.map((page) => (
-                  <button
-                    key={page}
-                    type="button"
-                    className={currentPage === page ? "pagination-active" : ""}
-                    onClick={() => goToPage(page)}
-                  >
-                    {page}
-                  </button>
-                ))}
-
-                {/* NEXT */}
-
-                <button
-                  type="button"
-                  onClick={goToNext}
-                  disabled={currentPage === totalPages}
-                  aria-label="Next page"
-                >
-                  ›
+                  {loading ? "LOADING MACHINES..." : "SHOW MORE MACHINES"}
                 </button>
               </div>
             )}

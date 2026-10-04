@@ -24,7 +24,7 @@ const Navbar = () => {
 
         {/* Menu */}
         <div className={`navbar-menu ${open ? "active" : ""}`}>
-          <NavLink to="/" onClick={closeMenu}>
+          <NavLink to="/" end onClick={closeMenu}>
             Home
           </NavLink>
 

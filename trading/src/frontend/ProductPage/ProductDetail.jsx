@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import DataProduct from "./DataProduct";
 import "./style/ProductDetail.css";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const product = DataProduct.find((item) => String(item.id) === String(id));
+  const product =
+    location.state?.product ||
+    DataProduct.find((item) => String(item.id) === String(id));
 
   const [activeImage, setActiveImage] = useState(product?.image || "");
 

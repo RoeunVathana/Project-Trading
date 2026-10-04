@@ -22,6 +22,7 @@ const MACHINE_FIELDS = [
 
 const REQUIRED_FIELDS = ["name", "model", "categoryId"];
 const REQUIRED_STRING_FIELDS = ["name", "model"];
+const MACHINE_PAGE_SIZE = 10;
 
 const categoryAssociation = () => ({
   model: Category,
@@ -120,6 +121,15 @@ const handleDatabaseError = (res, message, error) => {
 
 const getMachines = async (req, res) => {
   try {
+    const pageValue = req.query.page === undefined ? "1" : req.query.page;
+    const page = Number(pageValue);
+    if (!Number.isSafeInteger(page) || page < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "page must be a positive integer.",
+      });
+    }
+
     const filters = [];
     const queryFields = ["name", "model"];
 
@@ -186,12 +196,24 @@ const getMachines = async (req, res) => {
       categoryInclude.where = { [Op.and]: categoryFilters };
     }
 
-    const machines = await Machine.findAll({
+    const { count, rows: machines } = await Machine.findAndCountAll({
       where: filters.length ? { [Op.and]: filters } : undefined,
       include: includes,
       order: [["id", "ASC"]],
+      limit: MACHINE_PAGE_SIZE,
+      offset: (page - 1) * MACHINE_PAGE_SIZE,
+      distinct: true,
     });
-    return res.status(200).json({ success: true, data: machines });
+    return res.status(200).json({
+      success: true,
+      data: machines,
+      pagination: {
+        currentPage: page,
+        pageSize: MACHINE_PAGE_SIZE,
+        totalItems: count,
+        totalPages: Math.ceil(count / MACHINE_PAGE_SIZE),
+      },
+    });
   } catch (error) {
     return handleDatabaseError(res, "Unable to retrieve machines.", error);
   }

@@ -13,9 +13,14 @@ import GetStartedPage from "./frontend/GetStartedPage/GetStartedPage";
 import CapabilitiesPage from "./frontend/CapabilitiesPage/CapabilitiesPage";
 import ResourcesPage from "./frontend/ResourcesPage/ResourcesPage";
 import ProductDetail from "./frontend/ProductPage/ProductDetail";
+import DashboardLayout from "./dashboard/components/Layout";
+import DashboardPage from "./dashboard/DashboardPage";
 const App = () => {
   return (
     <Routes>
+      <Route path="/dashboard" element={<DashboardLayout />}>
+        <Route index element={<DashboardPage />} />
+      </Route>
       {/* Layout */}
       <Route element={<Layout />}>
         {/* Home */}
@@ -24,8 +29,8 @@ const App = () => {
         {/* Product */}
         <Route path="/product" element={<ProductPage />} />
         <Route
-            path="/product/:id"
-            element={<ProductDetail />}
+          path="/product/:id"
+          element={<ProductDetail />}
         />
 
         {/* Distribution Partner */}

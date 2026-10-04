@@ -24,6 +24,7 @@ const MachineRoute = require("./routes/Machine.route");
 const MachineGalleryRoute = require("./routes/MachineGallery.route");
 const MachineSpecRoute = require("./routes/MachineSpec.route");
 const MachinePdfRoute = require("./routes/MachinePdf.route");
+const UserRoute = require("./routes/User.route");
 // Routes
 ProductRoute(app);
 CategoryRoute(app);
@@ -31,6 +32,7 @@ MachineRoute(app);
 MachineGalleryRoute(app);
 MachineSpecRoute(app);
 MachinePdfRoute(app);
+UserRoute(app);
 
 // Sync database
 db.sequelize

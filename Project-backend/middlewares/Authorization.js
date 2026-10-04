@@ -1,32 +1,53 @@
- const jwt = require("jsonwebtoken");
-const { TOKEN_SECRET } = process.env;
-const validate_token = () => {
-  return (req, res, next) => {
-    var authorization = req.headers.authorization; // token from client
-    var token_from_client = null;
-    if (authorization != null && authorization != "") {
-      token_from_client = authorization.split(" "); // authorization : "Bearer <token>" 
-      token_from_client = token_from_client[1]; // get only access_token
+const jwt = require("jsonwebtoken");
+const { logError } = require("./LogError");
+
+const Authorization = (req, res, next) => {
+  const secret = process.env.TOKEN_SECRET;
+  if (!secret) {
+    const error = new Error("TOKEN_SECRET is not configured.");
+    void logError("Authorization", error);
+    return res.status(500).json({
+      success: false,
+      message: "Authentication is not configured.",
+    });
+  }
+
+  const authorization = req.get("authorization") || "";
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
+  if (!match) {
+    return res.status(401).json({
+      success: false,
+      message: "A Bearer token is required.",
+    });
+  }
+
+  try {
+    const payload = jwt.verify(match[1].trim(), secret);
+    if (!payload || typeof payload !== "object" || !payload.sub) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired token.",
+      });
     }
 
-    if (token_from_client == null) {
-      res.status(401).send({
-        message: "Unauthorized",
-      });
-    } else {
-      jwt.verify(token_from_client, TOKEN_SECRET, (error, result) => {
-        if (error) {
-          res.status(401).send({
-            message: "Unauthorized",
-            error: error,
-          });
-        } else {
-          req.user = result;
-          next();
-        }
+    req.user = payload;
+    return next();
+  } catch (error) {
+    if (
+      error.name === "TokenExpiredError" ||
+      error.name === "JsonWebTokenError" ||
+      error.name === "NotBeforeError"
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired token.",
       });
     }
-  };
+    return logError("Authorization", error, res, "Unable to verify the token.");
+  }
 };
 
-module.exports = {validate_token};
+// Keep the previous factory export available for existing route imports.
+module.exports = Authorization;
+module.exports.Authorization = Authorization;
+module.exports.validate_token = () => Authorization;
