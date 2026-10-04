@@ -1,0 +1,8 @@
+--Generate the Machine model
+    npx sequelize-cli model:generate --name Machine --attributes name:string,model:string,categoryId:integer,image:string,badge:string,machineType:string,power:string,precision:string,availability:string
+
+--Generate MachineGallery
+npx sequelize-cli model:generate --name MachineGallery --attributes machineId:integer,imageUrl:string,sortOrder:integer
+
+--Generate MachineSpec
+npx sequelize-cli model:generate --name MachineSpec --attributes machineId:integer,specName:string,specValue:string

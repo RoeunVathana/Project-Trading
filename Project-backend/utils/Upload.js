@@ -1,74 +1,83 @@
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const fs = require("fs");
+const path = require("path");
+const multer = require("multer");
+const { randomUUID } = require("crypto");
+const { logError } = require("../middlewares/LogError");
 
-// Ensure upload directory exists
-const uploadDir = path.join(__dirname, '../Public/image');
+const imageDirectory = path.resolve(__dirname, "../Public/image");
+const imageUrlPrefix = "/image/";
+const allowedExtensions = new Set([
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".webp",
+  ".bmp",
+  ".svg",
+  ".tif",
+  ".tiff",
+]);
 
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+fs.mkdirSync(imageDirectory, { recursive: true });
 
-// Storage config
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
-    cb(null, fileName);
+  destination: (_req, _file, callback) => callback(null, imageDirectory),
+  filename: (_req, file, callback) => {
+    const extension = path.extname(file.originalname).toLowerCase();
+    const safeName = `${Date.now()}-${randomUUID()}${extension}`;
+    callback(null, safeName);
   },
 });
 
-// Allowed types
-const allowedTypes = ['.jpg', '.jpeg',
-  '.png',
-  '.gif',
-  '.webp',
-  '.bmp',
-  '.svg',
-  '.tiff'
-];
-const fileFilter = (req, file, cb) => {
-  const ext = path.extname(file.originalname).toLowerCase();
-  if (allowedTypes.includes(ext)) cb(null, true);
-  else cb(new Error('Only JPG, JPEG, PNG, GIF, and WEBP files are allowed'));
-};
-
-const upload = multer({
+const multerUpload = multer({
   storage,
-  fileFilter,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (_req, file, callback) => {
+    const extension = path.extname(file.originalname).toLowerCase();
+    if (allowedExtensions.has(extension)) return callback(null, true);
+    return callback(new Error("Only image files are allowed."));
+  },
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
 
-// Middleware for single file upload (any field name)
-const uploadAny = (req, res, next) => {
-  upload.any()(req, res, (error) => {
+const uploadImage = (req, res, next) => {
+  multerUpload.single("image")(req, res, (error) => {
     if (!error) return next();
 
-    if (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE') {
-      return res.status(413).json({
-        success: false,
-        message: 'File too large. Max size is 10MB.',
-      });
-    }
-
-    return res.status(400).json({
+    const isTooLarge =
+      error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE";
+    return res.status(isTooLarge ? 413 : 400).json({
       success: false,
-      message: error.message || 'Invalid file upload',
+      message: isTooLarge
+        ? "File too large. Maximum size is 10MB."
+        : error.message,
     });
   });
 };
 
-const deleteImageFolder = (filePath) => {
-  if (!filePath) return;
+const getImageUrl = (file) =>
+  file ? `${imageUrlPrefix}${file.filename}` : null;
 
-  // const cleanedPath = filePath.replace(/^\/image\//, '');
-  const clearnedPath = path.join(__dirname,  "../../public")
-  const fullPath = path.join(clearnedPath, filePath);
+const removeImage = (imageUrl) => {
+  if (typeof imageUrl !== "string" || !imageUrl.startsWith(imageUrlPrefix))
+    return;
 
-  if (fs.existsSync(fullPath)) {
-    fs.unlinkSync(fullPath);
+  const filename = imageUrl.slice(imageUrlPrefix.length);
+  if (!filename || path.basename(filename) !== filename) return;
+
+  const imagePath = path.resolve(imageDirectory, filename);
+  if (!imagePath.startsWith(`${imageDirectory}${path.sep}`)) return;
+
+  try {
+    fs.unlinkSync(imagePath);
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      void logError("ImageFileCleanup", error);
+    }
   }
 };
 
-module.exports = { uploadAny, deleteImageFolder };
+module.exports = {
+  uploadImage,
+  getImageUrl,
+  removeImage,
+};

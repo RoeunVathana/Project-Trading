@@ -1,24 +1,38 @@
 const fs = require("fs/promises");
+const path = require("path");
 const moment = require("moment");
 const { validationResult } = require("express-validator");
-const logError = async (controller,err,res) => {
-    try {
-        
 
-        const timestamp = moment().format("DD/MM/YYYY HH:mm:ss");
-        const folderPath = "./logs";
-        const filePath = `${folderPath}/${controller + moment().format("YYYY-MM-DD") }.txt`;
-        // Create "logs" folder if missing
-        await fs.mkdir(folderPath, { recursive: true });
-        const logMessage = `[${timestamp}] [${controller}] ${err.message}\n${err.stack || ''}\n`;
+const logError = async (
+  controller,
+  error,
+  res,
+  responseMessage = "Internal Server Error",
+) => {
+  const label = String(controller || "Application").replace(/[^a-z0-9_-]/gi, "_");
+  const timestamp = moment().format("DD/MM/YYYY HH:mm:ss");
+  const logDirectory = path.resolve(__dirname, "../logs");
+  const filePath = path.join(logDirectory, `${label}-${moment().format("YYYY-MM-DD")}.txt`);
+  const errorMessage = error instanceof Error ? error.message : String(error || "Unknown error");
+  const errorStack = error instanceof Error ? error.stack || "" : "";
 
-        await fs.appendFile(filePath, logMessage);
+  try {
+    await fs.mkdir(logDirectory, { recursive: true });
+    await fs.appendFile(
+      filePath,
+      `[${timestamp}] [${label}] ${errorMessage}\n${errorStack}\n`,
+      "utf8",
+    );
+  } catch (logWriteError) {
+    console.error("Error writing to the application log:", logWriteError);
+  }
 
-    } catch (error) {
-        console.error("Error writing to log file:", error);
-    }
-
-    res.status(500).send("Internal Server Error!");
+  if (res && !res.headersSent) {
+    return res.status(500).json({
+      success: false,
+      message: responseMessage,
+    });
+  }
 };
 
 const validateCheck = (req, res, next) => {
@@ -26,11 +40,8 @@ const validateCheck = (req, res, next) => {
   if (errors.isEmpty()) {
     return next();
   }
-  // const extractedErrors = [];
-  // errors.array().map((err) => extractedErrors.push({ [err.path]: err.msg }));
-  return res.status(400).json({
-    errors: errors.array(),
-  });
+
+  return res.status(400).json({ errors: errors.array() });
 };
 
-module.exports = {logError, validateCheck };
+module.exports = { logError, validateCheck };
