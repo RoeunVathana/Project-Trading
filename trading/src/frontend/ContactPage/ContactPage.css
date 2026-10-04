@@ -864,7 +864,7 @@
 /* Expanded full-screen layout and larger type scale. */
 .contact-page {
   min-height: 100vh;
-  min-height: 100svh;
+  min-height: 100dvh;
 }
 
 .contact-shell {
@@ -1114,7 +1114,9 @@
 
 @media (max-width: 620px) {
   .contact-shell {
-    width: min(calc(100% - 32px), 560px);
+    width: 100%;
+    max-width: none;
+    padding-inline: 16px;
   }
 
   .contact-hero {
@@ -1149,7 +1151,18 @@
   }
 
   .contact-sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
     gap: 22px;
+  }
+
+  .contact-network-card,
+  .contact-office-list,
+  .contact-training-card {
+    width: 100%;
+    min-width: 0;
   }
 
   .contact-network-card {
@@ -1176,7 +1189,7 @@
 
 @media (max-width: 420px) {
   .contact-shell {
-    width: calc(100% - 28px);
+    padding-inline: 14px;
   }
 
   .contact-form-panel {
