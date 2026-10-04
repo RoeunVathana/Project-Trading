@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../dashboardApi";
+import { publicFileUrl } from "../dashboardUtils";
 import { NAV_ITEMS } from "../dashboardConfig";
 
 const DashboardSidebar = ({
@@ -35,7 +36,11 @@ const DashboardSidebar = ({
       </div>
 
       <div className="dashboard-profile">
-        <span className="profile-avatar">{(account?.name || account?.username || "E").slice(0, 1).toUpperCase()}</span>
+        {account?.profileImage ? (
+          <img className="profile-avatar" src={publicFileUrl(account.profileImage)} alt={`${account.name || account.username} profile`} />
+        ) : (
+          <span className="profile-avatar">{(account?.name || account?.username || "E").slice(0, 1).toUpperCase()}</span>
+        )}
         <div>
           <strong>{account?.name || account?.username || "EFSAN Workspace"}</strong>
           <span>{account?.email || "Inventory management"}</span>

@@ -1,0 +1,13 @@
+About page stock photography was downloaded from Unsplash.
+
+hero-machine.jpg
+Sven Daniel — https://unsplash.com/photos/eaanLTG7TCU
+
+precision-workshop.jpg
+Simon Kadula — https://unsplash.com/photos/8gr6bObQLOI
+
+production-line.jpg
+Homa Appliances — https://unsplash.com/photos/_XDK4naBbgw
+
+The imported orange-robot production-line image is an existing project asset at
+src/assets/Homepage/Background.png.

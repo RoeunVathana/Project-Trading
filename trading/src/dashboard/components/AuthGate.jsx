@@ -55,6 +55,10 @@ const AuthGate = ({
                   <input required placeholder="Enter your name" value={accountForm.name} onChange={(event) => setAccountForm((current) => ({ ...current, name: event.target.value }))} autoComplete="username" />
                 </label>
                 <label className="dashboard-field">
+                  <span>Profile image <small>(optional)</small></span>
+                  <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => setAccountForm((current) => ({ ...current, profileImage: event.target.files?.[0] || null }))} />
+                </label>
+                <label className="dashboard-field">
                   <span>Email</span>
                   <input type="email" required placeholder="name@example.com" value={accountForm.email} onChange={(event) => setAccountForm((current) => ({ ...current, email: event.target.value }))} autoComplete="email" />
                 </label>

@@ -29,6 +29,10 @@ module.exports = (sequelize, DataTypes) => {
         unique: 'users_email_unique',
         validate: { isEmail: true },
       },
+      profileImage: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+      },
       password: {
         type: DataTypes.STRING(60),
         allowNull: false,

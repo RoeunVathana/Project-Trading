@@ -3,12 +3,18 @@ const jwt = require("jsonwebtoken");
 const { Op, col, fn, where } = require("sequelize");
 const { User } = require("../models");
 const { logError } = require("../middlewares/LogError");
+const { getImageUrl, removeImage } = require("../utils/Upload");
+
+const discardUploadedImage = (req) => {
+  if (req.file) removeImage(getImageUrl(req.file));
+};
 
 const publicUser = (user) => ({
   id: user.id,
   name: user.username,
   username: user.username,
   email: user.email,
+  profileImage: user.profileImage,
 });
 
 const createAccessToken = (user) => {
@@ -31,6 +37,7 @@ const register = async (req, res) => {
   try {
     const body = req.body;
     if (!body || typeof body !== "object" || Array.isArray(body)) {
+      discardUploadedImage(req);
       return res.status(400).json({
         success: false,
         message: "Request body must be a JSON object.",
@@ -42,24 +49,28 @@ const register = async (req, res) => {
     const password = body.password;
 
     if (typeof usernameValue !== "string" || !usernameValue.trim()) {
+      discardUploadedImage(req);
       return res.status(400).json({
         success: false,
         message: "name or username is required.",
       });
     }
     if (typeof emailValue !== "string" || !emailValue.trim()) {
+      discardUploadedImage(req);
       return res.status(400).json({
         success: false,
         message: "A valid email is required.",
       });
     }
     if (typeof password !== "string" || password.length < 8) {
+      discardUploadedImage(req);
       return res.status(400).json({
         success: false,
         message: "password must contain at least 8 characters.",
       });
     }
     if (Buffer.byteLength(password, "utf8") > 72) {
+      discardUploadedImage(req);
       return res.status(400).json({
         success: false,
         message: "password cannot exceed 72 bytes when using bcrypt.",
@@ -70,12 +81,14 @@ const register = async (req, res) => {
     const email = emailValue.trim().toLowerCase();
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
+      discardUploadedImage(req);
       return res.status(400).json({
         success: false,
         message: "A valid email is required.",
       });
     }
     if (username.length > 100 || email.length > 254) {
+      discardUploadedImage(req);
       return res.status(400).json({
         success: false,
         message: "name or email is too long.",
@@ -91,6 +104,7 @@ const register = async (req, res) => {
       },
     });
     if (existingUser) {
+      discardUploadedImage(req);
       return res.status(409).json({
         success: false,
         message: "That name or email is already registered.",
@@ -98,13 +112,19 @@ const register = async (req, res) => {
     }
 
     // The User model hashes password changes in its beforeSave hook.
-    const user = await User.create({ username, email, password });
+    const user = await User.create({
+      username,
+      email,
+      password,
+      profileImage: req.file ? getImageUrl(req.file) : null,
+    });
     return res.status(201).json({
       success: true,
       message: "Account created.",
       data: publicUser(user),
     });
   } catch (error) {
+    discardUploadedImage(req);
     if (error.name === "SequelizeUniqueConstraintError") {
       await logError("UserRegister", error);
       return res.status(409).json({

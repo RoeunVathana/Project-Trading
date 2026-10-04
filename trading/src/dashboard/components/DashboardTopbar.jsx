@@ -1,3 +1,5 @@
+import { publicFileUrl } from "../dashboardUtils";
+
 const DashboardTopbar = ({
   account,
   activeSection,
@@ -45,7 +47,11 @@ const DashboardTopbar = ({
         title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
       >{theme === "dark" ? "☼" : "◐"}</button>
       <div className="dashboard-account">
-        <span className="account-avatar">{(account?.name || account?.username || "U").slice(0, 1).toUpperCase()}</span>
+        {account?.profileImage ? (
+          <img className="account-avatar" src={publicFileUrl(account.profileImage)} alt={`${account.name || account.username} profile`} />
+        ) : (
+          <span className="account-avatar">{(account?.name || account?.username || "U").slice(0, 1).toUpperCase()}</span>
+        )}
         <span className="account-name">{account?.name || account?.username}</span>
         <button type="button" className="account-action" onClick={signOut}>Sign out</button>
       </div>

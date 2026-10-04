@@ -29,7 +29,7 @@ const DashboardPage = () => {
   const [account, setAccount] = useState(null);
   const [authChecking, setAuthChecking] = useState(() => Boolean(savedToken()));
   const [accountMode, setAccountMode] = useState("login");
-  const [accountForm, setAccountForm] = useState({ name: "", email: "", identifier: "", password: "" });
+  const [accountForm, setAccountForm] = useState({ name: "", email: "", identifier: "", password: "", profileImage: null });
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -258,13 +258,14 @@ const DashboardPage = () => {
     setBusy(true);
     try {
       if (accountMode === "register") {
+        const registrationBody = new FormData();
+        registrationBody.append("name", accountForm.name);
+        registrationBody.append("email", accountForm.email);
+        registrationBody.append("password", accountForm.password);
+        if (accountForm.profileImage) registrationBody.append("image", accountForm.profileImage);
         await requestApi("/api/users/register", {
           method: "POST",
-          body: {
-            name: accountForm.name,
-            email: accountForm.email,
-            password: accountForm.password,
-          },
+          body: registrationBody,
           token,
         });
       }
@@ -284,7 +285,7 @@ const DashboardPage = () => {
       }
       setToken(nextToken);
       setAccount(loginResult.data.user);
-      setAccountForm({ name: "", email: "", identifier: "", password: "" });
+      setAccountForm({ name: "", email: "", identifier: "", password: "", profileImage: null });
       setNotice({ type: "success", message: "Signed in successfully." });
     } catch (error) {
       setNotice({ type: "error", message: error.message || "Unable to sign in." });

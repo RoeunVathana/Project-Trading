@@ -37,10 +37,18 @@ UserRoute(app);
 // Sync database
 db.sequelize
   .sync()
-  .then(() => console.log("Database synced"))
+  .then(async () => {
+    const queryInterface = db.sequelize.getQueryInterface();
+    const usersTable = await queryInterface.describeTable("Users");
+    if (!usersTable.profileImage) {
+      await queryInterface.addColumn("Users", "profileImage", {
+        type: db.Sequelize.STRING(500),
+        allowNull: true,
+      });
+    }
+    console.log("Database synced");
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
   .catch((error) => logError("DatabaseSync", error));
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});

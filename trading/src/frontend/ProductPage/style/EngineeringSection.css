@@ -44,7 +44,7 @@
 
     color: var(--theme-accent-text);
 
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 700;
 
     letter-spacing: 1.2px;
@@ -59,7 +59,7 @@
 
     color: var(--theme-text-strong);
 
-    font-size: 28px;
+    font-size: 34px;
     font-weight: 400;
 
     line-height: 1.2;
@@ -74,7 +74,7 @@
 
     color: var(--theme-text-primary);
 
-    font-size: 11px;
+    font-size: 15px;
     font-weight: 400;
 
     line-height: 1.65;
@@ -108,7 +108,7 @@
 
     font-family: inherit;
 
-    font-size: 8px;
+    font-size: 11px;
     font-weight: 700;
 
     cursor: pointer;
@@ -131,7 +131,7 @@
 
     color: var(--theme-text-muted);
 
-    font-size: 7px;
+    font-size: 10px;
 }
 
 
@@ -169,7 +169,7 @@
 
     color: var(--theme-text-strong);
 
-    font-size: 23px;
+    font-size: 27px;
     font-weight: 400;
 
     line-height: 1.2;
@@ -183,7 +183,7 @@
 
     color: var(--theme-text-primary);
 
-    font-size: 10px;
+    font-size: 14px;
     line-height: 1.65;
 }
 
@@ -201,7 +201,7 @@
 
     font-family: inherit;
 
-    font-size: 7px;
+    font-size: 10px;
     font-weight: 700;
 
     cursor: pointer;
@@ -235,7 +235,7 @@
     }
 
     .engineering-consultation h2 {
-        font-size: 29px;
+        font-size: 36px;
     }
 
     .structural-audit {
@@ -257,11 +257,12 @@
     }
 
     .engineering-consultation h2 {
-        font-size: 25px;
+        font-size: 31px;
     }
 
     .engineering-consultation p {
         width: 450px;
+        font-size: 14px;
     }
 
     .structural-audit {
@@ -287,13 +288,13 @@
     }
 
     .engineering-consultation h2 {
-        font-size: 23px;
+        font-size: 27px;
     }
 
     .engineering-consultation p {
         width: 100%;
 
-        font-size: 10px;
+        font-size: 13px;
     }
 
     .engineering-consultation-action {
@@ -302,6 +303,7 @@
 
     .engineering-primary-button {
         width: 165px;
+        font-size: 11px;
     }
 
     .structural-audit {
@@ -313,11 +315,12 @@
     }
 
     .structural-audit h2 {
-        font-size: 21px;
+        font-size: 24px;
     }
 
     .structural-audit p {
         width: 100%;
+        font-size: 13px;
     }
 }
 
@@ -341,11 +344,11 @@
     }
 
     .engineering-label {
-        font-size: 8px;
+        font-size: 9px;
     }
 
     .engineering-consultation h2 {
-        font-size: 23px;
+        font-size: 25px;
 
         line-height: 1.25;
     }
@@ -357,7 +360,7 @@
     .engineering-consultation p {
         width: 100%;
 
-        font-size: 10px;
+        font-size: 14px;
     }
 
     .engineering-consultation-action {
@@ -371,11 +374,11 @@
 
         height: 40px;
 
-        font-size: 8px;
+        font-size: 11px;
     }
 
     .engineering-consultation-action span {
-        font-size: 7px;
+        font-size: 10px;
     }
 
 
@@ -396,11 +399,11 @@
     }
 
     .structural-audit h2 {
-        font-size: 21px;
+        font-size: 23px;
     }
 
     .structural-audit p {
-        font-size: 10px;
+        font-size: 14px;
     }
 
     .engineering-outline-button {
@@ -408,7 +411,7 @@
 
         height: 40px;
 
-        font-size: 8px;
+        font-size: 11px;
     }
 }
 
@@ -426,11 +429,11 @@
     }
 
     .engineering-consultation h2 {
-        font-size: 20px;
+        font-size: 22px;
     }
 
     .engineering-consultation p {
-        font-size: 9px;
+        font-size: 13px;
     }
 
     .structural-audit {
@@ -440,11 +443,11 @@
     }
 
     .structural-audit h2 {
-        font-size: 19px;
+        font-size: 21px;
     }
 
     .structural-audit p {
-        font-size: 9px;
+        font-size: 13px;
     }
 }
 
@@ -462,7 +465,7 @@
     }
 
     .engineering-consultation h2 {
-        font-size: 18px;
+        font-size: 20px;
     }
 
     .structural-audit {
@@ -470,6 +473,6 @@
     }
 
     .structural-audit h2 {
-        font-size: 17px;
+        font-size: 19px;
     }
 }
