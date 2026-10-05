@@ -5,7 +5,7 @@ import Layout from "./frontend/components/Layout";
 import HomePage from "./frontend/HomePage/HomePage";
 import ProductPage from "./frontend/ProductPage/ProductPage";
 import DistributionPage from "./frontend/DistributionPage/DistributionPage";
-import ReferencePage from "./frontend/ReferencePage/ReferencePage";
+import NewPreference from "./frontend/NewProjectRreference/NewPreference";
 import AboutPage from "./frontend/AboutPage/AboutPage";
 import ContactPage from "./frontend/ContactPage/ContactPage";
 import CompliancePage from "./frontend/CompliancePage/CompliancePage";
@@ -21,6 +21,7 @@ const App = () => {
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<DashboardPage />} />
       </Route>
+      <Route path="/reference" element={<NewPreference />} />
       {/* Layout */}
       <Route element={<Layout />}>
         {/* Home */}
@@ -35,9 +36,6 @@ const App = () => {
 
         {/* Distribution Partner */}
         <Route path="/distribution" element={<DistributionPage />} />
-
-        {/* Project Reference */}
-        <Route path="/reference" element={<ReferencePage />} />
 
         {/* About */}
         <Route path="/about" element={<AboutPage />} />
