@@ -1,7 +1,7 @@
 :root {
   color-scheme: dark;
-  --theme-surface-0: #0b0b0b;
-  --theme-surface-1: #121212;
+  --theme-surface-0: #071512;
+  --theme-surface-1: #071512;
   --theme-surface-2: #1b1b1b;
   --theme-surface-3: #252525;
   --theme-text-strong: #f5f5f5;
@@ -19,7 +19,7 @@
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --theme-surface-0: #f4f7fb;
+  --theme-surface-0: #ffffff;
   --theme-surface-1: #ffffff;
   --theme-surface-2: #edf2f8;
   --theme-surface-3: #e3ebf4;
@@ -47,6 +47,26 @@ body {
   background: var(--theme-surface-0);
   color: var(--theme-text-strong);
   transition: background-color 180ms ease, color 180ms ease;
+}
+
+.scroll-reveal-scope,
+.page-content {
+  min-width: 0;
+}
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+  transition:
+    opacity 560ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
 }
 
 ::selection {
@@ -138,6 +158,13 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .scroll-reveal,
+  .scroll-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none !important;
+  }
+
   *,
   *::before,
   *::after {

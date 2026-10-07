@@ -10,9 +10,8 @@ const readSavedTheme = () => {
       return savedTheme;
     }
 
-    return window.matchMedia?.("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
+    // New visitors start in light mode; an explicit saved choice still wins.
+    return "light";
   } catch {
     return "light";
   }

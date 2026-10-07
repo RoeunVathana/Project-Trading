@@ -1,12 +1,15 @@
 import { Outlet } from 'react-router-dom'
 import Navbar from './Navbar/Navbar'
 import Footer from './Footer/Footer'
+import ScrollReveal from './ScrollReveal/ScrollReveal'
 
 const Layout = () => {
   return (
     <>
       <Navbar />
-      <Outlet />
+      <ScrollReveal>
+        <Outlet />
+      </ScrollReveal>
       <Footer />
     </>
   )

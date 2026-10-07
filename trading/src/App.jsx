@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import Layout from "./frontend/components/Layout";
 
@@ -21,41 +21,35 @@ const App = () => {
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<DashboardPage />} />
       </Route>
-      <Route path="/reference" element={<NewPreference />} />
-      {/* Layout */}
+
       <Route element={<Layout />}>
-        {/* Home */}
         <Route path="/" element={<HomePage />} />
 
-        {/* Product */}
         <Route path="/product" element={<ProductPage />} />
         <Route
           path="/product/:id"
           element={<ProductDetail />}
         />
 
-        {/* Distribution Partner */}
         <Route path="/distribution" element={<DistributionPage />} />
 
-        {/* About */}
+        <Route path="/reference" element={<NewPreference />} />
+
         <Route path="/about" element={<AboutPage />} />
 
-        {/* Contact */}
         <Route path="/contact" element={<ContactPage />} />
 
-        {/* Compliance */}
         <Route path="/compliance" element={<CompliancePage />} />
 
-        {/* Get Started */}
         <Route path="/get-started" element={<GetStartedPage />} />
-        <Route path="/" element={<HomePage />} />
-
-        <Route path="/product" element={<ProductPage />} />
 
         <Route path="/capabilities/5" element={<CapabilitiesPage />} />
 
         <Route path="/resources" element={<ResourcesPage />} />
       </Route>
+
+      {/* Keep Home as the default destination for unknown public URLs. */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

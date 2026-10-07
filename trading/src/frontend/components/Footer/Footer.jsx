@@ -1,69 +1,47 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
 import "./Footer.css";
 
-const Footer = () => {
-  return (
-    <footer className="footer">
-      {/* Main Footer */}
-      <div className="footer-container">
-        {/* Company */}
-        <div className="footer-company">
-          <NavLink to="/" className="footer-logo">
-            <span className="footer-logo-icon">✿</span>
+const Footer = () => (
+  <footer className="footer">
+    <div className="footer-container">
+      <div className="footer-company">
+        <NavLink to="/" className="footer-logo">
+          SNTT Power Systems
+        </NavLink>
 
-            <span>Efsan Machine</span>
-          </NavLink>
-
-          <p className="footer-description">
-            Heavy industrial engineering and plant solutions optimized for raw
-            operational integrity under continuous severe performance
-            guidelines.
-          </p>
-        </div>
-
-        {/* Machinery */}
-        <div className="footer-column">
-          <h3>MACHINERY</h3>
-
-          <NavLink to="/product">CNC Milling</NavLink>
-
-          <NavLink to="/product">Hydraulic Presses</NavLink>
-
-          <NavLink to="/product">Automated Press Brakes</NavLink>
-        </div>
-
-        {/* Capabilities */}
-        <div className="footer-column">
-          <h3>CAPABILITIES</h3>
-
-          <NavLink to="/capabilities/5-axis">5-Axis Machining</NavLink>
-
-          <NavLink to="/capabilities/robotic">Robotic Assembly</NavLink>
-
-          <NavLink to="/capabilities/foundry">Heavy Foundry Casting</NavLink>
-        </div>
-
-        {/* Resources */}
-        <div className="footer-column">
-          <h3>RESOURCES</h3>
-
-          <NavLink to="/resources/spec-sheets">Technical Spec Sheets</NavLink>
-
-          <NavLink to="/resources/case-studies">Case Studies</NavLink>
-
-          <NavLink to="/resources/maintenance">Maintenance Guides</NavLink>
-        </div>
+        <p className="footer-description">
+          Product supply, smart-energy solutions, and manufacturing capability
+          for reliable power projects.
+        </p>
       </div>
 
-      {/* Bottom */}
-      <div className="footer-bottom">
-        <p>© 2026 EFSAN MACHINE INDUSTRY. ALL RIGHTS RESERVED.</p>
-
-        <p>[ COORD: 34.0522° N, 118.2437° W ]</p>
+      <div className="footer-column">
+        <h3>PRODUCT RANGE</h3>
+        <NavLink to="/product?division=trd&collection=chint">Product CHINT</NavLink>
+        <NavLink to="/product?division=trd&collection=huawei">Product HUAWEI</NavLink>
+        <NavLink to="/product?division=man&collection=factory">Factory</NavLink>
       </div>
-    </footer>
-  );
-};
+
+      <div className="footer-column">
+        <h3>EXPLORE</h3>
+        <NavLink to="/distribution">Distribution Partner</NavLink>
+        <NavLink to="/reference">Project Reference</NavLink>
+        <NavLink to="/resources">Resources</NavLink>
+      </div>
+
+      <div className="footer-column">
+        <h3>COMPANY</h3>
+        <NavLink to="/about">About Us</NavLink>
+        <NavLink to="/contact">Contact</NavLink>
+        <NavLink to="/get-started">Get Started</NavLink>
+      </div>
+    </div>
+
+    <div className="footer-bottom">
+      <p>© 2026 SNTT POWER SYSTEMS. ALL RIGHTS RESERVED.</p>
+      <p>TRD / MAN / POWER SYSTEMS</p>
+    </div>
+  </footer>
+);
 
 export default Footer;

@@ -1,6 +1,6 @@
 .about-page {
   --about-navbar-height: 76px;
-  --about-bg: #0a0d0f;
+  --about-bg: var(--theme-surface-1);
   --about-surface: #101518;
   --about-raised: #151b1e;
   --about-text: #f5f7f6;
@@ -17,7 +17,7 @@
 }
 
 :root[data-theme="light"] .about-page {
-  --about-bg: #f2f5f4;
+  --about-bg: var(--theme-surface-1);
   --about-surface: #e9efed;
   --about-raised: #ffffff;
   --about-text: #111a18;

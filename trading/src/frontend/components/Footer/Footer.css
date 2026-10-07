@@ -77,29 +77,6 @@
 
 
 /* =========================================
-   LOGO ICON
-========================================= */
-
-.footer-logo-icon {
-    width: 18px;
-    height: 18px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    background: #0875ff;
-
-    border-radius: 3px;
-
-    color: var(--theme-text-strong);
-
-    font-size: 11px;
-}
-
-
-/* =========================================
    DESCRIPTION
 ========================================= */
 

@@ -182,7 +182,7 @@ const ContactPage = () => {
               </div>
             </section>
 
-            <div className="contact-office-list">
+            <div id="contact-details" className="contact-office-list">
               <article className="contact-office">
                 <span className="contact-office__icon"><Icon name="pin" /></span>
                 <div>

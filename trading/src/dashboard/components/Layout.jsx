@@ -1,8 +1,11 @@
 import { Outlet } from "react-router-dom";
+import ScrollReveal from "../../frontend/components/ScrollReveal/ScrollReveal";
 
 const DashboardLayout = () => (
   <div className="dashboard-route">
-    <Outlet />
+    <ScrollReveal>
+      <Outlet />
+    </ScrollReveal>
   </div>
 );
 

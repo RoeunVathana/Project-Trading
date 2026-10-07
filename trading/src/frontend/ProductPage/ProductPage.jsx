@@ -3,7 +3,7 @@ import "./style/ProductPage.css";
 
 import fallbackProducts from "./DataProduct";
 import EngineeringSection from "./EngineeringSection";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000")
   .replace(/\/$/, "");
@@ -68,8 +68,26 @@ const toProduct = (machine) => {
   };
 };
 
+const productContexts = {
+  chint: {
+    title: "PRODUCT CHINT",
+    description: "Explore CHINT low-voltage, power transmission, distribution, and metering solutions for industrial power systems.",
+  },
+  huawei: {
+    title: "PRODUCT HUAWEI",
+    description: "Explore Huawei smart-energy solutions for residential, commercial, and industrial applications.",
+  },
+  factory: {
+    title: "FACTORY",
+    description: "Explore factory power transmission, distribution, and power-quality automation capabilities.",
+  },
+};
+
 const ProductPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const collection = searchParams.get("collection");
+  const productContext = productContexts[collection] || productContexts.chint;
   const [products, setProducts] = useState([]);
   const [nextPage, setNextPage] = useState(1);
   const [totalMachines, setTotalMachines] = useState(0);
@@ -240,14 +258,10 @@ const ProductPage = () => {
             <span>//</span> CATEGORY
           </div>
 
-          <h1>PRODUCT CHINT</h1>
+          <h1>{productContext.title}</h1>
 
           <p>
-            Precision-engineered milling centers, lathes, and multi-axis
-            processing units designed for sub-micron accuracy in extreme
-            industrial environments. Efsan Global CNC solutions represent the
-            pinnacle of structural rigidity and thermal stability for aerospace,
-            medical, and automotive applications.
+            {productContext.description}
           </p>
         </div>
       </section>
