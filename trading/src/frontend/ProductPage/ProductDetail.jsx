@@ -3,14 +3,75 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import DataProduct from "./DataProduct";
 import "./style/ProductDetail.css";
 
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000")
+  .replace(/\/$/, "");
+
+const toMediaUrl = (path) => {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+};
+
+const normalizeApiProduct = (machine) => {
+  const image = toMediaUrl(machine.image);
+  const gallery = Array.isArray(machine.gallery)
+    ? machine.gallery
+        .map((item) => (typeof item === "string" ? item : item?.imageUrl))
+        .map(toMediaUrl)
+        .filter(Boolean)
+    : [];
+  const specs = Array.isArray(machine.specs)
+    ? machine.specs
+        .map((spec) => [spec.specName, spec.specValue])
+        .filter(([label, value]) => label && value)
+    : [];
+
+  return {
+    ...machine,
+    image,
+    gallery: [...new Set([image, ...gallery].filter(Boolean))],
+    category: machine.category?.name || "UNCATEGORIZED",
+    specs,
+  };
+};
+
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const routeProduct = location.state?.product;
 
-  const product =
-    location.state?.product ||
-    DataProduct.find((item) => String(item.id) === String(id));
+  const [apiProduct, setApiProduct] = useState(routeProduct || null);
+  const [apiStatus, setApiStatus] = useState(routeProduct ? "ready" : "loading");
+
+  useEffect(() => {
+    if (routeProduct) return undefined;
+
+    const controller = new AbortController();
+
+    fetch(`${API_BASE_URL}/api/machines/${id}`, { signal: controller.signal })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok || !result.data) {
+          throw new Error(result.message || "Unable to load this product.");
+        }
+        return result.data;
+      })
+      .then((machine) => {
+        setApiProduct(normalizeApiProduct(machine));
+        setApiStatus("ready");
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") setApiStatus("error");
+      });
+
+    return () => controller.abort();
+  }, [id, routeProduct]);
+
+  const fallbackProduct = DataProduct.find(
+    (item) => String(item.id) === String(id),
+  );
+  const product = routeProduct || apiProduct || (apiStatus === "error" ? fallbackProduct : null);
 
   const [activeImage, setActiveImage] = useState(product?.image || "");
 
@@ -20,9 +81,9 @@ const ProductDetail = () => {
        GALLERY
     ========================================= */
 
-  const gallery = product?.gallery?.length
-    ? product.gallery
-    : [product?.image].filter(Boolean);
+  const gallery = [product?.image, ...(product?.gallery || [])].filter(
+    (image, index, images) => image && images.indexOf(image) === index,
+  );
 
   /* =========================================
        RESET IMAGE WHEN PRODUCT CHANGES
@@ -36,6 +97,14 @@ const ProductDetail = () => {
   /* =========================================
        PRODUCT NOT FOUND
     ========================================= */
+
+  if (!product && apiStatus === "loading") {
+    return (
+      <div className="product-detail-loading" role="status">
+        Loading product details...
+      </div>
+    );
+  }
 
   if (!product) {
     return (

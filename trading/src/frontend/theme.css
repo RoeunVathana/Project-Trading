@@ -2,6 +2,7 @@
   color-scheme: dark;
   --theme-surface-0: #071512;
   --theme-surface-1: #071512;
+  --theme-home-background: #071512;
   --theme-surface-2: #1b1b1b;
   --theme-surface-3: #252525;
   --theme-text-strong: #f5f5f5;
@@ -21,6 +22,7 @@
   color-scheme: light;
   --theme-surface-0: #ffffff;
   --theme-surface-1: #ffffff;
+  --theme-home-background: #ffffff;
   --theme-surface-2: #edf2f8;
   --theme-surface-3: #e3ebf4;
   --theme-text-strong: #152238;

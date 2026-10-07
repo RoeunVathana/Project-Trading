@@ -143,7 +143,7 @@ const createCrudController = ({
 
         const records = await model.findAll({
           where: Object.keys(where).length ? where : undefined,
-          order: [["id", "ASC"]],
+          order: [["id", "DESC"]],
         });
         return res.status(200).json({ success: true, data: records });
       } catch (error) {

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { API_BASE_URL } from "../dashboardApi";
 import { publicFileUrl } from "../dashboardUtils";
 import { NAV_ITEMS } from "../dashboardConfig";
@@ -9,7 +10,10 @@ const DashboardSidebar = ({
   setSidebarOpen,
   loadIssues,
   account,
-}) => (
+}) => {
+  const [machinesOpen, setMachinesOpen] = useState(activeSection !== "overview");
+
+  return (
   <>
     {sidebarOpen && (
       <button
@@ -49,17 +53,50 @@ const DashboardSidebar = ({
 
       <div className="dashboard-nav-label">MAIN MENU</div>
       <nav className="dashboard-nav" aria-label="Dashboard sections">
-        {NAV_ITEMS.map((item) => (
-          <button
-            type="button"
-            key={item.key}
-            className={activeSection === item.key ? "dashboard-nav-item active" : "dashboard-nav-item"}
-            onClick={() => setCurrentSection(item.key)}
-          >
-            <span className="dashboard-nav-icon">{item.icon}</span>
-            <span>{item.label}</span>
-          </button>
-        ))}
+        {NAV_ITEMS.map((item) => {
+          const childActive = item.children?.some((child) => child.key === activeSection);
+          const itemActive = activeSection === item.key || childActive;
+
+          return (
+            <div
+              className={`dashboard-nav-group ${item.children ? "has-submenu" : ""} ${machinesOpen || childActive ? "is-open" : ""}`}
+              key={item.key}
+            >
+              <button
+                type="button"
+                className={`dashboard-nav-item ${itemActive ? "active" : ""} ${item.children ? "has-children" : ""}`}
+                onClick={() => {
+                  if (item.children) {
+                    setMachinesOpen((isOpen) => !isOpen);
+                    if (!itemActive) setCurrentSection(item.key, { closeSidebar: false });
+                    return;
+                  }
+                  setCurrentSection(item.key);
+                }}
+                aria-expanded={item.children ? machinesOpen : undefined}
+              >
+                <span className="dashboard-nav-icon">{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
+
+              {item.children && (
+                <div className="dashboard-nav-submenu">
+                  {item.children.map((child) => (
+                    <button
+                      type="button"
+                      key={child.key}
+                      className={`dashboard-nav-subitem ${activeSection === child.key ? "active" : ""}`}
+                      onClick={() => setCurrentSection(child.key)}
+                    >
+                      <span className="dashboard-nav-submark">{child.icon}</span>
+                      <span>{child.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </nav>
 
       <div className="dashboard-sidebar-foot">
@@ -71,6 +108,7 @@ const DashboardSidebar = ({
       </div>
     </aside>
   </>
-);
+  );
+};
 
 export default DashboardSidebar;

@@ -108,7 +108,12 @@ const ProductPage = () => {
         throw new Error(result.message || "Unable to load machines.");
       }
 
-      const newMachines = (result.data || []).map(toProduct);
+      const newMachines = Array.isArray(result.data)
+        ? result.data.map(toProduct)
+        : [];
+      const totalPages = Number(result.pagination?.totalPages);
+      const totalItems = Number(result.pagination?.totalItems);
+
       setProducts((current) => {
         const loadedIds = new Set(current.map((machine) => machine.id));
         return [
@@ -116,9 +121,13 @@ const ProductPage = () => {
           ...newMachines.filter((machine) => !loadedIds.has(machine.id)),
         ];
       });
-      setTotalMachines(result.pagination?.totalItems ?? newMachines.length);
+      setTotalMachines(Number.isFinite(totalItems) ? totalItems : newMachines.length);
       setNextPage(pageToLoad + 1);
-      setHasMore(pageToLoad < (result.pagination?.totalPages ?? 0));
+      setHasMore(
+        Number.isFinite(totalPages)
+          ? pageToLoad < totalPages
+          : newMachines.length > 0,
+      );
     } catch (error) {
       setLoadError(error.message || "Unable to connect to the machine server.");
     } finally {
@@ -532,7 +541,11 @@ const ProductPage = () => {
                   onClick={() => loadMachines(nextPage)}
                   disabled={loading}
                 >
-                  {loading ? "LOADING MACHINES..." : "SHOW MORE MACHINES"}
+                  {loading
+                    ? "LOADING PRODUCTS..."
+                    : loadError
+                      ? "RETRY LOADING PRODUCTS"
+                      : "LOAD MORE PRODUCTS"}
                 </button>
               </div>
             )}

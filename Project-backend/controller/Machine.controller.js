@@ -36,13 +36,13 @@ const machineIncludes = () => [
     model: MachineGallery,
     as: "gallery",
     separate: true,
-    order: [["sortOrder", "ASC"], ["id", "ASC"]],
+    order: [["id", "DESC"]],
   },
   {
     model: MachineSpec,
     as: "specs",
     separate: true,
-    order: [["id", "ASC"]],
+    order: [["id", "DESC"]],
   },
 ];
 
@@ -199,7 +199,7 @@ const getMachines = async (req, res) => {
     const { count, rows: machines } = await Machine.findAndCountAll({
       where: filters.length ? { [Op.and]: filters } : undefined,
       include: includes,
-      order: [["id", "ASC"]],
+      order: [["id", "DESC"]],
       limit: MACHINE_PAGE_SIZE,
       offset: (page - 1) * MACHINE_PAGE_SIZE,
       distinct: true,

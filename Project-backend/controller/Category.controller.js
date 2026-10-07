@@ -55,7 +55,7 @@ const parseCategoryPayload = (body, requireName = false) => {
 
 const getCategories = async (_req, res) => {
   try {
-    const categories = await Category.findAll({ order: [["name", "ASC"]] });
+    const categories = await Category.findAll({ order: [["id", "DESC"]] });
     return res.status(200).json({ success: true, data: categories });
   } catch (error) {
     return logError("Category", error, res, "Unable to retrieve categories.");

@@ -81,11 +81,16 @@ export const RESOURCE_CONFIG = {
 
 export const NAV_ITEMS = [
   { key: "overview", label: "Overview", icon: "⌂" },
-  ...RESOURCE_KEYS.map((key) => ({
-    key,
-    label: RESOURCE_CONFIG[key].title,
-    icon: RESOURCE_CONFIG[key].icon,
-  })),
+  {
+    key: "machines",
+    label: RESOURCE_CONFIG.machines.title,
+    icon: RESOURCE_CONFIG.machines.icon,
+      children: ["machines", "categories", "gallery", "specs", "pdfs"].map((key) => ({
+      key,
+      label: RESOURCE_CONFIG[key].title,
+      icon: RESOURCE_CONFIG[key].icon,
+    })),
+  },
 ];
 
 export const TABLE_COLUMNS = {

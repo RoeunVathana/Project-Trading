@@ -148,10 +148,10 @@ const DashboardPage = () => {
     });
   }, [activeRecords, activeConfig, records]);
 
-  const setCurrentSection = (section) => {
+  const setCurrentSection = (section, options = {}) => {
     setActiveSection(section);
     setSearch("");
-    setSidebarOpen(false);
+    if (options.closeSidebar !== false) setSidebarOpen(false);
   };
 
   const requireSignIn = () => {
@@ -397,6 +397,7 @@ const DashboardPage = () => {
             />
           ) : (
             <ResourceSection
+              key={`${activeSection}:${search}`}
               activeSection={activeSection}
               activeConfig={activeConfig}
               filteredRecords={filteredRecords}

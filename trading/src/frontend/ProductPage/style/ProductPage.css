@@ -7,7 +7,19 @@
   min-height: 100vh;
   background: var(--theme-surface-0);
   color: var(--theme-text-strong);
-  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+/* Keep the product catalog easy to scan while the page reveal animation runs. */
+.product-page .scroll-reveal {
+  transform: translate3d(0, 14px, 0);
+  transition-duration: 360ms;
+}
+
+.product-page .product-card.scroll-reveal {
+  transform: translate3d(0, 8px, 0);
+  transition-delay: 0ms;
+  transition-duration: 260ms;
 }
 
 /* =====================================================*
@@ -93,6 +105,30 @@
 .product-filter {
   width: 194px;
   min-width: 0;
+}
+
+@media (min-width: 851px) {
+  .product-filter {
+    position: sticky;
+    top: 96px;
+    max-height: calc(100svh - 116px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--theme-border) transparent;
+  }
+
+  .product-filter::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .product-filter::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .product-filter::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: var(--theme-border);
+  }
 }
 
 .product-filter > h3 {
