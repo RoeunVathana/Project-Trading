@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "./style/ProductPage.css";
 
 import fallbackProducts from "./DataProduct";
 import EngineeringSection from "./EngineeringSection";
+import { toSpecificationRows } from "./specificationUtils";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000")
@@ -22,7 +23,19 @@ const toProduct = (machine) => {
   const precisionValue = String(machine.precision || "").toLowerCase();
   const precisionNumber = Number.parseFloat(precisionValue);
   const availabilityValue = String(machine.availability || "").toLowerCase();
-  const specs = (machine.specs || []).map((spec) => [spec.specName, spec.specValue]);
+  const specificationRows = toSpecificationRows(machine.specs);
+  const firstSpecification = specificationRows[0];
+  const specs = firstSpecification
+    ? [
+        ["FRAME VARIATION", firstSpecification.frameVariation],
+        ["RATED CURRENT (IN)", firstSpecification.ratedCurrent],
+        ["VOLTAGE (UE)", firstSpecification.voltage],
+        ["ICU / ICS (KA)", firstSpecification.icuIcs],
+        ["POLES", firstSpecification.poles],
+        ["MOUNTING", firstSpecification.mounting],
+        ["TRIP UNIT", firstSpecification.tripUnit],
+      ].filter(([, value]) => value)
+    : [];
 
   if (specs.length === 0) {
     [
@@ -40,6 +53,7 @@ const toProduct = (machine) => {
     image: toMediaUrl(machine.image) || fallbackProducts[0]?.image || "",
     gallery: (machine.gallery || []).map((image) => toMediaUrl(image.imageUrl)),
     category: categoryName.toUpperCase(),
+    specificationRows,
     specs,
     machineType: /turn|lathe/.test(machineTypeValue)
       ? "turning"
@@ -94,6 +108,8 @@ const ProductPage = () => {
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [topCategories, setTopCategories] = useState([]);
 
   const loadMachines = useCallback(async (pageToLoad) => {
     setLoading(true);
@@ -135,9 +151,38 @@ const ProductPage = () => {
     }
   }, []);
 
+  const loadTopCategories = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/categories/top?limit=5`);
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Unable to load top categories.");
+
+      setTopCategories(
+        (Array.isArray(result.data) ? result.data : []).map((category) => ({
+          ...category,
+          name: String(category.name || "UNCATEGORIZED").trim().toUpperCase(),
+          machineCount: Number(category.machineCount || 0),
+          viewCount: Number(category.viewCount || 0),
+        })),
+      );
+    } catch {
+      // Category ranking is optional; the local fallback still works with loaded products.
+      setTopCategories([]);
+    }
+  }, []);
+
   useEffect(() => {
-    loadMachines(1);
-  }, [loadMachines]);
+    const timer = window.setTimeout(() => {
+      loadMachines(1);
+      loadTopCategories();
+    }, 0);
+    const refreshTimer = window.setInterval(loadTopCategories, 60 * 1000);
+
+    return () => {
+      window.clearTimeout(timer);
+      window.clearInterval(refreshTimer);
+    };
+  }, [loadMachines, loadTopCategories]);
   /* =================================================
        FILTER STATE
     ================================================= */
@@ -190,8 +235,29 @@ const ProductPage = () => {
       inStock: false,
       customOrder: false,
     });
-
+    setSelectedCategory("");
   };
+
+  const popularCategories = useMemo(() => {
+    if (topCategories.length > 0) return topCategories;
+
+    const categoryMap = new Map();
+
+    products.forEach((product) => {
+      const name = product.category || "UNCATEGORIZED";
+      const current = categoryMap.get(name) || { name, machineCount: 0, viewCount: 0 };
+      current.machineCount += 1;
+      current.viewCount += Number(product.viewCount || 0);
+      categoryMap.set(name, current);
+    });
+
+    return [...categoryMap.values()]
+      .sort(
+        (left, right) =>
+          right.viewCount - left.viewCount || right.machineCount - left.machineCount,
+      )
+      .slice(0, 5);
+  }, [products, topCategories]);
 
   /* =================================================
        CHECK ACTIVE FILTER GROUP
@@ -212,7 +278,14 @@ const ProductPage = () => {
     ================================================= */
 
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
+    return [...products]
+      .sort((left, right) => {
+        const viewDifference = Number(right.viewCount || 0) - Number(left.viewCount || 0);
+        return viewDifference || Number(right.id || 0) - Number(left.id || 0);
+      })
+      .filter((product) => {
+      const categoryMatch = !selectedCategory || product.category === selectedCategory;
+
       /*
        * MACHINE TYPE
        */
@@ -238,8 +311,8 @@ const ProductPage = () => {
        * Product must match
        * every active filter group
        */
-      return machineMatch && powerMatch && precisionMatch && availabilityMatch;
-    });
+      return categoryMatch && machineMatch && powerMatch && precisionMatch && availabilityMatch;
+      });
   }, [
     products,
     filters,
@@ -247,6 +320,7 @@ const ProductPage = () => {
     hasPowerFilter,
     hasPrecisionFilter,
     hasAvailabilityFilter,
+    selectedCategory,
   ]);
 
   /* =================================================
@@ -443,6 +517,35 @@ const ProductPage = () => {
                     ================================================= */}
 
           <div className="product-content">
+            {popularCategories.length > 0 && (
+              <section className="product-popular-categories" aria-label="Most viewed categories">
+                <div className="product-popular-heading">
+                  <span>TOP CATEGORIES</span>
+                  <strong>Most viewed by customers</strong>
+                </div>
+                <div className="product-popular-list">
+                  <button
+                    type="button"
+                    className={`product-popular-category ${!selectedCategory ? "active" : ""}`}
+                    onClick={() => setSelectedCategory("")}
+                  >
+                    All categories
+                  </button>
+                  {popularCategories.map((category) => (
+                    <button
+                      type="button"
+                      className={`product-popular-category ${selectedCategory === category.name ? "active" : ""}`}
+                      key={category.name}
+                      onClick={() => setSelectedCategory(category.name)}
+                    >
+                      <span>{category.name}</span>
+                      <small>{category.viewCount} views</small>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {/* RESULT COUNT */}
 
             <div className="product-result-header">

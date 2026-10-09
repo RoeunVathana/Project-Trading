@@ -19,12 +19,47 @@ module.exports = (sequelize, DataTypes) => {
 
       specName: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
 
       specValue: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
+      },
+
+      frameVariation: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      ratedCurrent: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      voltage: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      icuIcs: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      poles: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      mounting: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      tripUnit: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
     },
     {

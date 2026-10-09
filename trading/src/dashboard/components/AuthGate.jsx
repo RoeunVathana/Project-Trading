@@ -1,3 +1,6 @@
+import SnttLogo from "../../assets/SNTT.png";
+import { UPLOAD_LIMITS } from "../dashboardConfig";
+
 const AuthGate = ({
   checking = false,
   accountMode,
@@ -10,11 +13,25 @@ const AuthGate = ({
   theme,
   toggleTheme,
 }) => {
+  const handleProfileImageChange = (event) => {
+    const input = event.target;
+    const file = input.files?.[0] || null;
+    if (file && file.size > UPLOAD_LIMITS.image.bytes) {
+      input.setCustomValidity(`Profile image must be ${UPLOAD_LIMITS.image.label} or smaller.`);
+      input.value = "";
+      setAccountForm((current) => ({ ...current, profileImage: null }));
+      return;
+    }
+
+    input.setCustomValidity("");
+    setAccountForm((current) => ({ ...current, profileImage: file }));
+  };
+
   if (checking) {
     return (
       <main className="dashboard-auth-screen" data-theme={theme} aria-busy="true">
         <section className="dashboard-auth-loading">
-          <span className="dashboard-brand-mark">EF</span>
+          <img className="dashboard-auth-loading-logo" src={SnttLogo} alt="SNTT Power Systems" />
           <span className="dashboard-spinner" />
           <strong>Checking your account...</strong>
         </section>
@@ -29,7 +46,9 @@ const AuthGate = ({
       </button>
       <section className="dashboard-auth-card">
         <aside className="dashboard-auth-aside">
-          <div className="dashboard-auth-brand"><span>EF</span><strong>EFSAN</strong></div>
+          <div className="dashboard-auth-brand">
+            <img className="dashboard-auth-logo" src={SnttLogo} alt="SNTT Power Systems" />
+          </div>
           <div className="dashboard-auth-aside-copy">
             <span>SECURE WORKSPACE</span>
             <h1>Inventory<br />management</h1>
@@ -40,7 +59,7 @@ const AuthGate = ({
 
         <section className="dashboard-auth-form-panel">
           <div className="dashboard-auth-form-heading">
-            <span className="dashboard-eyebrow">EFSAN CONTROL DESK</span>
+            <span className="dashboard-eyebrow">SNTT CONTROL DESK</span>
             <h2>{accountMode === "login" ? "Welcome back" : "Create your account"}</h2>
             <p>{accountMode === "login" ? "Sign in to continue to your dashboard." : "Register to get access to the inventory workspace."}</p>
           </div>
@@ -56,7 +75,8 @@ const AuthGate = ({
                 </label>
                 <label className="dashboard-field">
                   <span>Profile image <small>(optional)</small></span>
-                  <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => setAccountForm((current) => ({ ...current, profileImage: event.target.files?.[0] || null }))} />
+                  <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={handleProfileImageChange} />
+                  <small>Maximum {UPLOAD_LIMITS.image.label}</small>
                 </label>
                 <label className="dashboard-field">
                   <span>Email</span>

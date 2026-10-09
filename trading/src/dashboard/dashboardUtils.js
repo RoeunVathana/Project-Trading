@@ -6,6 +6,7 @@ export const defaultForm = (config, record) => {
     values[field.name] = field.type === "file"
       ? null
       : String(record?.[field.name] ?? (field.name === "sortOrder" ? 0 : ""));
+    if (field.clearField) values[field.clearField] = false;
   });
   return values;
 };
@@ -14,8 +15,16 @@ export const recordTitle = (resource, record) => {
   if (resource === "machines") return record.name || record.model;
   if (resource === "categories") return record.name;
   if (resource === "gallery") return `Gallery image #${record.id}`;
-  if (resource === "specs") return record.specName;
-  return record.fileName || `PDF #${record.id}`;
+  if (resource === "specs") return record.frameVariation || record.specName || `Specification #${record.id}`;
+  if (resource === "pdfs") return record.fileName || `PDF #${record.id}`;
+  if (resource === "users") return displayAccountName(record, `User #${record.id}`);
+  return `Record #${record.id}`;
+};
+
+export const displayAccountName = (account, fallback = "User") => {
+  const value = account?.name || account?.username || account?.email || fallback;
+  const name = String(value).split("@")[0].trim();
+  return name || fallback;
 };
 
 export const bytesLabel = (bytes) => {

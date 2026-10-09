@@ -16,6 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve images statically at /image
 app.use("/image", express.static(path.join(__dirname, "Public/image")));
+app.use("/video", express.static(path.join(__dirname, "Public/video")));
 app.use("/pdf", express.static(path.join(__dirname, "Public/pdf")));
 
 const ProductRoute = require("./routes/Product.route");
@@ -43,6 +44,50 @@ db.sequelize
     if (!usersTable.profileImage) {
       await queryInterface.addColumn("Users", "profileImage", {
         type: db.Sequelize.STRING(500),
+        allowNull: true,
+      });
+    }
+    const machinesTable = await queryInterface.describeTable("machines");
+    if (!machinesTable.viewCount) {
+      await queryInterface.addColumn("machines", "viewCount", {
+        type: db.Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      });
+    }
+    if (!machinesTable.video) {
+      await queryInterface.addColumn("machines", "video", {
+        type: db.Sequelize.STRING(500),
+        allowNull: true,
+      });
+    }
+    const specsTable = await queryInterface.describeTable("machine_specs");
+    const specificationColumns = [
+      "frameVariation",
+      "ratedCurrent",
+      "voltage",
+      "icuIcs",
+      "poles",
+      "mounting",
+      "tripUnit",
+    ];
+    for (const column of specificationColumns) {
+      if (!specsTable[column]) {
+        await queryInterface.addColumn("machine_specs", column, {
+          type: db.Sequelize.STRING,
+          allowNull: true,
+        });
+      }
+    }
+    if (specsTable.specName && specsTable.specName.allowNull === false) {
+      await queryInterface.changeColumn("machine_specs", "specName", {
+        type: db.Sequelize.STRING,
+        allowNull: true,
+      });
+    }
+    if (specsTable.specValue && specsTable.specValue.allowNull === false) {
+      await queryInterface.changeColumn("machine_specs", "specValue", {
+        type: db.Sequelize.STRING,
         allowNull: true,
       });
     }

@@ -399,6 +399,13 @@
     font-weight: 700;
 }
 
+.specification-table .specification-empty {
+    padding: 24px 17px;
+    color: var(--theme-text-muted);
+    text-align: center;
+    white-space: normal;
+}
+
 
 /* =====================================================
    NOT FOUND

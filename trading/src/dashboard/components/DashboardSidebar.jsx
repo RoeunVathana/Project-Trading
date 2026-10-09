@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { API_BASE_URL } from "../dashboardApi";
-import { publicFileUrl } from "../dashboardUtils";
+import { displayAccountName, publicFileUrl } from "../dashboardUtils";
 import { NAV_ITEMS } from "../dashboardConfig";
+import SnttLogo from "../../assets/SNTT.png";
 
 const DashboardSidebar = ({
   activeSection,
@@ -12,6 +13,7 @@ const DashboardSidebar = ({
   account,
 }) => {
   const [machinesOpen, setMachinesOpen] = useState(activeSection !== "overview");
+  const accountName = displayAccountName(account, "EFSAN Workspace");
 
   return (
   <>
@@ -26,11 +28,7 @@ const DashboardSidebar = ({
 
     <aside className={`dashboard-sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
       <div className="dashboard-brand">
-        <div className="dashboard-brand-mark">EF</div>
-        <div>
-          <strong>EFSAN</strong>
-          <span>CONTROL DESK</span>
-        </div>
+        <img className="dashboard-brand-logo" src={SnttLogo} alt="SNTT Power Systems" />
         <button
           type="button"
           className="sidebar-close"
@@ -41,12 +39,12 @@ const DashboardSidebar = ({
 
       <div className="dashboard-profile">
         {account?.profileImage ? (
-          <img className="profile-avatar" src={publicFileUrl(account.profileImage)} alt={`${account.name || account.username} profile`} />
+          <img className="profile-avatar" src={publicFileUrl(account.profileImage)} alt={`${accountName} profile`} />
         ) : (
-          <span className="profile-avatar">{(account?.name || account?.username || "E").slice(0, 1).toUpperCase()}</span>
+          <span className="profile-avatar">{accountName.slice(0, 1).toUpperCase()}</span>
         )}
         <div>
-          <strong>{account?.name || account?.username || "EFSAN Workspace"}</strong>
+          <strong>{accountName}</strong>
           <span>{account?.email || "Inventory management"}</span>
         </div>
       </div>

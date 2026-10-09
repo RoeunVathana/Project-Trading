@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import DataProduct from "./DataProduct";
+import { toSpecificationRows } from "./specificationUtils";
 import "./style/ProductDetail.css";
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000")
@@ -20,10 +21,17 @@ const normalizeApiProduct = (machine) => {
         .map(toMediaUrl)
         .filter(Boolean)
     : [];
-  const specs = Array.isArray(machine.specs)
-    ? machine.specs
-        .map((spec) => [spec.specName, spec.specValue])
-        .filter(([label, value]) => label && value)
+  const specificationRows = toSpecificationRows(machine.specs);
+  const specs = specificationRows.length
+    ? [
+        ["FRAME VARIATION", specificationRows[0].frameVariation],
+        ["RATED CURRENT (IN)", specificationRows[0].ratedCurrent],
+        ["VOLTAGE (UE)", specificationRows[0].voltage],
+        ["ICU / ICS (KA)", specificationRows[0].icuIcs],
+        ["POLES", specificationRows[0].poles],
+        ["MOUNTING", specificationRows[0].mounting],
+        ["TRIP UNIT", specificationRows[0].tripUnit],
+      ].filter(([, value]) => value)
     : [];
 
   return {
@@ -31,6 +39,7 @@ const normalizeApiProduct = (machine) => {
     image,
     gallery: [...new Set([image, ...gallery].filter(Boolean))],
     category: machine.category?.name || "UNCATEGORIZED",
+    specificationRows,
     specs,
   };
 };
@@ -43,6 +52,44 @@ const ProductDetail = () => {
 
   const [apiProduct, setApiProduct] = useState(routeProduct || null);
   const [apiStatus, setApiStatus] = useState(routeProduct ? "ready" : "loading");
+  const viewRequestRef = useRef("");
+
+  useEffect(() => {
+    if (!id || viewRequestRef.current === id) return undefined;
+    viewRequestRef.current = id;
+
+    const viewStorageKey = `efs-machine-view-${id}`;
+    let shouldRecordView = true;
+
+    try {
+      const lastViewAt = Number(window.sessionStorage.getItem(viewStorageKey) || 0);
+      shouldRecordView = !lastViewAt || Date.now() - lastViewAt > 2000;
+    } catch {
+      // Analytics should continue even when browser storage is unavailable.
+    }
+
+    if (!shouldRecordView) return undefined;
+
+    fetch(`${API_BASE_URL}/api/machines/${id}/view`, {
+      method: "POST",
+      keepalive: true,
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Unable to record product view.");
+        try {
+          window.sessionStorage.setItem(viewStorageKey, String(Date.now()));
+        } catch {
+          // Analytics can still work when browser storage is unavailable.
+        }
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") {
+          // View analytics should never prevent customers from reading details.
+        }
+      });
+
+    return undefined;
+  }, [id]);
 
   useEffect(() => {
     if (routeProduct) return undefined;
@@ -351,53 +398,21 @@ const ProductDetail = () => {
             </thead>
 
             <tbody>
-              <tr>
-                <td>NXA16</td>
-
-                <td>630A - 1600A</td>
-
-                <td>AC380/400/415V</td>
-
-                <td className="cyan-value">50 / 50</td>
-
-                <td>3P / 4P</td>
-
-                <td>Fixed / Draw-out</td>
-
-                <td>2.0 / 3.0 / 5.0 (LSIG)</td>
-              </tr>
-
-              <tr>
-                <td>NXA20 - NXA32</td>
-
-                <td>2000A - 3200A</td>
-
-                <td>AC380/400/415/690V</td>
-
-                <td className="cyan-value">80 / 80</td>
-
-                <td>3P / 4P</td>
-
-                <td>Fixed / Draw-out</td>
-
-                <td>2.0 / 3.0 / 5.0 (LSIG)</td>
-              </tr>
-
-              <tr>
-                <td>NXA40 - NXA63</td>
-
-                <td>4000A - 6300A</td>
-
-                <td>AC380/400/415/690V</td>
-
-                <td className="cyan-value">100 / 120</td>
-
-                <td>3P / 4P</td>
-
-                <td>Fixed / Draw-out</td>
-
-                <td>2.0 / 3.0 / 5.0 (LSIG)</td>
-              </tr>
+              {product.specificationRows?.length ? product.specificationRows.map((row, index) => (
+                <tr key={`${row.frameVariation || "specification"}-${index}`}>
+                  <td>{row.frameVariation || "—"}</td>
+                  <td>{row.ratedCurrent || "—"}</td>
+                  <td>{row.voltage || "—"}</td>
+                  <td className="cyan-value">{row.icuIcs || "—"}</td>
+                  <td>{row.poles || "—"}</td>
+                  <td>{row.mounting || "—"}</td>
+                  <td>{row.tripUnit || "—"}</td>
+                </tr>
+              )) : (
+                <tr>
+                  <td className="specification-empty" colSpan="7">No technical specifications available for this product.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

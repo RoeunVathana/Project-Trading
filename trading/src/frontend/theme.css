@@ -88,11 +88,22 @@ button {
 }
 
 :root[data-theme="light"] .distribution-hero {
-  background: linear-gradient(110deg, #ffffff 0%, #f1f5fa 60%, #e8eef6 100%);
+  background: url("../assets/distribution-warehouse-large.webp") center 42% / cover no-repeat;
 }
 
 :root[data-theme="light"] .distribution-hero::after {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.34));
+  background: transparent;
+}
+
+:root[data-theme="light"] .distribution-hero h1,
+:root[data-theme="light"] .distribution-hero p,
+:root[data-theme="light"] .distribution-hero .history-btn {
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+}
+
+:root[data-theme="light"] .distribution-hero .history-btn {
+  border-color: rgba(255, 255, 255, 0.7);
 }
 
 :root[data-theme="light"] .reference-hero {
@@ -102,15 +113,35 @@ button {
 }
 
 :root[data-theme="light"] .product-hero-overlay {
-  background: linear-gradient(90deg, rgba(247, 249, 252, 0.97) 0%, rgba(247, 249, 252, 0.91) 38%, rgba(247, 249, 252, 0.68) 72%, rgba(247, 249, 252, 0.8) 100%);
+  background: transparent;
+}
+
+:root[data-theme="light"] .product-hero .product-category,
+:root[data-theme="light"] .product-hero h1,
+:root[data-theme="light"] .product-hero p {
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
 }
 
 :root[data-theme="dark"] .distribution-hero {
-  background: linear-gradient(110deg, #0b0b0b 0%, #151515 60%, #202020 100%);
+  background:
+    linear-gradient(90deg, rgba(5, 9, 14, 0.7), rgba(5, 11, 18, 0.46) 42%, rgba(5, 11, 18, 0.2)),
+    url("../assets/distribution-warehouse-large.webp") center 42% / cover no-repeat;
 }
 
 :root[data-theme="dark"] .distribution-hero::after {
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.3));
+  background: linear-gradient(90deg, transparent, rgba(7, 13, 20, 0.12));
+}
+
+:root[data-theme="dark"] .distribution-hero h1,
+:root[data-theme="dark"] .distribution-hero p,
+:root[data-theme="dark"] .distribution-hero .history-btn {
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+}
+
+:root[data-theme="dark"] .distribution-hero .history-btn {
+  border-color: rgba(255, 255, 255, 0.7);
 }
 
 :root[data-theme="dark"] .reference-hero {

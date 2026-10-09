@@ -8,9 +8,24 @@ import DashboardSidebar from "./components/DashboardSidebar";
 import DashboardTopbar from "./components/DashboardTopbar";
 import RecordDialogs from "./components/RecordDialogs";
 import ResourceSection from "./components/ResourceSection";
-import { CATEGORY_COLORS, RESOURCE_CONFIG, emptyRecords } from "./dashboardConfig";
-import { TOKEN_KEY, fetchAllMachines, requestApi, savedToken } from "./dashboardApi";
-import { bytesLabel, defaultForm, publicFileUrl, recordTitle } from "./dashboardUtils";
+import {
+  CATEGORY_COLORS,
+  RESOURCE_CONFIG,
+  emptyRecords,
+} from "./dashboardConfig";
+import {
+  TOKEN_KEY,
+  fetchAllMachines,
+  requestApi,
+  savedToken,
+} from "./dashboardApi";
+import {
+  bytesLabel,
+  defaultForm,
+  displayAccountName,
+  publicFileUrl,
+  recordTitle,
+} from "./dashboardUtils";
 
 const DashboardPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -21,6 +36,8 @@ const DashboardPage = () => {
   const [loadIssues, setLoadIssues] = useState([]);
   const [search, setSearch] = useState("");
   const [dialog, setDialog] = useState(null);
+  const [viewTarget, setViewTarget] = useState(null);
+  const [imageTarget, setImageTarget] = useState(null);
   const [form, setForm] = useState({});
   const [busy, setBusy] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -29,16 +46,53 @@ const DashboardPage = () => {
   const [account, setAccount] = useState(null);
   const [authChecking, setAuthChecking] = useState(() => Boolean(savedToken()));
   const [accountMode, setAccountMode] = useState("login");
-  const [accountForm, setAccountForm] = useState({ name: "", email: "", identifier: "", password: "", profileImage: null });
+  const [accountForm, setAccountForm] = useState({
+    name: "",
+    email: "",
+    identifier: "",
+    password: "",
+    profileImage: null,
+  });
 
   const loadData = useCallback(async () => {
     setLoading(true);
     const loaders = [
       ["machines", () => fetchAllMachines(token)],
-      ["categories", () => requestApi("/api/categories", { token }).then((result) => result.data || [])],
-      ["gallery", () => requestApi("/api/machine-galleries", { token }).then((result) => result.data || [])],
-      ["specs", () => requestApi("/api/machine-specs", { token }).then((result) => result.data || [])],
-      ["pdfs", () => requestApi("/api/machine-pdfs", { token }).then((result) => result.data || [])],
+      [
+        "categories",
+        () =>
+          requestApi("/api/categories", { token }).then(
+            (result) => result.data || [],
+          ),
+      ],
+      [
+        "gallery",
+        () =>
+          requestApi("/api/machine-galleries", { token }).then(
+            (result) => result.data || [],
+          ),
+      ],
+      [
+        "specs",
+        () =>
+          requestApi("/api/machine-specs", { token }).then(
+            (result) => result.data || [],
+          ),
+      ],
+      [
+        "pdfs",
+        () =>
+          requestApi("/api/machine-pdfs", { token }).then(
+            (result) => result.data || [],
+          ),
+      ],
+      [
+        "users",
+        () =>
+          requestApi("/api/users", { token }).then(
+            (result) => result.data || [],
+          ),
+      ],
     ];
 
     const results = await Promise.allSettled(loaders.map(([, load]) => load()));
@@ -49,7 +103,9 @@ const DashboardPage = () => {
       if (result.status === "fulfilled") {
         nextRecords[resource] = result.value;
       } else {
-        issues.push(`${RESOURCE_CONFIG[resource].title}: ${result.reason?.message || "request failed"}`);
+        issues.push(
+          `${RESOURCE_CONFIG[resource].title}: ${result.reason?.message || "request failed"}`,
+        );
       }
     });
     setRecords(nextRecords);
@@ -58,27 +114,18 @@ const DashboardPage = () => {
   }, [token]);
 
   useEffect(() => {
-    if (!token || !account) {
-      setLoading(false);
-      return;
-    }
-    loadData();
+    if (!token || !account) return;
+    const timer = window.setTimeout(() => loadData(), 0);
+    return () => window.clearTimeout(timer);
   }, [loadData, token, account]);
 
   useEffect(() => {
-    if (!token) {
-      setAccount(null);
-      setAuthChecking(false);
-      return;
-    }
+    if (!token) return;
 
-    if (account) {
-      setAuthChecking(false);
-      return;
-    }
+    if (account) return;
 
     let active = true;
-    setAuthChecking(true);
+    const checkingTimer = window.setTimeout(() => setAuthChecking(true), 0);
     requestApi("/api/users/me", { token })
       .then((result) => {
         if (!active) return;
@@ -101,6 +148,7 @@ const DashboardPage = () => {
 
     return () => {
       active = false;
+      window.clearTimeout(checkingTimer);
     };
   }, [token, account]);
 
@@ -111,32 +159,62 @@ const DashboardPage = () => {
   }, [notice]);
 
   const activeConfig = RESOURCE_CONFIG[activeSection];
-  const activeRecords = activeConfig ? records[activeSection] : [];
-  const categoryStats = useMemo(() => records.categories
-    .map((category) => ({
-      ...category,
-      machineCount: records.machines.filter((machine) => Number(machine.categoryId) === Number(category.id)).length,
-    }))
-    .sort((left, right) => right.machineCount - left.machineCount), [records.categories, records.machines]);
-  const categoryTotal = categoryStats.reduce((total, category) => total + category.machineCount, 0);
+  const categoryStats = useMemo(
+    () =>
+      records.categories
+        .map((category) => ({
+          ...category,
+          machineCount: records.machines.filter(
+            (machine) => Number(machine.categoryId) === Number(category.id),
+          ).length,
+          viewCount: records.machines
+            .filter((machine) => Number(machine.categoryId) === Number(category.id))
+            .reduce((total, machine) => total + Number(machine.viewCount || 0), 0),
+        }))
+        .sort((left, right) => right.machineCount - left.machineCount),
+    [records.categories, records.machines],
+  );
+  const topCategoryStats = useMemo(
+    () =>
+      [...categoryStats].sort(
+        (left, right) =>
+          right.viewCount - left.viewCount || right.machineCount - left.machineCount,
+      ),
+    [categoryStats],
+  );
+  const largestCategoryViewCount = Math.max(
+    1,
+    ...topCategoryStats.map((category) => category.viewCount),
+  );
+  const categoryTotal = categoryStats.reduce(
+    (total, category) => total + category.machineCount,
+    0,
+  );
   const categoryDonutBackground = useMemo(() => {
-    if (!categoryTotal) return "conic-gradient(var(--theme-surface-3) 0deg 360deg)";
+    if (!categoryTotal)
+      return "conic-gradient(var(--theme-surface-3) 0deg 360deg)";
     let start = 0;
-    const segments = categoryStats.filter((category) => category.machineCount > 0).map((category, index) => {
-      const end = start + (category.machineCount / categoryTotal) * 360;
-      const segment = `${CATEGORY_COLORS[index % CATEGORY_COLORS.length]} ${start}deg ${end}deg`;
-      start = end;
-      return segment;
-    });
+    const segments = categoryStats
+      .filter((category) => category.machineCount > 0)
+      .map((category, index) => {
+        const end = start + (category.machineCount / categoryTotal) * 360;
+        const segment = `${CATEGORY_COLORS[index % CATEGORY_COLORS.length]} ${start}deg ${end}deg`;
+        start = end;
+        return segment;
+      });
     return `conic-gradient(${segments.join(", ")})`;
   }, [categoryStats, categoryTotal]);
-  const largestCategoryCount = Math.max(1, ...categoryStats.map((category) => category.machineCount));
   const filteredRecords = useMemo(() => {
+    const activeRecords = activeConfig ? records[activeSection] : [];
     const term = search.trim().toLowerCase();
     if (!term || !activeConfig) return activeRecords;
     return activeRecords.filter((record) => {
-      const machine = records.machines.find((item) => item.id === record.machineId);
-      const category = records.categories.find((item) => item.id === record.categoryId);
+      const machine = records.machines.find(
+        (item) => item.id === record.machineId,
+      );
+      const category = records.categories.find(
+        (item) => item.id === record.categoryId,
+      );
       const searchable = [
         ...Object.values(record).map((value) => String(value ?? "")),
         machine?.name,
@@ -144,9 +222,13 @@ const DashboardPage = () => {
         category?.name,
         record.category?.name,
       ];
-      return searchable.some((value) => String(value || "").toLowerCase().includes(term));
+      return searchable.some((value) =>
+        String(value || "")
+          .toLowerCase()
+          .includes(term),
+      );
     });
-  }, [activeRecords, activeConfig, records]);
+  }, [activeSection, activeConfig, records, search]);
 
   const setCurrentSection = (section, options = {}) => {
     setActiveSection(section);
@@ -156,7 +238,10 @@ const DashboardPage = () => {
 
   const requireSignIn = () => {
     if (token) return true;
-    setNotice({ type: "error", message: "Sign in to create, update, or delete records." });
+    setNotice({
+      type: "error",
+      message: "Sign in to create, update, or delete records.",
+    });
     return false;
   };
 
@@ -178,6 +263,14 @@ const DashboardPage = () => {
     setDeleteTarget({ resource, record });
   };
 
+  const openView = (resource, record) => {
+    setViewTarget({ resource, record });
+  };
+
+  const openImageView = (image) => {
+    if (image?.src) setImageTarget(image);
+  };
+
   const submitRecord = async (event) => {
     event.preventDefault();
     if (!dialog || !requireSignIn()) return;
@@ -190,6 +283,7 @@ const DashboardPage = () => {
       const value = form[field.name];
       if (field.type === "file") {
         if (value) fileUploads.push([field.apiField, value]);
+        if (field.clearField && form[field.clearField]) payload[field.clearField] = "true";
       } else if (value !== "" && value !== undefined && value !== null) {
         payload[field.name] = field.type === "number" ? Number(value) : value;
       }
@@ -197,11 +291,15 @@ const DashboardPage = () => {
 
     if (!record) {
       const missingRequired = config.fields.find((field) => {
-        if (field.type === "file") return field.requiredOnCreate && !form[field.name];
-        return field.required && !String(form[field.name] || "").trim();
+        if (field.type === "file")
+          return field.requiredOnCreate && !form[field.name];
+        return (field.required || field.requiredOnCreate) && !String(form[field.name] || "").trim();
       });
       if (missingRequired) {
-        setNotice({ type: "error", message: `${missingRequired.label} is required.` });
+        setNotice({
+          type: "error",
+          message: `${missingRequired.label} is required.`,
+        });
         return;
       }
     }
@@ -209,16 +307,23 @@ const DashboardPage = () => {
     let body = payload;
     if (fileUploads.length) {
       body = new FormData();
-      Object.entries(payload).forEach(([key, value]) => body.append(key, value));
+      Object.entries(payload).forEach(([key, value]) =>
+        body.append(key, value),
+      );
       fileUploads.forEach(([key, file]) => body.append(key, file));
     }
 
     setBusy(true);
     try {
-      await requestApi(
-        record ? `${config.endpoint}/${record.id}` : config.endpoint,
+      const savedResult = await requestApi(
+        record
+          ? `${config.endpoint}/${record.id}`
+          : config.createEndpoint || config.endpoint,
         { method: record ? "PUT" : "POST", body, token },
       );
+      if (resource === "users" && record?.id === account?.id && savedResult.data) {
+        setAccount(savedResult.data);
+      }
       setDialog(null);
       setNotice({
         type: "success",
@@ -226,7 +331,10 @@ const DashboardPage = () => {
       });
       await loadData();
     } catch (error) {
-      setNotice({ type: "error", message: error.message || "Unable to save changes." });
+      setNotice({
+        type: "error",
+        message: error.message || "Unable to save changes.",
+      });
     } finally {
       setBusy(false);
     }
@@ -247,7 +355,10 @@ const DashboardPage = () => {
       await loadData();
     } catch (error) {
       setDeleteTarget(null);
-      setNotice({ type: "error", message: error.message || "Unable to delete this record." });
+      setNotice({
+        type: "error",
+        message: error.message || "Unable to delete this record.",
+      });
     } finally {
       setBusy(false);
     }
@@ -262,7 +373,8 @@ const DashboardPage = () => {
         registrationBody.append("name", accountForm.name);
         registrationBody.append("email", accountForm.email);
         registrationBody.append("password", accountForm.password);
-        if (accountForm.profileImage) registrationBody.append("image", accountForm.profileImage);
+        if (accountForm.profileImage)
+          registrationBody.append("image", accountForm.profileImage);
         await requestApi("/api/users/register", {
           method: "POST",
           body: registrationBody,
@@ -272,9 +384,13 @@ const DashboardPage = () => {
 
       const loginResult = await requestApi("/api/users/login", {
         method: "POST",
-        body: accountMode === "register"
-          ? { email: accountForm.email, password: accountForm.password }
-          : { identifier: accountForm.identifier, password: accountForm.password },
+        body:
+          accountMode === "register"
+            ? { email: accountForm.email, password: accountForm.password }
+            : {
+                identifier: accountForm.identifier,
+                password: accountForm.password,
+              },
         token,
       });
       const nextToken = loginResult.data.token;
@@ -285,10 +401,19 @@ const DashboardPage = () => {
       }
       setToken(nextToken);
       setAccount(loginResult.data.user);
-      setAccountForm({ name: "", email: "", identifier: "", password: "", profileImage: null });
+      setAccountForm({
+        name: "",
+        email: "",
+        identifier: "",
+        password: "",
+        profileImage: null,
+      });
       setNotice({ type: "success", message: "Signed in successfully." });
     } catch (error) {
-      setNotice({ type: "error", message: error.message || "Unable to sign in." });
+      setNotice({
+        type: "error",
+        message: error.message || "Unable to sign in.",
+      });
     } finally {
       setBusy(false);
     }
@@ -312,30 +437,91 @@ const DashboardPage = () => {
   };
 
   const machineName = (machineId) => {
-    const machine = records.machines.find((item) => item.id === Number(machineId));
-    return machine ? `${machine.name} · ${machine.model}` : `Machine #${machineId}`;
+    const machine = records.machines.find(
+      (item) => item.id === Number(machineId),
+    );
+    return machine
+      ? `${machine.name} · ${machine.model}`
+      : `Machine #${machineId}`;
   };
 
   const renderCell = (resource, key, record) => {
+    if (resource === "users" && key === "name") {
+      return displayAccountName(record, `User #${record.id}`);
+    }
     if (key === "category") {
-      return record.category?.name || records.categories.find((item) => item.id === record.categoryId)?.name || "—";
+      return (
+        record.category?.name ||
+        records.categories.find((item) => item.id === record.categoryId)
+          ?.name ||
+        "—"
+      );
     }
     if (key === "machine") return machineName(record.machineId);
+    if (key === "video") {
+      return record.video ? (
+        <a
+          className="dashboard-video-link"
+          href={publicFileUrl(record.video)}
+          target="_blank"
+          rel="noreferrer"
+          onClick={(event) => event.stopPropagation()}
+        >
+          Watch video
+        </a>
+      ) : (
+        <span className="table-muted">No video</span>
+      );
+    }
     if (key === "image") {
-      const path = resource === "machines" ? record.image : record.imageUrl;
-      return path ? <img className="dashboard-thumb" src={publicFileUrl(path)} alt="" /> : <span className="table-muted">No image</span>;
+      const path = resource === "machines"
+        ? record.image
+        : resource === "users"
+          ? record.profileImage
+          : record.imageUrl;
+      return path ? (
+        <img
+          className={`dashboard-thumb ${resource === "users" ? "dashboard-user-thumb" : ""}`}
+          src={publicFileUrl(path)}
+          alt={resource === "users" ? `${record.name || record.email || "User"} profile` : ""}
+        />
+      ) : (
+        resource === "users" ? (
+          <span className="dashboard-user-avatar-fallback" aria-label={`${record.name || "User"} profile placeholder`}>
+            {(record.name || record.email || "U").slice(0, 1).toUpperCase()}
+          </span>
+        ) : (
+          <span className="table-muted">No image</span>
+        )
+      );
     }
     if (key === "galleryCount") return record.gallery?.length ?? 0;
     if (key === "specCount") return record.specs?.length ?? 0;
     if (key === "document") {
-      return record.filePath
-        ? <a className="dashboard-file-link" href={publicFileUrl(record.filePath)} target="_blank" rel="noreferrer">{record.fileName || "Open PDF"}</a>
-        : "—";
+      return record.filePath ? (
+        <a
+          className="dashboard-file-link"
+          href={publicFileUrl(record.filePath)}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {record.fileName || "Open PDF"}
+        </a>
+      ) : (
+        "—"
+      );
     }
     if (key === "fileSize") return bytesLabel(record.fileSize);
-    if (key === "status") return <span className={`status-pill status-${record.status}`}>{record.status || "—"}</span>;
+    if (key === "status")
+      return (
+        <span className={`status-pill status-${record.status}`}>
+          {record.status || "—"}
+        </span>
+      );
     const value = record[key];
-    return value === null || value === undefined || value === "" ? "—" : String(value);
+    return value === null || value === undefined || value === ""
+      ? "—"
+      : String(value);
   };
 
   if (!token || !account || authChecking) {
@@ -381,7 +567,9 @@ const DashboardPage = () => {
             <div className="dashboard-api-alert" role="status">
               <strong>Some API data could not be loaded.</strong>
               <span>{loadIssues.join(" · ")}</span>
-              <button type="button" onClick={loadData}>Retry</button>
+              <button type="button" onClick={loadData}>
+                Retry
+              </button>
             </div>
           )}
           {activeSection === "overview" ? (
@@ -389,9 +577,10 @@ const DashboardPage = () => {
               records={records}
               loading={loading}
               categoryStats={categoryStats}
+              topCategoryStats={topCategoryStats}
               categoryTotal={categoryTotal}
               categoryDonutBackground={categoryDonutBackground}
-              largestCategoryCount={largestCategoryCount}
+              largestCategoryViewCount={largestCategoryViewCount}
               openCreate={openCreate}
               setCurrentSection={setCurrentSection}
             />
@@ -406,20 +595,31 @@ const DashboardPage = () => {
               loadData={loadData}
               renderCell={renderCell}
               recordTitle={recordTitle}
+              onView={(record) => openView(activeSection, record)}
+              onImageView={openImageView}
               onCreate={() => openCreate(activeSection)}
               onEdit={(record) => openEdit(activeSection, record)}
               onDelete={(record) => openDelete(activeSection, record)}
             />
-          )}        </main>
+          )}{" "}
+        </main>
       </div>
-
       {notice && (
-        <div className={`dashboard-toast toast-${notice.type}`} role={notice.type === "error" ? "alert" : "status"}>
-          <span>{notice.type === "success" ? "✓" : "!"}</span>{notice.message}
-          <button type="button" aria-label="Dismiss message" onClick={() => setNotice(null)}>×</button>
+        <div
+          className={`dashboard-toast toast-${notice.type}`}
+          role={notice.type === "error" ? "alert" : "status"}
+        >
+          <span>{notice.type === "success" ? "✓" : "!"}</span>
+          {notice.message}
+          <button
+            type="button"
+            aria-label="Dismiss message"
+            onClick={() => setNotice(null)}
+          >
+            ×
+          </button>
         </div>
       )}
-
       <RecordDialogs
         dialog={dialog}
         form={form}
@@ -428,10 +628,17 @@ const DashboardPage = () => {
         busy={busy}
         onSave={submitRecord}
         onClose={() => setDialog(null)}
+        viewTarget={viewTarget}
+        onCloseView={() => setViewTarget(null)}
+        imageTarget={imageTarget}
+        onCloseImage={() => setImageTarget(null)}
+        onImageView={openImageView}
+        renderCell={renderCell}
         deleteTarget={deleteTarget}
         onCancelDelete={() => setDeleteTarget(null)}
         onConfirmDelete={removeRecord}
-      />    </div>
+      />{" "}
+    </div>
   );
 };
 

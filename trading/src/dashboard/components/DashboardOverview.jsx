@@ -4,9 +4,10 @@ const DashboardOverview = ({
   records,
   loading,
   categoryStats,
+  topCategoryStats,
   categoryTotal,
   categoryDonutBackground,
-  largestCategoryCount,
+  largestCategoryViewCount,
   openCreate,
   setCurrentSection,
 }) => (
@@ -61,21 +62,21 @@ const DashboardOverview = ({
 
       <article className="dashboard-panel category-ranking-panel">
         <div className="dashboard-panel-heading">
-          <div><span className="panel-kicker">CATEGORY PERFORMANCE</span><h2>Top categories</h2></div>
+            <div><span className="panel-kicker">CUSTOMER INTEREST</span><h2>Most viewed categories</h2></div>
           <button type="button" className="text-button" onClick={() => setCurrentSection("categories")}>View all <span>→</span></button>
         </div>
         <div className="category-bars">
-          {categoryStats.length ? categoryStats.slice(0, 5).map((category, index) => (
+          {topCategoryStats.length ? topCategoryStats.slice(0, 5).map((category, index) => (
             <div className="category-bar-row" key={category.id}>
-              <div className="category-bar-label"><span>{category.name}</span><strong>{category.machineCount}</strong></div>
+              <div className="category-bar-label"><span>{category.name}</span><strong>{category.viewCount} views</strong></div>
               <div className="category-bar-track">
                 <span style={{
-                  width: `${Math.max(category.machineCount ? 8 : 0, category.machineCount / largestCategoryCount * 100)}%`,
+                  width: `${Math.max(category.viewCount ? 8 : 0, category.viewCount / largestCategoryViewCount * 100)}%`,
                   background: CATEGORY_COLORS[index % CATEGORY_COLORS.length],
                 }} />
               </div>
             </div>
-          )) : <p className="dashboard-insight-empty">Category counts will appear here when inventory is added.</p>}
+          )) : <p className="dashboard-insight-empty">Customer views will appear here when products are explored.</p>}
         </div>
       </article>
     </section>

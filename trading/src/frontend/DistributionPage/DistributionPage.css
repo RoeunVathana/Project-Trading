@@ -27,10 +27,12 @@
 
     overflow: hidden;
 
-    background: linear-gradient(90deg,
-            #090f1b 0%,
-            #111723 52%,
-            rgba(39, 44, 55, 0.85) 100%);
+    background:
+        linear-gradient(90deg,
+            rgba(5, 9, 14, 0.7) 0%,
+            rgba(5, 11, 18, 0.46) 42%,
+            rgba(5, 11, 18, 0.2) 100%),
+        url("../../assets/distribution-warehouse-large.webp") center 42% / cover no-repeat;
 }
 
 
@@ -45,8 +47,9 @@
     height: 100%;
 
     background: linear-gradient(90deg,
-            rgba(10, 15, 26, 0.2),
-            rgba(100, 105, 116, 0.28));
+            transparent 0%,
+            rgba(7, 13, 20, 0.04) 48%,
+            rgba(7, 13, 20, 0.12) 100%);
 
     pointer-events: none;
 }
@@ -236,51 +239,6 @@
 
 
 /* =========================================
-   METRIC SWITCH
-========================================= */
-
-.metric-switch {
-    display: flex;
-    align-items: center;
-
-    padding: 3px;
-
-    border: 1px solid var(--theme-border);
-    border-radius: 5px;
-
-    background: var(--theme-surface-1);
-}
-
-
-.metric-switch button {
-    height: 29px;
-
-    padding: 0 14px;
-
-    border: none;
-    border-radius: 4px;
-
-    background: transparent;
-
-    color: var(--theme-text-muted);
-
-    font-size: 9px;
-    font-weight: 600;
-
-    cursor: pointer;
-}
-
-
-.metric-switch button.active {
-    background: #0878ff;
-
-    color: white;
-
-    box-shadow: 0 3px 10px rgba(0, 120, 255, 0.2);
-}
-
-
-/* =========================================
    ANALYTICS GRID
 ========================================= */
 
@@ -434,6 +392,24 @@
     color: var(--theme-text-muted);
 
     font-size: 8px;
+}
+
+.chart-x-labels span {
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.analytics-empty {
+    display: grid;
+    min-height: 220px;
+    place-items: center;
+    padding: 24px;
+    color: var(--theme-text-muted);
+    font-size: 11px;
+    line-height: 1.6;
+    text-align: center;
 }
 
 
@@ -854,11 +830,6 @@
     .distribution-section-header p,
     .inventory-header p {
         font-size: 10px;
-    }
-
-
-    .metric-switch {
-        align-self: flex-start;
     }
 
 

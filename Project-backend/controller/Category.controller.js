@@ -1,4 +1,5 @@
 const { Category, Machine } = require("../models");
+const { fn, col } = require("sequelize");
 const { logError } = require("../middlewares/LogError");
 
 const CATEGORY_FIELDS = ["name", "description", "status"];
@@ -24,7 +25,8 @@ const parseCategoryPayload = (body, requireName = false) => {
         return { error: "name is required and must be a non-empty string." };
       }
       const name = value.trim();
-      if (name.length > 100) return { error: "name cannot exceed 100 characters." };
+      if (name.length > 100)
+        return { error: "name cannot exceed 100 characters." };
       values.name = name;
       continue;
     }
@@ -62,16 +64,78 @@ const getCategories = async (_req, res) => {
   }
 };
 
+const getTopCategories = async (req, res) => {
+  try {
+    const requestedLimit =
+      req.query.limit === undefined ? 5 : Number(req.query.limit);
+    if (!Number.isSafeInteger(requestedLimit) || requestedLimit < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "limit must be a positive integer.",
+      });
+    }
+
+    const limit = Math.min(requestedLimit, 10);
+    const categories = await Category.findAll({
+      where: { status: "active" },
+      attributes: [
+        "id",
+        "name",
+        [fn("COUNT", col("machines.id")), "machineCount"],
+        [fn("SUM", col("machines.viewCount")), "viewCount"],
+      ],
+      include: [
+        {
+          model: Machine,
+          as: "machines",
+          attributes: [],
+          required: true,
+        },
+      ],
+      group: ["Category.id", "Category.name"],
+      order: [
+        [fn("SUM", col("machines.viewCount")), "DESC"],
+        [fn("COUNT", col("machines.id")), "DESC"],
+      ],
+      limit,
+      subQuery: false,
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: categories.map((category) => {
+        const record = category.toJSON();
+        return {
+          ...record,
+          machineCount: Number(record.machineCount || 0),
+          viewCount: Number(record.viewCount || 0),
+        };
+      }),
+    });
+  } catch (error) {
+    return logError(
+      "Category",
+      error,
+      res,
+      "Unable to retrieve top categories.",
+    );
+  }
+};
+
 const getCategoryById = async (req, res) => {
   try {
     const id = parseCategoryId(req.params.id);
     if (!id) {
-      return res.status(400).json({ success: false, message: "id must be a positive integer." });
+      return res
+        .status(400)
+        .json({ success: false, message: "id must be a positive integer." });
     }
 
     const category = await Category.findByPk(id);
     if (!category) {
-      return res.status(404).json({ success: false, message: "Category not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Category not found." });
     }
     return res.status(200).json({ success: true, data: category });
   } catch (error) {
@@ -84,9 +148,13 @@ const createCategory = async (req, res) => {
     const { values, error } = parseCategoryPayload(req.body, true);
     if (error) return res.status(400).json({ success: false, message: error });
 
-    const existingCategory = await Category.findOne({ where: { name: values.name } });
+    const existingCategory = await Category.findOne({
+      where: { name: values.name },
+    });
     if (existingCategory) {
-      return res.status(409).json({ success: false, message: "Category name already exists." });
+      return res
+        .status(409)
+        .json({ success: false, message: "Category name already exists." });
     }
 
     const category = await Category.create(values);
@@ -100,7 +168,9 @@ const updateCategory = async (req, res) => {
   try {
     const id = parseCategoryId(req.params.id);
     if (!id) {
-      return res.status(400).json({ success: false, message: "id must be a positive integer." });
+      return res
+        .status(400)
+        .json({ success: false, message: "id must be a positive integer." });
     }
 
     const { values, error } = parseCategoryPayload(req.body);
@@ -108,13 +178,19 @@ const updateCategory = async (req, res) => {
 
     const category = await Category.findByPk(id);
     if (!category) {
-      return res.status(404).json({ success: false, message: "Category not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Category not found." });
     }
 
     if (values.name) {
-      const existingCategory = await Category.findOne({ where: { name: values.name } });
+      const existingCategory = await Category.findOne({
+        where: { name: values.name },
+      });
       if (existingCategory && existingCategory.id !== category.id) {
-        return res.status(409).json({ success: false, message: "Category name already exists." });
+        return res
+          .status(409)
+          .json({ success: false, message: "Category name already exists." });
       }
     }
 
@@ -129,12 +205,16 @@ const deleteCategory = async (req, res) => {
   try {
     const id = parseCategoryId(req.params.id);
     if (!id) {
-      return res.status(400).json({ success: false, message: "id must be a positive integer." });
+      return res
+        .status(400)
+        .json({ success: false, message: "id must be a positive integer." });
     }
 
     const category = await Category.findByPk(id);
     if (!category) {
-      return res.status(404).json({ success: false, message: "Category not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Category not found." });
     }
 
     const machineCount = await Machine.count({ where: { categoryId: id } });
@@ -146,7 +226,9 @@ const deleteCategory = async (req, res) => {
     }
 
     await category.destroy();
-    return res.status(200).json({ success: true, message: "Category deleted." });
+    return res
+      .status(200)
+      .json({ success: true, message: "Category deleted." });
   } catch (error) {
     return logError("Category", error, res, "Unable to delete the category.");
   }
@@ -154,6 +236,7 @@ const deleteCategory = async (req, res) => {
 
 module.exports = {
   getCategories,
+  getTopCategories,
   getCategoryById,
   createCategory,
   updateCategory,

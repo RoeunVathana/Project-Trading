@@ -6,6 +6,8 @@ const { logError } = require("../middlewares/LogError");
 
 const pdfDirectory = path.resolve(__dirname, "../Public/pdf");
 const pdfUrlPrefix = "/pdf/";
+const MAX_PDF_SIZE_MB = 250;
+const MAX_PDF_FILE_SIZE = MAX_PDF_SIZE_MB * 1024 * 1024;
 
 fs.mkdirSync(pdfDirectory, { recursive: true });
 
@@ -25,7 +27,7 @@ const multerUpload = multer({
     }
     return callback(new Error("Only PDF files are allowed."));
   },
-  limits: { fileSize: 25 * 1024 * 1024 },
+  limits: { fileSize: MAX_PDF_FILE_SIZE },
 });
 
 const getPdfUrl = (file) => (file ? `${pdfUrlPrefix}${file.filename}` : null);
@@ -75,7 +77,9 @@ const uploadPdf = (req, res, next) => {
       const isTooLarge = error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE";
       return res.status(isTooLarge ? 413 : 400).json({
         success: false,
-        message: isTooLarge ? "PDF too large. Maximum size is 25MB." : error.message,
+        message: isTooLarge
+          ? `PDF too large. Maximum size is ${MAX_PDF_SIZE_MB}MB.`
+          : error.message,
       });
     }
 
@@ -93,6 +97,7 @@ const uploadPdf = (req, res, next) => {
 
 module.exports = {
   uploadPdf,
+  MAX_PDF_FILE_SIZE,
   getPdfUrl,
   getPdfMetadata,
   removePdf,

@@ -3,9 +3,15 @@ const {
   MachineGallery,
   MachineSpec,
   Category,
+  sequelize,
 } = require("../models");
 const { Op, col, fn, where } = require("sequelize");
-const { getImageUrl, removeImage } = require("../utils/Upload");
+const {
+  getImageUrl,
+  getVideoUrl,
+  removeImage,
+  removeVideo,
+} = require("../utils/Upload");
 const { logError } = require("../middlewares/LogError");
 
 const MACHINE_FIELDS = [
@@ -13,6 +19,7 @@ const MACHINE_FIELDS = [
   "model",
   "categoryId",
   "image",
+  "video",
   "badge",
   "machineType",
   "power",
@@ -49,11 +56,20 @@ const machineIncludes = () => [
 const getMachineBody = (req) => {
   const body = { ...(req.body || {}) };
   if (req.file) body.image = getImageUrl(req.file);
+  if (req.videoFile) body.video = getVideoUrl(req.videoFile);
+  else if (
+    body.removeVideo === true ||
+    String(body.removeVideo).toLowerCase() === "true"
+  ) {
+    body.video = null;
+  }
+  delete body.removeVideo;
   return body;
 };
 
-const discardUploadedImage = (req) => {
+const discardUploadedMedia = (req) => {
   if (req.file) removeImage(getImageUrl(req.file));
+  if (req.videoFile) removeVideo(getVideoUrl(req.videoFile));
 };
 
 const parseMachineId = (value) => {
@@ -244,30 +260,108 @@ const getMachineById = async (req, res) => {
   }
 };
 
+const getTopMachines = async (req, res) => {
+  try {
+    const requestedLimit =
+      req.query.limit === undefined ? 5 : Number(req.query.limit);
+    if (!Number.isSafeInteger(requestedLimit) || requestedLimit < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "limit must be a positive integer.",
+      });
+    }
+
+    const limit = Math.min(requestedLimit, 10);
+    const machines = await Machine.findAll({
+      attributes: ["id", "name", "model", "categoryId", "viewCount"],
+      include: [categoryAssociation()],
+      order: [
+        ["viewCount", "DESC"],
+        ["id", "DESC"],
+      ],
+      limit,
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: machines.map((machine) => ({
+        ...machine.toJSON(),
+        viewCount: Number(machine.viewCount || 0),
+      })),
+    });
+  } catch (error) {
+    return handleDatabaseError(res, "Unable to retrieve top machines.", error);
+  }
+};
+
+const recordMachineView = async (req, res) => {
+  let transaction;
+
+  try {
+    const id = parseMachineId(req.params.id);
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Machine id must be a positive integer.",
+      });
+    }
+
+    transaction = await sequelize.transaction();
+    const machine = await Machine.findByPk(id, {
+      attributes: ["id", "viewCount"],
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+    });
+    if (!machine) {
+      await transaction.rollback();
+      return res.status(404).json({
+        success: false,
+        message: "Machine not found.",
+      });
+    }
+
+    await machine.update(
+      {
+        viewCount: Number(machine.viewCount || 0) + 1,
+      },
+      { transaction },
+    );
+    await transaction.commit();
+    return res
+      .status(200)
+      .json({ success: true, message: "Machine view recorded." });
+  } catch (error) {
+    if (transaction && !transaction.finished) await transaction.rollback();
+    return handleDatabaseError(
+      res,
+      "Unable to record the machine view.",
+      error,
+    );
+  }
+};
+
 const createMachine = async (req, res) => {
   try {
     const { values, error } = parseMachinePayload(getMachineBody(req), true);
     if (error) {
-      discardUploadedImage(req);
+      discardUploadedMedia(req);
       return res.status(400).json({ success: false, message: error });
     }
 
     const category = await Category.findByPk(values.categoryId);
     if (!category) {
-      discardUploadedImage(req);
-      return res.status(404).json({ success: false, message: "Category not found." });
+      discardUploadedMedia(req);
+      return res
+        .status(404)
+        .json({ success: false, message: "Category not found." });
     }
 
     const machine = await Machine.create(values);
     await machine.reload({ include: machineIncludes() });
     return res.status(201).json({ success: true, data: machine });
   } catch (error) {
-    discardUploadedImage(req);
-    return handleDatabaseError(
-      res,
-      "Unable to create the machine.",
-      error,
-    );
+    discardUploadedMedia(req);
+    return handleDatabaseError(res, "Unable to create the machine.", error);
   }
 };
 
@@ -275,7 +369,7 @@ const updateMachine = async (req, res) => {
   try {
     const id = parseMachineId(req.params.id);
     if (!id) {
-      discardUploadedImage(req);
+      discardUploadedMedia(req);
       return res.status(400).json({
         success: false,
         message: "Machine id must be a positive integer.",
@@ -284,13 +378,13 @@ const updateMachine = async (req, res) => {
 
     const { values, error } = parseMachinePayload(getMachineBody(req));
     if (error) {
-      discardUploadedImage(req);
+      discardUploadedMedia(req);
       return res.status(400).json({ success: false, message: error });
     }
 
     const machine = await Machine.findByPk(id);
     if (!machine) {
-      discardUploadedImage(req);
+      discardUploadedMedia(req);
       return res
         .status(404)
         .json({ success: false, message: "Machine not found." });
@@ -299,25 +393,27 @@ const updateMachine = async (req, res) => {
     if (Object.prototype.hasOwnProperty.call(values, "categoryId")) {
       const category = await Category.findByPk(values.categoryId);
       if (!category) {
-        discardUploadedImage(req);
-        return res.status(404).json({ success: false, message: "Category not found." });
+        discardUploadedMedia(req);
+        return res
+          .status(404)
+          .json({ success: false, message: "Category not found." });
       }
     }
 
     const previousImage = machine.image;
+    const previousVideo = machine.video;
     await machine.update(values);
     await machine.reload({ include: machineIncludes() });
     if (previousImage && previousImage !== machine.image) {
       removeImage(previousImage);
     }
+    if (previousVideo && previousVideo !== machine.video) {
+      removeVideo(previousVideo);
+    }
     return res.status(200).json({ success: true, data: machine });
   } catch (error) {
-    discardUploadedImage(req);
-    return handleDatabaseError(
-      res,
-      "Unable to update the machine.",
-      error,
-    );
+    discardUploadedMedia(req);
+    return handleDatabaseError(res, "Unable to update the machine.", error);
   }
 };
 
@@ -344,6 +440,7 @@ const deleteMachine = async (req, res) => {
     });
     await machine.destroy();
     removeImage(machine.image);
+    removeVideo(machine.video);
     galleryItems.forEach((item) => removeImage(item.imageUrl));
     return res.status(200).json({ success: true, message: "Machine deleted." });
   } catch (error) {
@@ -354,6 +451,8 @@ const deleteMachine = async (req, res) => {
 module.exports = {
   getMachines,
   getMachineById,
+  getTopMachines,
+  recordMachineView,
   createMachine,
   updateMachine,
   deleteMachine,

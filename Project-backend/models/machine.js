@@ -51,6 +51,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
       },
 
+      video: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+      },
+
       badge: {
         type: DataTypes.STRING,
       },
@@ -70,6 +75,13 @@ module.exports = (sequelize, DataTypes) => {
       availability: {
         type: DataTypes.STRING,
       },
+
+      viewCount: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+
     },
     {
       sequelize,

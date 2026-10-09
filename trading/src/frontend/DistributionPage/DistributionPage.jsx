@@ -1,5 +1,29 @@
-import React, { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "./DistributionPage.css";
+
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000")
+  .replace(/\/$/, "");
+
+const normalizeMachine = (machine) => ({
+  ...machine,
+  name: String(machine?.name || machine?.model || `Machine #${machine?.id || "?"}`).trim(),
+  model: String(machine?.model || "").trim(),
+  viewCount: Number(machine?.viewCount || 0),
+});
+
+const getAxisMax = (value) => {
+  if (value <= 0) return 1;
+  const magnitude = 10 ** Math.max(0, Math.floor(Math.log10(value)) - 1);
+  return Math.ceil(value / magnitude) * magnitude;
+};
+
+const getChartPoints = (values, maxValue) => {
+  const step = values.length > 1 ? 500 / (values.length - 1) : 250;
+  return values.map((value, index) => ({
+    x: values.length > 1 ? index * step : 250,
+    y: 205 - (Number(value || 0) / maxValue) * 165,
+  }));
+};
 
 const inventoryData = [
   {
@@ -41,7 +65,66 @@ const inventoryData = [
 ];
 
 const DistributionPage = () => {
-  const [metric, setMetric] = useState("standard");
+  const [topMachines, setTopMachines] = useState([]);
+  const [machineLoadError, setMachineLoadError] = useState("");
+
+  const loadMachineAnalytics = useCallback(async () => {
+    try {
+      const machineResponse = await fetch(`${API_BASE_URL}/api/machines/top?limit=5`);
+      const machineResult = await machineResponse.json();
+      if (!machineResponse.ok) throw new Error(machineResult.message || "Unable to load machine analytics.");
+
+      setTopMachines(
+        (Array.isArray(machineResult.data) ? machineResult.data : [])
+          .map(normalizeMachine)
+          .sort((left, right) => right.viewCount - left.viewCount || right.id - left.id),
+      );
+      setMachineLoadError("");
+    } catch (error) {
+      setMachineLoadError(error.message || "Unable to load machine analytics.");
+    }
+  }, []);
+
+  useEffect(() => {
+    const initialTimer = window.setTimeout(loadMachineAnalytics, 0);
+    const refreshTimer = window.setInterval(loadMachineAnalytics, 15 * 1000);
+
+    return () => {
+      window.clearTimeout(initialTimer);
+      window.clearInterval(refreshTimer);
+    };
+  }, [loadMachineAnalytics]);
+
+  const chartMachines = useMemo(
+    () => topMachines.slice(0, 5),
+    [topMachines],
+  );
+
+  const chartValues = useMemo(
+    () => chartMachines.map((machine) => machine.viewCount),
+    [chartMachines],
+  );
+
+  const chartMax = useMemo(
+    () => getAxisMax(Math.max(...chartValues, 0)),
+    [chartValues],
+  );
+
+  const chartPoints = useMemo(
+    () => getChartPoints(chartValues, chartMax),
+    [chartValues, chartMax],
+  );
+
+  const linePoints = chartPoints.map(({ x, y }) => `${x},${y}`).join(" ");
+  const areaPoints = linePoints
+    ? `${linePoints} 500,230 0,230`
+    : "0,230 500,230";
+  const axisLabels = [chartMax, chartMax * 0.75, chartMax * 0.5, chartMax * 0.25, 0];
+  const topMachineMax = useMemo(
+    () => getAxisMax(Math.max(...topMachines.map((machine) => machine.viewCount), 0)),
+    [topMachines],
+  );
+  const machineAxisLabels = [topMachineMax, topMachineMax * 0.75, topMachineMax * 0.5, topMachineMax * 0.25, 0];
 
   return (
     <section className="distribution-page">
@@ -88,25 +171,9 @@ const DistributionPage = () => {
       <section className="distribution-section analytics-section">
         <div className="distribution-section-header">
           <div>
-            <h2>REGIONAL SALES ANALYTICS</h2>
+            <h2>TOP MACHINE ANALYTICS</h2>
 
-            <p>Real-time distribution data and market penetration metrics.</p>
-          </div>
-
-          <div className="metric-switch">
-            <button
-              className={metric === "standard" ? "active" : ""}
-              onClick={() => setMetric("standard")}
-            >
-              Standard
-            </button>
-
-            <button
-              className={metric === "metric" ? "active" : ""}
-              onClick={() => setMetric("metric")}
-            >
-              Metric
-            </button>
+            <p>Live product-detail views ranked by machine.</p>
           </div>
         </div>
 
@@ -117,94 +184,48 @@ const DistributionPage = () => {
           <div className="analytics-card">
             <div className="chart-title">
               <span className="chart-icon line-icon">⌁</span>
-              <span>Quarterly Revenue Growth</span>
+              <span>Machine view activity</span>
             </div>
 
-            <div className="line-chart">
-              <div className="chart-y-labels">
-                <span>1000</span>
-                <span>800</span>
-                <span>600</span>
-                <span>400</span>
-                <span>200</span>
-                <span>0</span>
-              </div>
-
-              <div className="line-chart-area">
-                <div className="chart-grid-lines">
-                  <span />
-                  <span />
-                  <span />
-                  <span />
-                  <span />
-                  <span />
+            {chartMachines.length ? (
+              <div className="line-chart">
+                <div className="chart-y-labels">
+                  {axisLabels.map((label, index) => <span key={`axis-${index}`}>{Math.round(label)}</span>)}
                 </div>
 
-                <svg
-                  className="revenue-svg"
-                  viewBox="0 0 500 230"
-                  preserveAspectRatio="none"
-                >
-                  <defs>
-                    <linearGradient
-                      id="revenueFill"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="0%"
-                        stopColor="#0878ff"
-                        stopOpacity="0.22"
-                      />
+                <div className="line-chart-area">
+                  <div className="chart-grid-lines">
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                  </div>
 
-                      <stop
-                        offset="100%"
-                        stopColor="#0878ff"
-                        stopOpacity="0.03"
-                      />
-                    </linearGradient>
-                  </defs>
+                  <svg className="revenue-svg" viewBox="0 0 500 230" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="machineViewFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#0878ff" stopOpacity="0.22" />
+                        <stop offset="100%" stopColor="#0878ff" stopOpacity="0.03" />
+                      </linearGradient>
+                    </defs>
+                    <polygon points={areaPoints} fill="url(#machineViewFill)" />
+                    <polyline points={linePoints} fill="none" stroke="#0878ff" strokeWidth="3" />
+                    {chartPoints.map(({ x, y }, index) => (
+                      <circle key={`point-${index}`} cx={x} cy={y} r="4" fill="#0878ff" />
+                    ))}
+                  </svg>
 
-                  <polygon
-                    points="
-                      0,165
-                      165,135
-                      330,88
-                      500,48
-                      500,230
-                      0,230
-                    "
-                    fill="url(#revenueFill)"
-                  />
-
-                  <polyline
-                    points="
-                      0,165
-                      165,135
-                      330,88
-                      500,48
-                    "
-                    fill="none"
-                    stroke="#0878ff"
-                    strokeWidth="3"
-                  />
-
-                  <circle cx="0" cy="165" r="4" fill="#0878ff" />
-                  <circle cx="165" cy="135" r="4" fill="#0878ff" />
-                  <circle cx="330" cy="88" r="4" fill="#0878ff" />
-                  <circle cx="500" cy="48" r="4" fill="#0878ff" />
-                </svg>
-
-                <div className="chart-x-labels">
-                  <span>Q1</span>
-                  <span>Q2</span>
-                  <span>Q3</span>
-                  <span>Q4</span>
+                  <div className="chart-x-labels">
+                    {chartMachines.map((machine) => <span key={machine.id} title={machine.name}>{machine.name}</span>)}
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="analytics-empty">
+                {machineLoadError || "Open a product detail to start machine analytics."}
+              </div>
+            )}
           </div>
 
           {/* =================================
@@ -213,16 +234,12 @@ const DistributionPage = () => {
           <div className="analytics-card">
             <div className="chart-title">
               <span className="chart-icon bar-icon">↗</span>
-              <span>Inventory Turnover Rate</span>
+              <span>Top machine views</span>
             </div>
 
             <div className="bar-chart">
               <div className="bar-y-labels">
-                <span>8</span>
-                <span>6</span>
-                <span>4</span>
-                <span>2</span>
-                <span>0</span>
+                {machineAxisLabels.map((label, index) => <span key={`machine-axis-${index}`}>{Math.round(label)}</span>)}
               </div>
 
               <div className="bar-chart-area">
@@ -235,25 +252,19 @@ const DistributionPage = () => {
                 </div>
 
                 <div className="bars">
-                  <div className="bar-item">
-                    <div className="bar" style={{ height: "82%" }} />
-                    <span>North America</span>
-                  </div>
+                  {topMachines.length ? topMachines.map((machine) => {
+                    const value = machine.viewCount;
+                    const height = value ? Math.max(8, (value / topMachineMax) * 100) : 3;
 
-                  <div className="bar-item">
-                    <div className="bar" style={{ height: "70%" }} />
-                    <span>Europe</span>
-                  </div>
-
-                  <div className="bar-item">
-                    <div className="bar" style={{ height: "92%" }} />
-                    <span>Asia Pacific</span>
-                  </div>
-
-                  <div className="bar-item">
-                    <div className="bar" style={{ height: "57%" }} />
-                    <span>Latin America</span>
-                  </div>
+                    return (
+                      <div className="bar-item" key={machine.id}>
+                        <div className="bar" style={{ height: `${height}%` }} title={`${machine.name}: ${value} views`} />
+                        <span title={machine.name}>{machine.name}</span>
+                      </div>
+                    );
+                  }) : (
+                    <div className="analytics-empty">{machineLoadError || "No machine views yet."}</div>
+                  )}
                 </div>
               </div>
             </div>
