@@ -13,6 +13,29 @@ const toMediaUrl = (path) => {
   return `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 };
 
+const formatFileSize = (bytes) => {
+  const size = Number(bytes);
+  if (!Number.isFinite(size) || size < 0) return "—";
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)}KB`;
+  return `${(size / (1024 * 1024)).toFixed(2)}MB`;
+};
+
+const formatReleaseTime = (value) => {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toISOString().slice(0, 10);
+};
+
+const INFO_TABS = [
+  ["overview", "Overview"],
+  ["catalog", "Catalog"],
+  ["manual", "Manual"],
+  ["certificate", "Certificate"],
+  ["drawing", "Drawing"],
+  ["video", "Video"],
+];
+
 const normalizeApiProduct = (machine) => {
   const image = toMediaUrl(machine.image);
   const gallery = Array.isArray(machine.gallery)
@@ -22,6 +45,12 @@ const normalizeApiProduct = (machine) => {
         .filter(Boolean)
     : [];
   const specificationRows = toSpecificationRows(machine.specs);
+  const pdfs = Array.isArray(machine.pdfs)
+    ? machine.pdfs.map((pdf) => ({
+        ...pdf,
+        filePath: toMediaUrl(pdf.filePath),
+      }))
+    : [];
   const specs = specificationRows.length
     ? [
         ["FRAME VARIATION", specificationRows[0].frameVariation],
@@ -37,8 +66,10 @@ const normalizeApiProduct = (machine) => {
   return {
     ...machine,
     image,
+    video: toMediaUrl(machine.video),
     gallery: [...new Set([image, ...gallery].filter(Boolean))],
     category: machine.category?.name || "UNCATEGORIZED",
+    pdfs,
     specificationRows,
     specs,
   };
@@ -50,8 +81,9 @@ const ProductDetail = () => {
   const location = useLocation();
   const routeProduct = location.state?.product;
 
-  const [apiProduct, setApiProduct] = useState(routeProduct || null);
-  const [apiStatus, setApiStatus] = useState(routeProduct ? "ready" : "loading");
+  const [apiProduct, setApiProduct] = useState(null);
+  const [apiStatus, setApiStatus] = useState("loading");
+  const [activeInfoTab, setActiveInfoTab] = useState("overview");
   const viewRequestRef = useRef("");
 
   useEffect(() => {
@@ -92,8 +124,6 @@ const ProductDetail = () => {
   }, [id]);
 
   useEffect(() => {
-    if (routeProduct) return undefined;
-
     const controller = new AbortController();
 
     fetch(`${API_BASE_URL}/api/machines/${id}`, { signal: controller.signal })
@@ -102,7 +132,21 @@ const ProductDetail = () => {
         if (!response.ok || !result.data) {
           throw new Error(result.message || "Unable to load this product.");
         }
-        return result.data;
+        let pdfs = [];
+        try {
+          const pdfResponse = await fetch(
+            `${API_BASE_URL}/api/machine-pdfs?machineId=${id}`,
+            { signal: controller.signal },
+          );
+          const pdfResult = await pdfResponse.json();
+          if (pdfResponse.ok && Array.isArray(pdfResult.data)) {
+            pdfs = pdfResult.data;
+          }
+        } catch (pdfError) {
+          if (pdfError.name === "AbortError") throw pdfError;
+        }
+
+        return { ...result.data, pdfs };
       })
       .then((machine) => {
         setApiProduct(normalizeApiProduct(machine));
@@ -113,16 +157,28 @@ const ProductDetail = () => {
       });
 
     return () => controller.abort();
-  }, [id, routeProduct]);
+  }, [id]);
 
   const fallbackProduct = DataProduct.find(
     (item) => String(item.id) === String(id),
   );
-  const product = routeProduct || apiProduct || (apiStatus === "error" ? fallbackProduct : null);
+  const product = apiProduct || routeProduct || (apiStatus === "error" ? fallbackProduct : null);
 
   const [activeImage, setActiveImage] = useState(product?.image || "");
 
   const [animationDirection, setAnimationDirection] = useState("next");
+  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
+
+  const handleImageMouseMove = (event) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - bounds.left) / bounds.width) * 100;
+    const y = ((event.clientY - bounds.top) / bounds.height) * 100;
+
+    setZoomPosition({
+      x: Math.max(0, Math.min(100, x)),
+      y: Math.max(0, Math.min(100, y)),
+    });
+  };
 
   /* =========================================
        GALLERY
@@ -137,8 +193,12 @@ const ProductDetail = () => {
     ========================================= */
 
   useEffect(() => {
-    setActiveImage(product?.image || "");
-    setAnimationDirection("next");
+    const resetTimer = window.setTimeout(() => {
+      setActiveImage(product?.image || "");
+      setAnimationDirection("next");
+    }, 0);
+
+    return () => window.clearTimeout(resetTimer);
   }, [product]);
 
   /* =========================================
@@ -210,6 +270,41 @@ const ProductDetail = () => {
     setActiveImage(image);
   };
 
+  const firstSpecification = product.specificationRows?.[0] || {};
+  const overviewItems = product.specificationRows?.length
+    ? [
+        ["Frame size / variation", firstSpecification.frameVariation],
+        ["Rated current (In)", firstSpecification.ratedCurrent],
+        ["Rated operational voltage Ue (VAC)", firstSpecification.voltage],
+        ["ICU / ICS (kA)", firstSpecification.icuIcs],
+        ["Number of poles", firstSpecification.poles],
+        ["Mounting", firstSpecification.mounting],
+        ["Trip unit", firstSpecification.tripUnit],
+      ].filter(([, value]) => value)
+    : (product.specs || []).map(([label, value]) => [label, value]);
+  const overviewSections = [
+    {
+      title: "Compliant Standards",
+      items: ["IEC/EN 60947-2"],
+    },
+    {
+      title: "Electrical and Control Characteristics",
+      items: overviewItems.slice(0, 4).map(([label, value]) => `${label}: ${value}`),
+    },
+    {
+      title: "Mounting",
+      items: overviewItems
+        .filter(([label]) => /mount|pole/i.test(label))
+        .map(([label, value]) => `${label}: ${value}`),
+    },
+  ];
+  const productDocuments = Array.isArray(product.pdfs) ? product.pdfs : [];
+  const visibleDocuments = activeInfoTab === "catalog"
+    ? productDocuments
+    : productDocuments.filter((document) =>
+        String(document.fileName || "").toLowerCase().includes(activeInfoTab),
+      );
+
   return (
     <div className="product-detail-page">
       {/* =========================================
@@ -246,13 +341,27 @@ const ProductDetail = () => {
                 ===================================== */}
 
         <div className="product-detail-gallery">
-          <div className="product-detail-main-image">
+          <div
+            className="product-detail-main-image"
+            onMouseMove={handleImageMouseMove}
+          >
             <img
               key={`${activeImage}-${animationDirection}`}
               src={activeImage}
               alt={product.name}
               className={`product-main-image-animated ${animationDirection}`}
             />
+            <div className="product-detail-image-zoom" aria-hidden="true">
+              <img
+                src={activeImage}
+                alt=""
+                style={{
+                  transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                }}
+              />
+              <span>IMAGE ZOOM</span>
+            </div>
+            <span className="product-detail-zoom-hint">Hover to zoom</span>
           </div>
 
           {/* =================================
@@ -328,11 +437,15 @@ const ProductDetail = () => {
           {/* DESCRIPTION */}
 
           <p className="product-detail-description">
-            Engineered for maximum reliability and versatile performance, the{" "}
-            {product.name} series offers seamless switchboard integration.
-            Featuring advanced LSIG multi-protection trip units and multiple
-            mounting options, it delivers superior control for complex
-            industrial power distribution systems.
+            {product.description?.trim() || (
+              <>
+                Engineered for maximum reliability and versatile performance, the{" "}
+                {product.name} series offers seamless switchboard integration.
+                Featuring advanced LSIG multi-protection trip units and multiple
+                mounting options, it delivers superior control for complex
+                industrial power distribution systems.
+              </>
+            )}
           </p>
 
           {/* FEATURE CARDS */}
@@ -370,6 +483,95 @@ const ProductDetail = () => {
         </div>
       </section>
 
+      <section className="product-information" aria-labelledby="product-information-title">
+        <div className="product-information-heading">
+          <h2 id="product-information-title">
+            <span aria-hidden="true" />
+            Product Information
+          </h2>
+        </div>
+
+        <div className="product-info-tabs" role="tablist" aria-label="Product information">
+          {INFO_TABS.map(([tabKey, label]) => (
+            <button
+              type="button"
+              role="tab"
+              key={tabKey}
+              aria-selected={activeInfoTab === tabKey}
+              className={activeInfoTab === tabKey ? "active" : ""}
+              onClick={() => setActiveInfoTab(tabKey)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className="product-info-content">
+          {activeInfoTab === "overview" && (
+            <div className="product-info-overview" role="tabpanel">
+              <h3>Main Specifications</h3>
+              <div className="product-info-overview-grid">
+                {overviewSections.map((section) => (
+                  <section className="product-info-group" key={section.title}>
+                    <h4>{section.title}</h4>
+                    <ul>
+                      {section.items.length ? section.items.map((item) => (
+                        <li key={item}>{item}</li>
+                      )) : <li>No information available.</li>}
+                    </ul>
+                  </section>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeInfoTab !== "overview" && activeInfoTab !== "video" && (
+            <div className="product-info-documents" role="tabpanel">
+              {visibleDocuments.length ? (
+                <div className="product-document-table">
+                  <div className="product-document-row product-document-heading" role="row">
+                    <span>Name</span>
+                    <span>Size</span>
+                    <span>Release time</span>
+                    <span>Operate</span>
+                  </div>
+                  {visibleDocuments.map((document) => (
+                    <div className="product-document-row" role="row" key={document.id || document.filePath}>
+                      <strong>{document.fileName || "Product document"}</strong>
+                      <span>{formatFileSize(document.fileSize)}</span>
+                      <span>{formatReleaseTime(document.createdAt)}</span>
+                      <a href={toMediaUrl(document.filePath)} target="_blank" rel="noreferrer" download>
+                        Download <span aria-hidden="true">↓</span>
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="product-info-empty">
+                  <strong>No {activeInfoTab} documents available</strong>
+                  <p>Documents uploaded for this product will appear here.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeInfoTab === "video" && (
+            <div className="product-info-video" role="tabpanel">
+              {product.video ? (
+                <video controls src={toMediaUrl(product.video)}>
+                  Your browser does not support video playback.
+                </video>
+              ) : (
+                <div className="product-info-empty">
+                  <strong>No product video available</strong>
+                  <p>A video uploaded for this product will appear here.</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* =========================================
                 TECHNICAL SPECIFICATIONS
             ========================================= */}
@@ -383,7 +585,11 @@ const ProductDetail = () => {
           </p>
         </div>
 
-        <div className="specification-table-wrapper">
+        <div
+          className={`specification-table-wrapper ${
+            product.specificationRows?.length ? "has-specifications" : "is-empty"
+          }`}
+        >
           <table className="specification-table">
             <thead>
               <tr>

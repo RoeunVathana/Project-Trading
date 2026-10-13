@@ -24,6 +24,7 @@ const createCrudController = ({
   removeUploadedFile,
   cleanupFileFields = [],
   removeStoredFile = removeImage,
+  order = [["id", "DESC"]],
 }) => {
   const getRequestBody = (req) => {
     const body = { ...(req.body || {}) };
@@ -67,6 +68,11 @@ const createCrudController = ({
         const normalized = value.trim();
         if (requiredFields.includes(field) && !normalized) {
           return { error: `${field} is required.` };
+        }
+        if (definition.allowedValues && !definition.allowedValues.includes(normalized)) {
+          return {
+            error: `${field} must be one of: ${definition.allowedValues.join(", ")}.`,
+          };
         }
         values[field] = normalized;
         continue;
@@ -143,7 +149,7 @@ const createCrudController = ({
 
         const records = await model.findAll({
           where: Object.keys(where).length ? where : undefined,
-          order: [["id", "DESC"]],
+          order,
         });
         return res.status(200).json({ success: true, data: records });
       } catch (error) {

@@ -17,6 +17,7 @@ const { logError } = require("../middlewares/LogError");
 const MACHINE_FIELDS = [
   "name",
   "model",
+  "description",
   "categoryId",
   "image",
   "video",
@@ -147,7 +148,7 @@ const getMachines = async (req, res) => {
     }
 
     const filters = [];
-    const queryFields = ["name", "model"];
+    const queryFields = ["name", "model", "description"];
 
     for (const field of queryFields) {
       const queryValue = req.query[field];

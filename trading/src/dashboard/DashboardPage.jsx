@@ -66,6 +66,13 @@ const DashboardPage = () => {
           ),
       ],
       [
+        "processes",
+        () =>
+          requestApi("/api/processes", { token }).then(
+            (result) => result.data || [],
+          ),
+      ],
+      [
         "gallery",
         () =>
           requestApi("/api/machine-galleries", { token }).then(

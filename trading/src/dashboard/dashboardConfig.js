@@ -1,4 +1,4 @@
-export const RESOURCE_KEYS = ["machines", "categories", "gallery", "specs", "pdfs", "users"];
+export const RESOURCE_KEYS = ["machines", "categories", "processes", "gallery", "specs", "pdfs", "users"];
 export const CATEGORY_COLORS = ["#1a788c", "#48a6a0", "#7abcb4", "#e0a05f", "#8b9bd1"];
 export const UPLOAD_LIMITS = {
   image: { bytes: 100 * 1024 * 1024, label: "100 MB" },
@@ -16,6 +16,7 @@ export const RESOURCE_CONFIG = {
     fields: [
       { name: "name", label: "Machine name", required: true, placeholder: "Precision Pro 5K" },
       { name: "model", label: "Model", required: true, placeholder: "EFS-CNC-5000" },
+      { name: "description", label: "Description", type: "textarea", placeholder: "Describe the machine and its intended application." },
       { name: "categoryId", label: "Category", type: "relation", resource: "categories", required: true },
       { name: "machineType", label: "Machine type", placeholder: "Milling center" },
       { name: "power", label: "Power", placeholder: "35 kW" },
@@ -45,6 +46,29 @@ export const RESOURCE_CONFIG = {
           { value: "inactive", label: "Inactive" },
         ],
       },
+    ],
+  },
+  processes: {
+    title: "Processes",
+    singular: "process",
+    description: "Manage production process records and their display order.",
+    endpoint: "/api/processes",
+    icon: "P",
+    fields: [
+      { name: "name", label: "Process name", required: true, placeholder: "Understand the application" },
+      { name: "description", label: "Description", type: "textarea", placeholder: "Explain this process step." },
+      {
+        name: "status",
+        label: "Status",
+        type: "select",
+        required: true,
+        defaultValue: "active",
+        options: [
+          { value: "active", label: "Active" },
+          { value: "inactive", label: "Inactive" },
+        ],
+      },
+      { name: "sortOrder", label: "Sort order", type: "number", min: 0, placeholder: "0" },
     ],
   },
   gallery: {
@@ -110,7 +134,7 @@ export const NAV_ITEMS = [
     key: "machines",
     label: RESOURCE_CONFIG.machines.title,
     icon: RESOURCE_CONFIG.machines.icon,
-      children: ["machines", "categories", "gallery", "specs", "pdfs"].map((key) => ({
+      children: ["machines", "categories", "processes", "gallery", "specs", "pdfs"].map((key) => ({
       key,
       label: RESOURCE_CONFIG[key].title,
       icon: RESOURCE_CONFIG[key].icon,
@@ -124,6 +148,7 @@ export const TABLE_COLUMNS = {
     { key: "image", label: "Image" },
     { key: "name", label: "Machine" },
     { key: "model", label: "Model" },
+    { key: "description", label: "Description" },
     { key: "category", label: "Category" },
     { key: "machineType", label: "Type" },
     { key: "galleryCount", label: "Gallery" },
@@ -134,6 +159,12 @@ export const TABLE_COLUMNS = {
     { key: "name", label: "Category" },
     { key: "description", label: "Description" },
     { key: "status", label: "Status" },
+  ],
+  processes: [
+    { key: "name", label: "Process" },
+    { key: "description", label: "Description" },
+    { key: "status", label: "Status" },
+    { key: "sortOrder", label: "Sort order" },
   ],
   gallery: [
     { key: "image", label: "Image" },
@@ -165,6 +196,7 @@ export const TABLE_COLUMNS = {
 export const emptyRecords = () => ({
   machines: [],
   categories: [],
+  processes: [],
   gallery: [],
   specs: [],
   pdfs: [],

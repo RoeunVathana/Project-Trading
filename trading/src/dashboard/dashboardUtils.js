@@ -5,7 +5,7 @@ export const defaultForm = (config, record) => {
   config.fields.forEach((field) => {
     values[field.name] = field.type === "file"
       ? null
-      : String(record?.[field.name] ?? (field.name === "sortOrder" ? 0 : ""));
+      : String(record?.[field.name] ?? field.defaultValue ?? (field.name === "sortOrder" ? 0 : ""));
     if (field.clearField) values[field.clearField] = false;
   });
   return values;
@@ -14,6 +14,7 @@ export const defaultForm = (config, record) => {
 export const recordTitle = (resource, record) => {
   if (resource === "machines") return record.name || record.model;
   if (resource === "categories") return record.name;
+  if (resource === "processes") return record.name;
   if (resource === "gallery") return `Gallery image #${record.id}`;
   if (resource === "specs") return record.frameVariation || record.specName || `Specification #${record.id}`;
   if (resource === "pdfs") return record.fileName || `PDF #${record.id}`;

@@ -25,6 +25,7 @@ const MachineRoute = require("./routes/Machine.route");
 const MachineGalleryRoute = require("./routes/MachineGallery.route");
 const MachineSpecRoute = require("./routes/MachineSpec.route");
 const MachinePdfRoute = require("./routes/MachinePdf.route");
+const ProcessRoute = require("./routes/Process.route");
 const UserRoute = require("./routes/User.route");
 // Routes
 ProductRoute(app);
@@ -33,6 +34,7 @@ MachineRoute(app);
 MachineGalleryRoute(app);
 MachineSpecRoute(app);
 MachinePdfRoute(app);
+ProcessRoute(app);
 UserRoute(app);
 
 // Sync database
@@ -58,6 +60,12 @@ db.sequelize
     if (!machinesTable.video) {
       await queryInterface.addColumn("machines", "video", {
         type: db.Sequelize.STRING(500),
+        allowNull: true,
+      });
+    }
+    if (!machinesTable.description) {
+      await queryInterface.addColumn("machines", "description", {
+        type: db.Sequelize.TEXT,
         allowNull: true,
       });
     }
