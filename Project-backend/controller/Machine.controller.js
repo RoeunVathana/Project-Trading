@@ -50,7 +50,10 @@ const machineIncludes = () => [
     model: MachineSpec,
     as: "specs",
     separate: true,
-    order: [["id", "DESC"]],
+    order: [
+      ["sortOrder", "ASC"],
+      ["id", "ASC"],
+    ],
   },
 ];
 

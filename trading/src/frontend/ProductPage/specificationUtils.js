@@ -9,3 +9,72 @@ export const toSpecificationRows = (specifications) => (specifications || [])
     tripUnit: specification.tripUnit || "",
   }))
   .filter((row) => Object.values(row).some(Boolean));
+
+const LEGACY_SPEC_FIELDS = [
+  { key: "frameVariation", section: "Electrical and Control Characteristics", label: "Frame variation" },
+  { key: "ratedCurrent", section: "Electrical and Control Characteristics", label: "Rated current (In)" },
+  { key: "voltage", section: "Electrical and Control Characteristics", label: "Rated operational voltage Ue (VAC)" },
+  { key: "icuIcs", section: "Electrical and Control Characteristics", label: "ICU / ICS (kA)" },
+  { key: "tripUnit", section: "Electrical and Control Characteristics", label: "Trip unit" },
+  { key: "poles", section: "Mounting", label: "Number of poles" },
+  { key: "mounting", section: "Mounting", label: "Installation method" },
+];
+
+export const toSpecificationEntries = (specifications) => (specifications || [])
+  .flatMap((specification, specificationIndex) => {
+    const structuredValue = specification.value || specification.specValue || "";
+    const hasContentFields = specification.section || specification.label || specification.value;
+
+    if (hasContentFields) {
+      return structuredValue
+        ? [{
+            id: specification.id,
+            section: specification.section || "General",
+            label: specification.label || specification.specName || "",
+            value: structuredValue,
+            sortOrder: Number(specification.sortOrder) || specificationIndex,
+          }]
+        : [];
+    }
+
+    const legacyEntries = LEGACY_SPEC_FIELDS
+      .filter(({ key }) => specification[key])
+      .map(({ key, section, label }, fieldIndex) => ({
+        id: `${specification.id || specificationIndex}-${key}`,
+        section,
+        label,
+        value: specification[key],
+        sortOrder: specificationIndex * LEGACY_SPEC_FIELDS.length + fieldIndex,
+      }));
+
+    if (legacyEntries.length) return legacyEntries;
+    return specification.specName || specification.specValue
+      ? [{
+          id: specification.id || specificationIndex,
+          section: "General",
+          label: specification.specName || "",
+          value: specification.specValue || "",
+          sortOrder: specificationIndex,
+        }]
+      : [];
+  })
+  .sort((left, right) => left.sortOrder - right.sortOrder);
+
+export const groupSpecificationEntries = (entries) => {
+  const groups = [];
+  const groupMap = new Map();
+
+  (entries || []).forEach((entry) => {
+    const section = String(entry.section || "General").trim() || "General";
+    const sectionKey = section.toLocaleLowerCase();
+    let group = groupMap.get(sectionKey);
+    if (!group) {
+      group = { title: section, items: [] };
+      groupMap.set(sectionKey, group);
+      groups.push(group);
+    }
+    group.items.push(entry);
+  });
+
+  return groups;
+};

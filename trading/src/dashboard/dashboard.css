@@ -2567,7 +2567,7 @@ img.profile-avatar {
 
 .dashboard-content {
   width: min(100%, 1720px);
-  padding-top: 34px;
+  padding: 10px;
 }
 
 .overview-heading {

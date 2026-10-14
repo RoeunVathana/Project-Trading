@@ -66,13 +66,6 @@ const DashboardPage = () => {
           ),
       ],
       [
-        "processes",
-        () =>
-          requestApi("/api/processes", { token }).then(
-            (result) => result.data || [],
-          ),
-      ],
-      [
         "gallery",
         () =>
           requestApi("/api/machine-galleries", { token }).then(
@@ -292,7 +285,10 @@ const DashboardPage = () => {
         if (value) fileUploads.push([field.apiField, value]);
         if (field.clearField && form[field.clearField]) payload[field.clearField] = "true";
       } else if (value !== "" && value !== undefined && value !== null) {
-        payload[field.name] = field.type === "number" ? Number(value) : value;
+        const normalizedValue = field.normalize === "lowercase" && typeof value === "string"
+          ? value.toLowerCase()
+          : value;
+        payload[field.name] = field.type === "number" ? Number(normalizedValue) : normalizedValue;
       }
     });
 
@@ -465,6 +461,18 @@ const DashboardPage = () => {
       );
     }
     if (key === "machine") return machineName(record.machineId);
+    if (resource === "specs" && key === "section") {
+      return record.section || "General";
+    }
+    if (resource === "specs" && key === "label") {
+      return record.label || record.specName || "—";
+    }
+    if (resource === "specs" && key === "value") {
+      return record.value || record.specValue || "—";
+    }
+    if (resource === "specs" && key === "sortOrder") {
+      return record.sortOrder ?? 0;
+    }
     if (key === "video") {
       return record.video ? (
         <a

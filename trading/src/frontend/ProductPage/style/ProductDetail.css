@@ -600,10 +600,44 @@
 
 .product-info-video video {
     display: block;
-    width: min(900px, 100%);
-    max-height: 500px;
-    margin: 0 auto;
-    border-radius: 14px;
+    width: 100%;
+    height: calc(100vh - 190px);
+    min-height: 460px;
+    max-height: none;
+    margin: 0;
+    border-radius: inherit;
+    background: #000;
+    object-fit: contain;
+}
+
+.video-information {
+    min-height: 100vh;
+    padding: 0 32px;
+}
+
+.video-information .product-info-content {
+    display: flex;
+    flex: 1;
+    padding: 40px 0 12px;
+}
+
+.video-information .product-info-video {
+    display: flex;
+    width: 100%;
+    min-height: calc(100vh - 190px);
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    border-radius: 16px 16px 0 0;
+    overflow: hidden;
+}
+
+.video-information .product-info-empty {
+    width: 100%;
+    min-height: calc(100vh - 190px);
+    border: 0;
+    border-radius: 16px 16px 0 0;
     background: #000;
 }
 
@@ -613,7 +647,7 @@
 ===================================================== */
 
 .technical-specifications {
-    display: none;
+    display: block;
     width: 100%;
     padding: 56px 60px 70px;
     background: var(--theme-surface-0);
@@ -652,7 +686,7 @@
 
 .specification-table {
     width: 100%;
-    min-width: 900px;
+    min-width: 640px;
     border-collapse: collapse;
     background: var(--theme-surface-1);
 }
@@ -674,7 +708,23 @@
     border-top: 1px solid var(--theme-border);
     color: var(--theme-text-primary);
     font-size: 15px;
-    white-space: nowrap;
+    vertical-align: top;
+    white-space: normal;
+}
+
+.specification-table th:first-child,
+.specification-table td:first-child {
+    width: 30%;
+}
+
+.specification-table th:nth-child(2),
+.specification-table td:nth-child(2) {
+    width: 30%;
+}
+
+.specification-table td:last-child {
+    width: 40%;
+    overflow-wrap: anywhere;
 }
 
 .specification-table td:first-child {
@@ -1155,6 +1205,26 @@
     .gallery-arrow {
         width: 24px;
         height: 24px;
+    }
+}
+
+@media (max-width: 650px) {
+    .video-information {
+        padding: 0;
+    }
+
+    .video-information .product-info-content {
+        padding: 32px 0 0;
+    }
+
+    .video-information .product-info-video,
+    .video-information .product-info-empty {
+        min-height: calc(100vh - 125px);
+    }
+
+    .product-info-video video {
+        height: calc(100vh - 125px);
+        min-height: 260px;
     }
 }
 

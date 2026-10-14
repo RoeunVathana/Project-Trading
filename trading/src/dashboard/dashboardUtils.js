@@ -14,9 +14,8 @@ export const defaultForm = (config, record) => {
 export const recordTitle = (resource, record) => {
   if (resource === "machines") return record.name || record.model;
   if (resource === "categories") return record.name;
-  if (resource === "processes") return record.name;
   if (resource === "gallery") return `Gallery image #${record.id}`;
-  if (resource === "specs") return record.frameVariation || record.specName || `Specification #${record.id}`;
+  if (resource === "specs") return record.label || record.value || record.specName || `Specification #${record.id}`;
   if (resource === "pdfs") return record.fileName || `PDF #${record.id}`;
   if (resource === "users") return displayAccountName(record, `User #${record.id}`);
   return `Record #${record.id}`;

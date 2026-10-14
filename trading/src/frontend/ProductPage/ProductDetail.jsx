@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import DataProduct from "./DataProduct";
-import { toSpecificationRows } from "./specificationUtils";
+import { groupSpecificationEntries, toSpecificationEntries } from "./specificationUtils";
 import "./style/ProductDetail.css";
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000")
@@ -44,24 +44,16 @@ const normalizeApiProduct = (machine) => {
         .map(toMediaUrl)
         .filter(Boolean)
     : [];
-  const specificationRows = toSpecificationRows(machine.specs);
+  const specificationEntries = toSpecificationEntries(machine.specs);
   const pdfs = Array.isArray(machine.pdfs)
     ? machine.pdfs.map((pdf) => ({
         ...pdf,
         filePath: toMediaUrl(pdf.filePath),
       }))
     : [];
-  const specs = specificationRows.length
-    ? [
-        ["FRAME VARIATION", specificationRows[0].frameVariation],
-        ["RATED CURRENT (IN)", specificationRows[0].ratedCurrent],
-        ["VOLTAGE (UE)", specificationRows[0].voltage],
-        ["ICU / ICS (KA)", specificationRows[0].icuIcs],
-        ["POLES", specificationRows[0].poles],
-        ["MOUNTING", specificationRows[0].mounting],
-        ["TRIP UNIT", specificationRows[0].tripUnit],
-      ].filter(([, value]) => value)
-    : [];
+  const specs = specificationEntries
+    .map((entry) => [entry.label || entry.section, entry.value])
+    .filter(([, value]) => value);
 
   return {
     ...machine,
@@ -70,7 +62,8 @@ const normalizeApiProduct = (machine) => {
     gallery: [...new Set([image, ...gallery].filter(Boolean))],
     category: machine.category?.name || "UNCATEGORIZED",
     pdfs,
-    specificationRows,
+    specificationRows: specificationEntries,
+    specificationEntries,
     specs,
   };
 };
@@ -132,6 +125,20 @@ const ProductDetail = () => {
         if (!response.ok || !result.data) {
           throw new Error(result.message || "Unable to load this product.");
         }
+        let specs = Array.isArray(result.data.specs) ? result.data.specs : [];
+        try {
+          const specificationResponse = await fetch(
+            `${API_BASE_URL}/api/machine-specs?machineId=${id}`,
+            { signal: controller.signal },
+          );
+          const specificationResult = await specificationResponse.json();
+          if (specificationResponse.ok && Array.isArray(specificationResult.data)) {
+            specs = specificationResult.data;
+          }
+        } catch (specificationError) {
+          if (specificationError.name === "AbortError") throw specificationError;
+        }
+
         let pdfs = [];
         try {
           const pdfResponse = await fetch(
@@ -146,7 +153,7 @@ const ProductDetail = () => {
           if (pdfError.name === "AbortError") throw pdfError;
         }
 
-        return { ...result.data, pdfs };
+        return { ...result.data, specs, pdfs };
       })
       .then((machine) => {
         setApiProduct(normalizeApiProduct(machine));
@@ -270,34 +277,31 @@ const ProductDetail = () => {
     setActiveImage(image);
   };
 
-  const firstSpecification = product.specificationRows?.[0] || {};
-  const overviewItems = product.specificationRows?.length
-    ? [
-        ["Frame size / variation", firstSpecification.frameVariation],
-        ["Rated current (In)", firstSpecification.ratedCurrent],
-        ["Rated operational voltage Ue (VAC)", firstSpecification.voltage],
-        ["ICU / ICS (kA)", firstSpecification.icuIcs],
-        ["Number of poles", firstSpecification.poles],
-        ["Mounting", firstSpecification.mounting],
-        ["Trip unit", firstSpecification.tripUnit],
-      ].filter(([, value]) => value)
-    : (product.specs || []).map(([label, value]) => [label, value]);
-  const overviewSections = [
-    {
-      title: "Compliant Standards",
-      items: ["IEC/EN 60947-2"],
-    },
-    {
-      title: "Electrical and Control Characteristics",
-      items: overviewItems.slice(0, 4).map(([label, value]) => `${label}: ${value}`),
-    },
-    {
-      title: "Mounting",
-      items: overviewItems
-        .filter(([label]) => /mount|pole/i.test(label))
-        .map(([label, value]) => `${label}: ${value}`),
-    },
-  ];
+  const displaySpecificationEntries = product.specificationEntries?.length
+    ? product.specificationEntries
+    : (product.specificationRows?.length
+      ? product.specificationRows
+      : (product.specs || []).map(([label, value], index) => ({
+          id: `fallback-${index}`,
+          section: "Electrical and Control Characteristics",
+          label,
+          value,
+          sortOrder: index,
+        })));
+  const groupedSpecificationEntries = groupSpecificationEntries(displaySpecificationEntries);
+  const overviewSections = groupedSpecificationEntries.map((section) => ({
+    title: section.title,
+    items: section.items.flatMap((entry) => {
+      const values = String(entry.value || "")
+        .split(/\r?\n/)
+        .map((value) => value.trim())
+        .filter(Boolean);
+
+      return values.map((value) => (
+        entry.label ? `${entry.label}: ${value}` : value
+      ));
+    }),
+  }));
   const productDocuments = Array.isArray(product.pdfs) ? product.pdfs : [];
   const visibleDocuments = activeInfoTab === "catalog"
     ? productDocuments
@@ -483,7 +487,10 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      <section className="product-information" aria-labelledby="product-information-title">
+      <section
+        className={`product-information ${activeInfoTab === "video" ? "video-information" : ""}`}
+        aria-labelledby="product-information-title"
+      >
         <div className="product-information-heading">
           <h2 id="product-information-title">
             <span aria-hidden="true" />
@@ -511,7 +518,7 @@ const ProductDetail = () => {
             <div className="product-info-overview" role="tabpanel">
               <h3>Main Specifications</h3>
               <div className="product-info-overview-grid">
-                {overviewSections.map((section) => (
+                {overviewSections.length ? overviewSections.map((section) => (
                   <section className="product-info-group" key={section.title}>
                     <h4>{section.title}</h4>
                     <ul>
@@ -520,7 +527,9 @@ const ProductDetail = () => {
                       )) : <li>No information available.</li>}
                     </ul>
                   </section>
-                ))}
+                )) : (
+                  <p className="product-info-empty">No specification data available from the API.</p>
+                )}
               </div>
             </div>
           )}
@@ -587,36 +596,28 @@ const ProductDetail = () => {
 
         <div
           className={`specification-table-wrapper ${
-            product.specificationRows?.length ? "has-specifications" : "is-empty"
+            displaySpecificationEntries.length ? "has-specifications" : "is-empty"
           }`}
         >
           <table className="specification-table">
             <thead>
               <tr>
-                <th>FRAME VARIATION</th>
-                <th>RATED CURRENT (IN)</th>
-                <th>VOLTAGE (UE)</th>
-                <th>ICU / ICS (KA)</th>
-                <th>POLES</th>
-                <th>MOUNTING</th>
-                <th>TRIP UNIT</th>
+                <th>SECTION</th>
+                <th>SPECIFICATION</th>
+                <th>VALUE</th>
               </tr>
             </thead>
 
             <tbody>
-              {product.specificationRows?.length ? product.specificationRows.map((row, index) => (
-                <tr key={`${row.frameVariation || "specification"}-${index}`}>
-                  <td>{row.frameVariation || "—"}</td>
-                  <td>{row.ratedCurrent || "—"}</td>
-                  <td>{row.voltage || "—"}</td>
-                  <td className="cyan-value">{row.icuIcs || "—"}</td>
-                  <td>{row.poles || "—"}</td>
-                  <td>{row.mounting || "—"}</td>
-                  <td>{row.tripUnit || "—"}</td>
+              {displaySpecificationEntries.length ? displaySpecificationEntries.map((entry, index) => (
+                <tr key={`${entry.id || entry.label || "specification"}-${index}`}>
+                  <td>{entry.section || "—"}</td>
+                  <td>{entry.label || "—"}</td>
+                  <td className="cyan-value">{entry.value || "—"}</td>
                 </tr>
               )) : (
                 <tr>
-                  <td className="specification-empty" colSpan="7">No technical specifications available for this product.</td>
+                  <td className="specification-empty" colSpan="3">No technical specifications available for this product.</td>
                 </tr>
               )}
             </tbody>

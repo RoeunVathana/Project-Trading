@@ -1,4 +1,4 @@
-export const RESOURCE_KEYS = ["machines", "categories", "processes", "gallery", "specs", "pdfs", "users"];
+export const RESOURCE_KEYS = ["machines", "categories", "gallery", "specs", "pdfs", "users"];
 export const CATEGORY_COLORS = ["#1a788c", "#48a6a0", "#7abcb4", "#e0a05f", "#8b9bd1"];
 export const UPLOAD_LIMITS = {
   image: { bytes: 100 * 1024 * 1024, label: "100 MB" },
@@ -48,29 +48,6 @@ export const RESOURCE_CONFIG = {
       },
     ],
   },
-  processes: {
-    title: "Processes",
-    singular: "process",
-    description: "Manage production process records and their display order.",
-    endpoint: "/api/processes",
-    icon: "P",
-    fields: [
-      { name: "name", label: "Process name", required: true, placeholder: "Understand the application" },
-      { name: "description", label: "Description", type: "textarea", placeholder: "Explain this process step." },
-      {
-        name: "status",
-        label: "Status",
-        type: "select",
-        required: true,
-        defaultValue: "active",
-        options: [
-          { value: "active", label: "Active" },
-          { value: "inactive", label: "Inactive" },
-        ],
-      },
-      { name: "sortOrder", label: "Sort order", type: "number", min: 0, placeholder: "0" },
-    ],
-  },
   gallery: {
     title: "Gallery",
     singular: "gallery image",
@@ -86,18 +63,15 @@ export const RESOURCE_CONFIG = {
   specs: {
     title: "Specifications",
     singular: "specification",
-    description: "Maintain the structured specification matrix shown with each machine.",
+    description: "Build the specification sections and bullet points shown with each machine. Add one row per bullet, or enter multiple values on separate lines.",
     endpoint: "/api/machine-specs",
     icon: "S",
     fields: [
       { name: "machineId", label: "Machine", type: "relation", resource: "machines", required: true },
-      { name: "frameVariation", label: "Frame variation", required: true, placeholder: "NXA16" },
-      { name: "ratedCurrent", label: "Rated current (In)", required: true, placeholder: "630A - 1600A" },
-      { name: "voltage", label: "Voltage (Ue)", required: true, placeholder: "AC380/400/415V" },
-      { name: "icuIcs", label: "ICU / ICS (kA)", required: true, placeholder: "50 / 50" },
-      { name: "poles", label: "Poles", required: true, placeholder: "3P / 4P" },
-      { name: "mounting", label: "Mounting", required: true, placeholder: "Fixed / Draw-out" },
-      { name: "tripUnit", label: "Trip unit", required: true, placeholder: "2.0 / 3.0 / 5.0 (LSIG)" },
+      { name: "section", label: "Section", required: true, normalize: "lowercase", placeholder: "Electrical and Control Characteristics" },
+      { name: "label", label: "Item label", placeholder: "Frame size (A)" },
+      { name: "value", label: "Specification value", type: "textarea", required: true, placeholder: "IEC/EN 60947-1\nIEC/EN 60947-2" },
+      { name: "sortOrder", label: "Display order", type: "number", min: 0, defaultValue: 0, placeholder: "0" },
     ],
   },
   pdfs: {
@@ -134,7 +108,7 @@ export const NAV_ITEMS = [
     key: "machines",
     label: RESOURCE_CONFIG.machines.title,
     icon: RESOURCE_CONFIG.machines.icon,
-      children: ["machines", "categories", "processes", "gallery", "specs", "pdfs"].map((key) => ({
+      children: ["machines", "categories", "gallery", "specs", "pdfs"].map((key) => ({
       key,
       label: RESOURCE_CONFIG[key].title,
       icon: RESOURCE_CONFIG[key].icon,
@@ -160,12 +134,6 @@ export const TABLE_COLUMNS = {
     { key: "description", label: "Description" },
     { key: "status", label: "Status" },
   ],
-  processes: [
-    { key: "name", label: "Process" },
-    { key: "description", label: "Description" },
-    { key: "status", label: "Status" },
-    { key: "sortOrder", label: "Sort order" },
-  ],
   gallery: [
     { key: "image", label: "Image" },
     { key: "machine", label: "Machine" },
@@ -173,13 +141,10 @@ export const TABLE_COLUMNS = {
   ],
   specs: [
     { key: "machine", label: "Machine" },
-    { key: "frameVariation", label: "Frame variation" },
-    { key: "ratedCurrent", label: "Rated current" },
-    { key: "voltage", label: "Voltage" },
-    { key: "icuIcs", label: "ICU / ICS" },
-    { key: "poles", label: "Poles" },
-    { key: "mounting", label: "Mounting" },
-    { key: "tripUnit", label: "Trip unit" },
+    { key: "section", label: "Section" },
+    { key: "label", label: "Item" },
+    { key: "value", label: "Value" },
+    { key: "sortOrder", label: "Order" },
   ],
   pdfs: [
     { key: "machine", label: "Machine" },
@@ -196,7 +161,6 @@ export const TABLE_COLUMNS = {
 export const emptyRecords = () => ({
   machines: [],
   categories: [],
-  processes: [],
   gallery: [],
   specs: [],
   pdfs: [],

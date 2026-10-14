@@ -137,7 +137,7 @@ const RecordDialogs = ({
                 <label className={`dashboard-field ${field.type === "textarea" ? "field-wide" : ""}`} key={field.name}>
                   <span>{field.label}{(field.required || field.requiredOnCreate) && !dialog.record ? <b> *</b> : null}</span>
                   {field.type === "textarea" ? (
-                    <textarea value={form[field.name] || ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} placeholder={field.placeholder} rows="3" />
+                    <textarea value={form[field.name] || ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: field.normalize === "lowercase" ? event.target.value.toLowerCase() : event.target.value }))} placeholder={field.placeholder} rows="3" />
                   ) : field.type === "select" ? (
                     <select value={form[field.name] || ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} required={field.required}>
                       <option value="">Select {field.label.toLowerCase()}</option>
@@ -181,7 +181,7 @@ const RecordDialogs = ({
                       type={field.type || "text"}
                       min={field.min}
                       value={form[field.name] ?? ""}
-                      onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))}
+                      onChange={(event) => setForm((current) => ({ ...current, [field.name]: field.normalize === "lowercase" ? event.target.value.toLowerCase() : event.target.value }))}
                       placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
                       required={field.required || (!dialog.record && field.requiredOnCreate)}
                     />

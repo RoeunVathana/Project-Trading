@@ -17,6 +17,27 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
 
+      section: {
+        type: DataTypes.STRING(160),
+        allowNull: true,
+      },
+
+      label: {
+        type: DataTypes.STRING(160),
+        allowNull: true,
+      },
+
+      value: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+
+      sortOrder: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+
       specName: {
         type: DataTypes.STRING,
         allowNull: true,

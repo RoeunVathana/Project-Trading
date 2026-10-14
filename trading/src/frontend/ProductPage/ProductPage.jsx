@@ -3,7 +3,7 @@ import "./style/ProductPage.css";
 
 import fallbackProducts from "./DataProduct";
 import EngineeringSection from "./EngineeringSection";
-import { toSpecificationRows } from "./specificationUtils";
+import { toSpecificationEntries } from "./specificationUtils";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000")
@@ -23,19 +23,10 @@ const toProduct = (machine) => {
   const precisionValue = String(machine.precision || "").toLowerCase();
   const precisionNumber = Number.parseFloat(precisionValue);
   const availabilityValue = String(machine.availability || "").toLowerCase();
-  const specificationRows = toSpecificationRows(machine.specs);
-  const firstSpecification = specificationRows[0];
-  const specs = firstSpecification
-    ? [
-        ["FRAME VARIATION", firstSpecification.frameVariation],
-        ["RATED CURRENT (IN)", firstSpecification.ratedCurrent],
-        ["VOLTAGE (UE)", firstSpecification.voltage],
-        ["ICU / ICS (KA)", firstSpecification.icuIcs],
-        ["POLES", firstSpecification.poles],
-        ["MOUNTING", firstSpecification.mounting],
-        ["TRIP UNIT", firstSpecification.tripUnit],
-      ].filter(([, value]) => value)
-    : [];
+  const specificationEntries = toSpecificationEntries(machine.specs);
+  const specs = specificationEntries
+    .map((entry) => [entry.label || entry.section, entry.value])
+    .filter(([, value]) => value);
 
   if (specs.length === 0) {
     [
@@ -53,7 +44,8 @@ const toProduct = (machine) => {
     image: toMediaUrl(machine.image) || fallbackProducts[0]?.image || "",
     gallery: (machine.gallery || []).map((image) => toMediaUrl(image.imageUrl)),
     category: categoryName.toUpperCase(),
-    specificationRows,
+    specificationRows: specificationEntries,
+    specificationEntries,
     specs,
     machineType: /turn|lathe/.test(machineTypeValue)
       ? "turning"

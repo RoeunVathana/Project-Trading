@@ -70,6 +70,30 @@ db.sequelize
       });
     }
     const specsTable = await queryInterface.describeTable("machine_specs");
+    const specificationContentColumns = {
+      section: {
+        type: db.Sequelize.STRING(160),
+        allowNull: true,
+      },
+      label: {
+        type: db.Sequelize.STRING(160),
+        allowNull: true,
+      },
+      value: {
+        type: db.Sequelize.TEXT,
+        allowNull: true,
+      },
+      sortOrder: {
+        type: db.Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+    };
+    for (const [column, definition] of Object.entries(specificationContentColumns)) {
+      if (!specsTable[column]) {
+        await queryInterface.addColumn("machine_specs", column, definition);
+      }
+    }
     const specificationColumns = [
       "frameVariation",
       "ratedCurrent",

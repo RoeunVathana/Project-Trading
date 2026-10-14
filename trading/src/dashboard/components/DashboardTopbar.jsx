@@ -12,6 +12,15 @@ const DashboardTopbar = ({
   setSidebarOpen,
 }) => {
   const accountName = displayAccountName(account, "back");
+  const searchScope = {
+    overview: "inventory",
+    machines: "machines",
+    categories: "categories",
+    gallery: "gallery",
+    specs: "specifications",
+    pdfs: "PDF library",
+    users: "users",
+  }[activeSection] || "records";
 
   return (
     <header className="dashboard-topbar">
@@ -33,7 +42,7 @@ const DashboardTopbar = ({
         className="dashboard-global-search"
         onSubmit={(event) => {
           event.preventDefault();
-          setActiveSection("machines");
+          if (activeSection === "overview") setActiveSection("machines");
         }}
       >
         <input
@@ -43,10 +52,10 @@ const DashboardTopbar = ({
             setSearch(event.target.value);
             if (activeSection === "overview") setActiveSection("machines");
           }}
-          placeholder="Search inventory..."
-          aria-label="Search inventory"
+          placeholder={`Search ${searchScope}...`}
+          aria-label={`Search ${searchScope}`}
         />
-        <button type="submit" className="dashboard-search-button" aria-label="Search inventory" title="Search inventory">⌕</button>
+        <button type="submit" className="dashboard-search-button" aria-label={`Search ${searchScope}`} title={`Search ${searchScope}`}>⌕</button>
       </form>
       <button
         type="button"
