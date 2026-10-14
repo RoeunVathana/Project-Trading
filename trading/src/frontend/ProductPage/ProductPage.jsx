@@ -101,6 +101,7 @@ const ProductPage = () => {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [categoryOptions, setCategoryOptions] = useState([]);
   const [topCategories, setTopCategories] = useState([]);
 
   const loadMachines = useCallback(async (pageToLoad) => {
@@ -163,10 +164,31 @@ const ProductPage = () => {
     }
   }, []);
 
+  const loadCategories = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/categories`);
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Unable to load categories.");
+
+      setCategoryOptions(
+        (Array.isArray(result.data) ? result.data : [])
+          .filter((category) => category.status !== "inactive")
+          .map((category) => ({
+            id: category.id,
+            name: String(category.name || "").trim(),
+          }))
+          .filter((category) => category.id && category.name),
+      );
+    } catch {
+      setCategoryOptions([]);
+    }
+  }, []);
+
   useEffect(() => {
     const timer = window.setTimeout(() => {
       loadMachines(1);
       loadTopCategories();
+      loadCategories();
     }, 0);
     const refreshTimer = window.setInterval(loadTopCategories, 60 * 1000);
 
@@ -174,15 +196,13 @@ const ProductPage = () => {
       window.clearTimeout(timer);
       window.clearInterval(refreshTimer);
     };
-  }, [loadMachines, loadTopCategories]);
+  }, [loadMachines, loadTopCategories, loadCategories]);
   /* =================================================
        FILTER STATE
     ================================================= */
 
   const [filters, setFilters] = useState({
-    milling: false,
-    turning: false,
-    fiveAxis: false,
+    categories: {},
 
     standard: false,
     highPower: false,
@@ -207,15 +227,24 @@ const ProductPage = () => {
 
   };
 
+  const handleCategoryFilter = (categoryId) => {
+    const key = String(categoryId);
+    setFilters((prev) => ({
+      ...prev,
+      categories: {
+        ...prev.categories,
+        [key]: !prev.categories[key],
+      },
+    }));
+  };
+
   /* =================================================
        RESET FILTER
     ================================================= */
 
   const handleResetFilters = () => {
     setFilters({
-      milling: false,
-      turning: false,
-      fiveAxis: false,
+      categories: {},
 
       standard: false,
       highPower: false,
@@ -255,8 +284,7 @@ const ProductPage = () => {
        CHECK ACTIVE FILTER GROUP
     ================================================= */
 
-  const hasMachineFilter =
-    filters.milling || filters.turning || filters.fiveAxis;
+  const hasCategoryFilter = Object.values(filters.categories).some(Boolean);
 
   const hasPowerFilter =
     filters.standard || filters.highPower || filters.heavyDuty;
@@ -277,12 +305,13 @@ const ProductPage = () => {
       })
       .filter((product) => {
       const categoryMatch = !selectedCategory || product.category === selectedCategory;
+      const apiCategoryMatch = !hasCategoryFilter || Boolean(
+        filters.categories[String(product.categoryId || product.category?.id)],
+      );
 
       /*
        * MACHINE TYPE
        */
-      const machineMatch = !hasMachineFilter || filters[product.machineType];
-
       /*
        * POWER
        */
@@ -303,12 +332,12 @@ const ProductPage = () => {
        * Product must match
        * every active filter group
        */
-      return categoryMatch && machineMatch && powerMatch && precisionMatch && availabilityMatch;
+      return categoryMatch && apiCategoryMatch && powerMatch && precisionMatch && availabilityMatch;
       });
   }, [
     products,
     filters,
-    hasMachineFilter,
+    hasCategoryFilter,
     hasPowerFilter,
     hasPrecisionFilter,
     hasAvailabilityFilter,
@@ -359,35 +388,19 @@ const ProductPage = () => {
             <div className="filter-group">
               <h4>MACHINE TYPE</h4>
 
-              <label>
-                <input
-                  type="checkbox"
-                  checked={filters.milling}
-                  onChange={() => handleFilter("milling")}
-                />
+              {categoryOptions.length ? categoryOptions.map((category) => (
+                <label key={category.id}>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(filters.categories[String(category.id)])}
+                    onChange={() => handleCategoryFilter(category.id)}
+                  />
 
-                <span>Milling Centers</span>
-              </label>
-
-              <label>
-                <input
-                  type="checkbox"
-                  checked={filters.turning}
-                  onChange={() => handleFilter("turning")}
-                />
-
-                <span>Turning Centers</span>
-              </label>
-
-              <label>
-                <input
-                  type="checkbox"
-                  checked={filters.fiveAxis}
-                  onChange={() => handleFilter("fiveAxis")}
-                />
-
-                <span>5-Axis Universal</span>
-              </label>
+                  <span>{category.name}</span>
+                </label>
+              )) : (
+                <span className="product-filter-empty">No categories available.</span>
+              )}
             </div>
 
             {/* POWER OUTPUT */}

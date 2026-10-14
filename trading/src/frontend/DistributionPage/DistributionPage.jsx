@@ -125,6 +125,18 @@ const DistributionPage = () => {
     [topMachines],
   );
   const machineAxisLabels = [topMachineMax, topMachineMax * 0.75, topMachineMax * 0.5, topMachineMax * 0.25, 0];
+  const totalMachineViews = useMemo(
+    () => topMachines.reduce((total, machine) => total + machine.viewCount, 0),
+    [topMachines],
+  );
+  const customerViewItems = useMemo(
+    () => topMachines.slice(0, 4).map((machine) => ({
+      ...machine,
+      share: totalMachineViews ? (machine.viewCount / totalMachineViews) * 100 : 0,
+      categoryName: machine.category?.name || "Machine item",
+    })),
+    [topMachines, totalMachineViews],
+  );
 
   return (
     <section className="distribution-page">
@@ -270,6 +282,62 @@ const DistributionPage = () => {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* =====================================
+          CUSTOMER VIEW PROCESS
+      ===================================== */}
+      <section className="distribution-section customer-process-section">
+        <div className="distribution-section-header customer-process-header">
+          <div>
+            <h2>CUSTOMER VIEW PROCESS</h2>
+
+            <p>Live customer activity ranked by the machine item viewed.</p>
+          </div>
+
+          {customerViewItems.length ? (
+            <span className="customer-process-total">
+              {totalMachineViews} TOTAL VIEWS
+            </span>
+          ) : null}
+        </div>
+
+        {customerViewItems.length ? (
+          <div className="customer-process-diagram" aria-label="Customer machine item views">
+            {customerViewItems.map((machine, index) => (
+              <div className="customer-process-step" key={machine.id}>
+                <article className="customer-process-node">
+                  <span className="customer-process-number">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+
+                  <div className="customer-process-copy">
+                    <span>VIEWED ITEM</span>
+                    <h3 title={machine.name}>{machine.name}</h3>
+                    <p>{machine.categoryName}</p>
+                  </div>
+
+                  <strong>
+                    {machine.viewCount}
+                    <small> views</small>
+                  </strong>
+
+                  <div className="customer-process-progress" aria-hidden="true">
+                    <span style={{ width: `${Math.max(machine.viewCount ? 8 : 0, machine.share)}%` }} />
+                  </div>
+                </article>
+
+                {index < customerViewItems.length - 1 ? (
+                  <span className="customer-process-arrow" aria-hidden="true">→</span>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="customer-process-empty">
+            {machineLoadError || "Open a product detail to start the customer view process."}
+          </div>
+        )}
       </section>
 
       {/* =====================================

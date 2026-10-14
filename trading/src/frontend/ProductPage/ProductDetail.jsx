@@ -298,7 +298,7 @@ const ProductDetail = () => {
         .filter(Boolean);
 
       return values.map((value) => (
-        entry.label ? `${entry.label}: ${value}` : value
+        { label: entry.label, value }
       ));
     }),
   }));
@@ -522,8 +522,12 @@ const ProductDetail = () => {
                   <section className="product-info-group" key={section.title}>
                     <h4>{section.title}</h4>
                     <ul>
-                      {section.items.length ? section.items.map((item) => (
-                        <li key={item}>{item}</li>
+                      {section.items.length ? section.items.map((item, itemIndex) => (
+                        <li key={`${item.label || "value"}-${item.value}-${itemIndex}`}>
+                          {item.label && <span className="product-info-item-label">{item.label}</span>}
+                          {item.label && ": "}
+                          {item.value}
+                        </li>
                       )) : <li>No information available.</li>}
                     </ul>
                   </section>
