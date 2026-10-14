@@ -15,9 +15,28 @@ const toMediaUrl = (path) => {
   return `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 };
 
+const toMachineTypeSlug = (value) => String(value || "")
+  .trim()
+  .toLowerCase()
+  .replace(/&/g, "and")
+  .replace(/[^a-z0-9]+/g, "-")
+  .replace(/^-+|-+$/g, "");
+
+const MACHINE_TYPE_OPTIONS = [
+  { slug: "main-power-distribution", label: "Main Power Distribution" },
+  { slug: "sub-power-distribution", label: "Sub Power Distribution" },
+  { slug: "final-power-distribution", label: "Final Power Distribution" },
+  { slug: "industrial-control", label: "Industrial Control" },
+  { slug: "transmission", label: "Transmission" },
+  { slug: "distribution", label: "Distribution" },
+  { slug: "power-quality-automation", label: "Power Quality & Automation" },
+  { slug: "electricity-meter", label: "Electricity Meter" },
+];
+
 const toProduct = (machine) => {
   const categoryName = machine.category?.name || "Uncategorized";
-  const machineTypeValue = `${machine.machineType || ""} ${categoryName}`.toLowerCase();
+  const rawMachineType = String(machine.machineType || "").trim();
+  const machineTypeValue = `${rawMachineType} ${categoryName}`.toLowerCase();
   const powerValue = String(machine.power || "").toLowerCase();
   const powerNumber = Number.parseFloat(powerValue);
   const precisionValue = String(machine.precision || "").toLowerCase();
@@ -30,7 +49,7 @@ const toProduct = (machine) => {
 
   if (specs.length === 0) {
     [
-      ["MACHINE TYPE", machine.machineType],
+      ["MACHINE TYPE", rawMachineType],
       ["POWER", machine.power],
       ["PRECISION", machine.precision],
       ["AVAILABILITY", machine.availability],
@@ -47,7 +66,9 @@ const toProduct = (machine) => {
     specificationRows: specificationEntries,
     specificationEntries,
     specs,
-    machineType: /turn|lathe/.test(machineTypeValue)
+    machineType: rawMachineType,
+    machineTypeKey: toMachineTypeSlug(rawMachineType),
+    machineTypeClass: /turn|lathe/.test(machineTypeValue)
       ? "turning"
       : /5[ -]?axis|five[ -]?axis|universal/.test(machineTypeValue)
         ? "fiveAxis"
@@ -91,8 +112,13 @@ const productContexts = {
 
 const ProductPage = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const collection = searchParams.get("collection");
+  const productSlug = searchParams.get("product") || "";
+  const selectedMachineTypeOption = MACHINE_TYPE_OPTIONS.find(
+    (option) => option.slug === productSlug,
+  );
+  const selectedMachineType = selectedMachineTypeOption?.label || "";
   const productContext = productContexts[collection] || productContexts.chint;
   const [products, setProducts] = useState([]);
   const [nextPage, setNextPage] = useState(1);
@@ -101,6 +127,8 @@ const ProductPage = () => {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [topCategories, setTopCategories] = useState([]);
 
@@ -109,8 +137,11 @@ const ProductPage = () => {
     setLoadError("");
 
     try {
+      const query = new URLSearchParams({ page: String(pageToLoad) });
+      if (selectedMachineType) query.set("machineType", selectedMachineType);
+
       const response = await fetch(
-        `${API_BASE_URL}/api/machines?page=${pageToLoad}`,
+        `${API_BASE_URL}/api/machines?${query.toString()}`,
       );
       const result = await response.json();
       if (!response.ok) {
@@ -124,6 +155,8 @@ const ProductPage = () => {
       const totalItems = Number(result.pagination?.totalItems);
 
       setProducts((current) => {
+        if (pageToLoad === 1) return newMachines;
+
         const loadedIds = new Set(current.map((machine) => machine.id));
         return [
           ...current,
@@ -142,7 +175,7 @@ const ProductPage = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedMachineType]);
 
   const loadTopCategories = useCallback(async () => {
     try {
@@ -186,17 +219,33 @@ const ProductPage = () => {
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
+      setProducts([]);
+      setNextPage(1);
+      setTotalMachines(0);
+      setHasMore(true);
       loadMachines(1);
-      loadTopCategories();
-      loadCategories();
     }, 0);
-    const refreshTimer = window.setInterval(loadTopCategories, 60 * 1000);
 
     return () => {
       window.clearTimeout(timer);
+    };
+  }, [loadMachines]);
+
+  useEffect(() => {
+    const initialTimer = window.setTimeout(loadTopCategories, 0);
+    const refreshTimer = window.setInterval(loadTopCategories, 60 * 1000);
+
+    return () => {
+      window.clearTimeout(initialTimer);
       window.clearInterval(refreshTimer);
     };
-  }, [loadMachines, loadTopCategories, loadCategories]);
+  }, [loadTopCategories]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(loadCategories, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [loadCategories]);
   /* =================================================
        FILTER STATE
     ================================================= */
@@ -238,6 +287,11 @@ const ProductPage = () => {
     }));
   };
 
+  const handleProductSearch = (event) => {
+    event.preventDefault();
+    setAppliedSearch(searchTerm.trim());
+  };
+
   /* =================================================
        RESET FILTER
     ================================================= */
@@ -257,20 +311,44 @@ const ProductPage = () => {
       customOrder: false,
     });
     setSelectedCategory("");
+    setSearchTerm("");
+    setAppliedSearch("");
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("product");
+    setSearchParams(nextParams);
   };
 
   const popularCategories = useMemo(() => {
-    if (topCategories.length > 0) return topCategories;
+    if (selectedMachineTypeOption) {
+      const relatedCategoryIds = new Set(
+        products
+          .filter((product) => product.machineTypeKey === selectedMachineTypeOption.slug)
+          .map((product) => String(product.categoryId || ""))
+          .filter(Boolean),
+      );
+      const relatedTopCategories = topCategories.filter((category) => (
+        relatedCategoryIds.has(String(category.id))
+      ));
+
+      if (relatedTopCategories.length > 0) return relatedTopCategories;
+    } else if (topCategories.length > 0) {
+      return topCategories;
+    }
 
     const categoryMap = new Map();
 
-    products.forEach((product) => {
+    products
+      .filter((product) => (
+        !selectedMachineTypeOption
+        || product.machineTypeKey === selectedMachineTypeOption.slug
+      ))
+      .forEach((product) => {
       const name = product.category || "UNCATEGORIZED";
       const current = categoryMap.get(name) || { name, machineCount: 0, viewCount: 0 };
       current.machineCount += 1;
       current.viewCount += Number(product.viewCount || 0);
       categoryMap.set(name, current);
-    });
+      });
 
     return [...categoryMap.values()]
       .sort(
@@ -278,7 +356,20 @@ const ProductPage = () => {
           right.viewCount - left.viewCount || right.machineCount - left.machineCount,
       )
       .slice(0, 5);
-  }, [products, topCategories]);
+  }, [products, selectedMachineTypeOption, topCategories]);
+
+  const relatedCategoryOptions = useMemo(() => {
+    if (!selectedMachineTypeOption) return categoryOptions;
+
+    const relatedCategoryIds = new Set(
+      products
+        .filter((product) => product.machineTypeKey === selectedMachineTypeOption.slug)
+        .map((product) => String(product.categoryId || ""))
+        .filter(Boolean),
+    );
+
+    return categoryOptions.filter((category) => relatedCategoryIds.has(String(category.id)));
+  }, [categoryOptions, products, selectedMachineTypeOption]);
 
   /* =================================================
        CHECK ACTIVE FILTER GROUP
@@ -292,6 +383,7 @@ const ProductPage = () => {
   const hasPrecisionFilter = filters.subMicron || filters.standardPrecision;
 
   const hasAvailabilityFilter = filters.inStock || filters.customOrder;
+  const normalizedSearch = appliedSearch.toLowerCase();
 
   /* =================================================
        FILTER PRODUCTS
@@ -304,10 +396,20 @@ const ProductPage = () => {
         return viewDifference || Number(right.id || 0) - Number(left.id || 0);
       })
       .filter((product) => {
+      const searchableProductText = [
+        product.name,
+        product.model,
+        product.category,
+        product.machineType,
+        product.description,
+      ].filter(Boolean).join(" ").toLowerCase();
+      const searchMatch = !normalizedSearch || searchableProductText.includes(normalizedSearch);
       const categoryMatch = !selectedCategory || product.category === selectedCategory;
       const apiCategoryMatch = !hasCategoryFilter || Boolean(
         filters.categories[String(product.categoryId || product.category?.id)],
       );
+      const machineTypeMatch = !selectedMachineTypeOption
+        || product.machineTypeKey === selectedMachineTypeOption.slug;
 
       /*
        * MACHINE TYPE
@@ -332,7 +434,7 @@ const ProductPage = () => {
        * Product must match
        * every active filter group
        */
-      return categoryMatch && apiCategoryMatch && powerMatch && precisionMatch && availabilityMatch;
+      return searchMatch && machineTypeMatch && categoryMatch && apiCategoryMatch && powerMatch && precisionMatch && availabilityMatch;
       });
   }, [
     products,
@@ -341,7 +443,9 @@ const ProductPage = () => {
     hasPowerFilter,
     hasPrecisionFilter,
     hasAvailabilityFilter,
+    normalizedSearch,
     selectedCategory,
+    selectedMachineTypeOption,
   ]);
 
   /* =================================================
@@ -383,12 +487,12 @@ const ProductPage = () => {
           <aside className="product-filter">
             <h3>FILTER PARAMETERS</h3>
 
-            {/* MACHINE TYPE */}
+            {/* CATEGORY */}
 
             <div className="filter-group">
-              <h4>MACHINE TYPE</h4>
+              <h4>CATEGORY</h4>
 
-              {categoryOptions.length ? categoryOptions.map((category) => (
+              {relatedCategoryOptions.length ? relatedCategoryOptions.map((category) => (
                 <label key={category.id}>
                   <input
                     type="checkbox"
@@ -522,6 +626,35 @@ const ProductPage = () => {
                     ================================================= */}
 
           <div className="product-content">
+            <form className="product-search" role="search" onSubmit={handleProductSearch}>
+              <label className="product-search-label" htmlFor="product-search-input">
+                SEARCH PRODUCTS
+              </label>
+              <div className="product-search-controls">
+                <input
+                  id="product-search-input"
+                  type="search"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="Search by product, model, or category"
+                  aria-label="Search products"
+                />
+                <button type="submit">SEARCH</button>
+                {appliedSearch && (
+                  <button
+                    type="button"
+                    className="product-search-clear"
+                    onClick={() => {
+                      setSearchTerm("");
+                      setAppliedSearch("");
+                    }}
+                  >
+                    CLEAR
+                  </button>
+                )}
+              </div>
+            </form>
+
             {popularCategories.length > 0 && (
               <section className="product-popular-categories" aria-label="Most viewed categories">
                 <div className="product-popular-heading">

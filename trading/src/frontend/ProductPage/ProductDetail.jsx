@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import DataProduct from "./DataProduct";
-import { groupSpecificationEntries, toSpecificationEntries } from "./specificationUtils";
+import {
+  groupSpecificationEntries,
+  toSpecificationEntries,
+} from "./specificationUtils";
 import "./style/ProductDetail.css";
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000")
-  .replace(/\/$/, "");
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:3000"
+).replace(/\/$/, "");
 
 const toMediaUrl = (path) => {
   if (!path) return "";
@@ -76,7 +80,14 @@ const ProductDetail = () => {
 
   const [apiProduct, setApiProduct] = useState(null);
   const [apiStatus, setApiStatus] = useState("loading");
-  const [activeInfoTab, setActiveInfoTab] = useState("overview");
+  const [activeInfoTab, setActiveInfoTab] = useState(() => {
+    const requestedTab = location.state?.initialTab;
+    return INFO_TABS.some(([tabKey]) => tabKey === requestedTab)
+      ? requestedTab
+      : "overview";
+  });
+  const [similarProducts, setSimilarProducts] = useState([]);
+  const [similarStartIndex, setSimilarStartIndex] = useState(0);
   const viewRequestRef = useRef("");
 
   useEffect(() => {
@@ -87,7 +98,9 @@ const ProductDetail = () => {
     let shouldRecordView = true;
 
     try {
-      const lastViewAt = Number(window.sessionStorage.getItem(viewStorageKey) || 0);
+      const lastViewAt = Number(
+        window.sessionStorage.getItem(viewStorageKey) || 0,
+      );
       shouldRecordView = !lastViewAt || Date.now() - lastViewAt > 2000;
     } catch {
       // Analytics should continue even when browser storage is unavailable.
@@ -132,11 +145,15 @@ const ProductDetail = () => {
             { signal: controller.signal },
           );
           const specificationResult = await specificationResponse.json();
-          if (specificationResponse.ok && Array.isArray(specificationResult.data)) {
+          if (
+            specificationResponse.ok &&
+            Array.isArray(specificationResult.data)
+          ) {
             specs = specificationResult.data;
           }
         } catch (specificationError) {
-          if (specificationError.name === "AbortError") throw specificationError;
+          if (specificationError.name === "AbortError")
+            throw specificationError;
         }
 
         let pdfs = [];
@@ -169,12 +186,77 @@ const ProductDetail = () => {
   const fallbackProduct = DataProduct.find(
     (item) => String(item.id) === String(id),
   );
-  const product = apiProduct || routeProduct || (apiStatus === "error" ? fallbackProduct : null);
+  const product =
+    apiProduct ||
+    routeProduct ||
+    (apiStatus === "error" ? fallbackProduct : null);
 
   const [activeImage, setActiveImage] = useState(product?.image || "");
 
   const [animationDirection, setAnimationDirection] = useState("next");
   const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
+
+  useEffect(() => {
+    const requestedTab = location.state?.initialTab;
+    const nextTab = INFO_TABS.some(([tabKey]) => tabKey === requestedTab)
+      ? requestedTab
+      : "overview";
+    const timer = window.setTimeout(() => setActiveInfoTab(nextTab), 0);
+
+    return () => window.clearTimeout(timer);
+  }, [id, location.state?.initialTab]);
+
+  useEffect(() => {
+    if (!product?.id) return undefined;
+
+    const controller = new AbortController();
+    const loadSimilarProducts = async () => {
+      try {
+        const query = new URLSearchParams({ page: "1" });
+        if (product.categoryId) query.set("categoryId", String(product.categoryId));
+
+        const response = await fetch(`${API_BASE_URL}/api/machines?${query.toString()}`, {
+          signal: controller.signal,
+        });
+        const result = await response.json();
+        if (!response.ok || !Array.isArray(result.data)) {
+          throw new Error(result.message || "Unable to load similar products.");
+        }
+
+        const uniqueMachines = [...new Map(
+          result.data
+            .filter((machine) => String(machine.id) !== String(product.id))
+            .map((machine) => [machine.id, machine]),
+        ).values()];
+
+        setSimilarProducts(uniqueMachines.map(normalizeApiProduct));
+      } catch (error) {
+        if (error.name !== "AbortError") setSimilarProducts([]);
+      }
+    };
+
+    loadSimilarProducts();
+
+    return () => controller.abort();
+  }, [product?.categoryId, product?.id]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSimilarStartIndex(0), 0);
+
+    return () => window.clearTimeout(timer);
+  }, [product?.id]);
+
+  useEffect(() => {
+    if (similarProducts.length <= 4) return undefined;
+
+    const timer = window.setInterval(() => {
+      setSimilarStartIndex((currentIndex) => (
+        (currentIndex + 1) % similarProducts.length
+      ));
+    }, 10000);
+
+    return () => window.clearInterval(timer);
+  }, [similarProducts.length]);
 
   const handleImageMouseMove = (event) => {
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -279,7 +361,7 @@ const ProductDetail = () => {
 
   const displaySpecificationEntries = product.specificationEntries?.length
     ? product.specificationEntries
-    : (product.specificationRows?.length
+    : product.specificationRows?.length
       ? product.specificationRows
       : (product.specs || []).map(([label, value], index) => ({
           id: `fallback-${index}`,
@@ -287,8 +369,10 @@ const ProductDetail = () => {
           label,
           value,
           sortOrder: index,
-        })));
-  const groupedSpecificationEntries = groupSpecificationEntries(displaySpecificationEntries);
+        }));
+  const groupedSpecificationEntries = groupSpecificationEntries(
+    displaySpecificationEntries,
+  );
   const overviewSections = groupedSpecificationEntries.map((section) => ({
     title: section.title,
     items: section.items.flatMap((entry) => {
@@ -297,17 +381,26 @@ const ProductDetail = () => {
         .map((value) => value.trim())
         .filter(Boolean);
 
-      return values.map((value) => (
-        { label: entry.label, value }
-      ));
+      return values.map((value) => ({ label: entry.label, value }));
     }),
   }));
   const productDocuments = Array.isArray(product.pdfs) ? product.pdfs : [];
-  const visibleDocuments = activeInfoTab === "catalog"
-    ? productDocuments
-    : productDocuments.filter((document) =>
-        String(document.fileName || "").toLowerCase().includes(activeInfoTab),
-      );
+  const visibleDocuments =
+    activeInfoTab === "catalog"
+      ? productDocuments
+      : productDocuments.filter((document) =>
+          String(document.fileName || "")
+            .toLowerCase()
+            .includes(activeInfoTab),
+        );
+  const safeSimilarStartIndex = similarProducts.length
+    ? similarStartIndex % similarProducts.length
+    : 0;
+  const visibleSimilarProducts = similarProducts.length > 4
+    ? Array.from({ length: 4 }, (_, index) => (
+        similarProducts[(safeSimilarStartIndex + index) % similarProducts.length]
+      ))
+    : similarProducts;
 
   return (
     <div className="product-detail-page">
@@ -443,11 +536,11 @@ const ProductDetail = () => {
           <p className="product-detail-description">
             {product.description?.trim() || (
               <>
-                Engineered for maximum reliability and versatile performance, the{" "}
-                {product.name} series offers seamless switchboard integration.
-                Featuring advanced LSIG multi-protection trip units and multiple
-                mounting options, it delivers superior control for complex
-                industrial power distribution systems.
+                Engineered for maximum reliability and versatile performance,
+                the {product.name} series offers seamless switchboard
+                integration. Featuring advanced LSIG multi-protection trip units
+                and multiple mounting options, it delivers superior control for
+                complex industrial power distribution systems.
               </>
             )}
           </p>
@@ -498,7 +591,11 @@ const ProductDetail = () => {
           </h2>
         </div>
 
-        <div className="product-info-tabs" role="tablist" aria-label="Product information">
+        <div
+          className="product-info-tabs"
+          role="tablist"
+          aria-label="Product information"
+        >
           {INFO_TABS.map(([tabKey, label]) => (
             <button
               type="button"
@@ -517,22 +614,36 @@ const ProductDetail = () => {
           {activeInfoTab === "overview" && (
             <div className="product-info-overview" role="tabpanel">
               <h3>Main Specifications</h3>
-              <div className="product-info-overview-grid">
-                {overviewSections.length ? overviewSections.map((section) => (
-                  <section className="product-info-group" key={section.title}>
-                    <h4>{section.title}</h4>
-                    <ul>
-                      {section.items.length ? section.items.map((item, itemIndex) => (
-                        <li key={`${item.label || "value"}-${item.value}-${itemIndex}`}>
-                          {item.label && <span className="product-info-item-label">{item.label}</span>}
-                          {item.label && ": "}
-                          {item.value}
-                        </li>
-                      )) : <li>No information available.</li>}
-                    </ul>
-                  </section>
-                )) : (
-                  <p className="product-info-empty">No specification data available from the API.</p>
+              <div className={`product-info-overview-grid ${overviewSections.length ? "" : "is-empty"}`}>
+                {overviewSections.length ? (
+                  overviewSections.map((section) => (
+                    <section className="product-info-group" key={section.title}>
+                      <h4>{section.title}</h4>
+                      <ul>
+                        {section.items.length ? (
+                          section.items.map((item, itemIndex) => (
+                            <li
+                              key={`${item.label || "value"}-${item.value}-${itemIndex}`}
+                            >
+                              {item.label && (
+                                <span className="product-info-item-label">
+                                  {item.label}
+                                </span>
+                              )}
+                              {item.label && ": "}
+                              {item.value}
+                            </li>
+                          ))
+                        ) : (
+                          <li>No information available.</li>
+                        )}
+                      </ul>
+                    </section>
+                  ))
+                ) : (
+                  <p className="product-info-empty">
+                    No specification data available from the API.
+                  </p>
                 )}
               </div>
             </div>
@@ -542,18 +653,30 @@ const ProductDetail = () => {
             <div className="product-info-documents" role="tabpanel">
               {visibleDocuments.length ? (
                 <div className="product-document-table">
-                  <div className="product-document-row product-document-heading" role="row">
+                  <div
+                    className="product-document-row product-document-heading"
+                    role="row"
+                  >
                     <span>Name</span>
                     <span>Size</span>
                     <span>Release time</span>
                     <span>Operate</span>
                   </div>
                   {visibleDocuments.map((document) => (
-                    <div className="product-document-row" role="row" key={document.id || document.filePath}>
+                    <div
+                      className="product-document-row"
+                      role="row"
+                      key={document.id || document.filePath}
+                    >
                       <strong>{document.fileName || "Product document"}</strong>
                       <span>{formatFileSize(document.fileSize)}</span>
                       <span>{formatReleaseTime(document.createdAt)}</span>
-                      <a href={toMediaUrl(document.filePath)} target="_blank" rel="noreferrer" download>
+                      <a
+                        href={toMediaUrl(document.filePath)}
+                        target="_blank"
+                        rel="noreferrer"
+                        download
+                      >
                         Download <span aria-hidden="true">↓</span>
                       </a>
                     </div>
@@ -600,7 +723,9 @@ const ProductDetail = () => {
 
         <div
           className={`specification-table-wrapper ${
-            displaySpecificationEntries.length ? "has-specifications" : "is-empty"
+            displaySpecificationEntries.length
+              ? "has-specifications"
+              : "is-empty"
           }`}
         >
           <table className="specification-table">
@@ -613,19 +738,141 @@ const ProductDetail = () => {
             </thead>
 
             <tbody>
-              {displaySpecificationEntries.length ? displaySpecificationEntries.map((entry, index) => (
-                <tr key={`${entry.id || entry.label || "specification"}-${index}`}>
-                  <td>{entry.section || "—"}</td>
-                  <td>{entry.label || "—"}</td>
-                  <td className="cyan-value">{entry.value || "—"}</td>
-                </tr>
-              )) : (
+              {displaySpecificationEntries.length ? (
+                displaySpecificationEntries.map((entry, index) => (
+                  <tr
+                    key={`${entry.id || entry.label || "specification"}-${index}`}
+                  >
+                    <td>{entry.section || "—"}</td>
+                    <td>{entry.label || "—"}</td>
+                    <td className="cyan-value">{entry.value || "—"}</td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
-                  <td className="specification-empty" colSpan="3">No technical specifications available for this product.</td>
+                  <td className="specification-empty" colSpan="3">
+                    No technical specifications available for this product.
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      {similarProducts.length > 0 && (
+        <section className="similar-products" aria-labelledby="similar-products-title">
+          <div className="similar-products-heading">
+            <h2 id="similar-products-title">
+              <span aria-hidden="true" />
+              Similar Products
+            </h2>
+          </div>
+
+          <div className="similar-products-viewport">
+            <div
+              key={safeSimilarStartIndex}
+              className={`similar-products-grid ${similarProducts.length > 4 ? "similar-products-grid--carousel" : ""}`}
+            >
+            {visibleSimilarProducts.map((similarProduct) => (
+              <article className="similar-product-card" key={similarProduct.id}>
+                <div className="similar-product-image">
+                  <img
+                    src={similarProduct.image}
+                    alt={similarProduct.name || similarProduct.model}
+                  />
+                </div>
+
+                <div className="similar-product-copy">
+                  <span className="similar-product-category">
+                    {similarProduct.category || "PRODUCT"}
+                  </span>
+                  <h3>{similarProduct.name || similarProduct.model}</h3>
+                  {similarProduct.model && similarProduct.model !== similarProduct.name && (
+                    <span className="similar-product-model">{similarProduct.model}</span>
+                  )}
+                </div>
+
+                <div className="similar-product-actions">
+                  <button
+                    type="button"
+                    className="similar-product-view"
+                    onClick={() => navigate(`/product/${similarProduct.id}`, {
+                      state: { product: similarProduct },
+                    })}
+                  >
+                    View Details
+                  </button>
+                  <button
+                    type="button"
+                    className="similar-product-documents"
+                    onClick={() => navigate(`/product/${similarProduct.id}`, {
+                      state: { product: similarProduct, initialTab: "catalog" },
+                    })}
+                  >
+                    Documents <span aria-hidden="true">^</span>
+                  </button>
+                </div>
+              </article>
+            ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="helpful-links" aria-labelledby="helpful-links-title">
+        <div className="helpful-links-heading">
+          <h2 id="helpful-links-title">
+            <span aria-hidden="true" />
+            Helpful Links
+          </h2>
+        </div>
+
+        <div className="helpful-links-grid">
+          <article className="helpful-link-card">
+            <div className="helpful-link-icon helpful-link-icon--blog" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none">
+                <circle cx="16" cy="28" r="11" fill="currentColor" />
+                <circle cx="28" cy="20" r="13" fill="currentColor" opacity="0.55" />
+                <path d="M28 14a6 6 0 0 1 6 6m-9 0a3 3 0 0 1 3 3m-7-9a10 10 0 0 1 10 10" stroke="white" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </div>
+            <h3>Blog</h3>
+            <p>Explore expert insights, trends, and CHINT perspectives on the smart energy industry.</p>
+            <Link className="helpful-link-action" to="/resources">
+              Read More <span aria-hidden="true">→</span>
+            </Link>
+          </article>
+
+          <article className="helpful-link-card">
+            <div className="helpful-link-icon helpful-link-icon--resources" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none">
+                <path d="M8 10h24v22H8z" fill="currentColor" />
+                <path d="M17 17h23v21H17z" fill="currentColor" opacity="0.45" />
+                <path d="M28.5 23v9m0 0-4-4m4 4 4-4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <h3>Resources</h3>
+            <p>Download essential CHINT resources for your business needs.</p>
+            <Link className="helpful-link-action" to="/resources">
+              Download Now <span aria-hidden="true">→</span>
+            </Link>
+          </article>
+
+          <article className="helpful-link-card">
+            <div className="helpful-link-icon helpful-link-icon--contact" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none">
+                <path d="M10 12h28v20H10z" fill="currentColor" />
+                <path d="M16 36h16l-3-5H19l-3 5Z" fill="currentColor" opacity="0.72" />
+                <path d="M24 18a5 5 0 0 1 5 5v3h-2v-3a3 3 0 0 0-6 0v3h-2v-3a5 5 0 0 1 5-5Zm-8 8h3v3h-3zm13 0h3v3h-3z" fill="white" />
+              </svg>
+            </div>
+            <h3>Contact Us</h3>
+            <p>Have questions? Contact us for support and solutions.</p>
+            <Link className="helpful-link-action" to="/contact">
+              Get Support <span aria-hidden="true">→</span>
+            </Link>
+          </article>
         </div>
       </section>
     </div>

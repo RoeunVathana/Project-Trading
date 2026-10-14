@@ -151,7 +151,7 @@ const getMachines = async (req, res) => {
     }
 
     const filters = [];
-    const queryFields = ["name", "model", "description"];
+    const queryFields = ["name", "model", "description", "machineType"];
 
     for (const field of queryFields) {
       const queryValue = req.query[field];

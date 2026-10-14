@@ -71,6 +71,13 @@ const productCollections = [
           { id: "accessories", label: "Accessories" },
         ],
       },
+      {
+        id: "products-huawei",
+        label: "products Huawei",
+        products: [
+          { id: "product-huawei-all", label: "Product Huawei" },
+        ]
+      },
     ],
   },
   {

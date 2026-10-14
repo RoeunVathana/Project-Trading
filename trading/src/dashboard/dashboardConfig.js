@@ -6,6 +6,17 @@ export const UPLOAD_LIMITS = {
   video: { bytes: 250 * 1024 * 1024, label: "250 MB" },
 };
 
+export const MACHINE_TYPE_OPTIONS = [
+  { value: "Main Power Distribution", label: "Main Power Distribution" },
+  { value: "Sub Power Distribution", label: "Sub Power Distribution" },
+  { value: "Final Power Distribution", label: "Final Power Distribution" },
+  { value: "Industrial Control", label: "Industrial Control" },
+  { value: "Transmission", label: "Transmission" },
+  { value: "Distribution", label: "Distribution" },
+  { value: "Power Quality & Automation", label: "Power Quality & Automation" },
+  { value: "Electricity Meter", label: "Electricity Meter" },
+];
+
 export const RESOURCE_CONFIG = {
   machines: {
     title: "Machines",
@@ -16,15 +27,15 @@ export const RESOURCE_CONFIG = {
     fields: [
       { name: "name", label: "Machine name", required: true, placeholder: "Precision Pro 5K" },
       { name: "model", label: "Model", required: true, placeholder: "EFS-CNC-5000" },
-      { name: "description", label: "Description", type: "textarea", placeholder: "Describe the machine and its intended application." },
       { name: "categoryId", label: "Category", type: "relation", resource: "categories", required: true },
-      { name: "machineType", label: "Machine type", placeholder: "Milling center" },
+      { name: "machineType", label: "Machine type", type: "select", options: MACHINE_TYPE_OPTIONS },
       { name: "power", label: "Power", placeholder: "35 kW" },
       { name: "precision", label: "Precision", placeholder: "0.001 mm" },
       { name: "availability", label: "Availability", placeholder: "In stock" },
       { name: "badge", label: "Badge", placeholder: "New arrival" },
       { name: "imageFile", label: "Machine image", type: "file", apiField: "image", accept: "image/*", maxSize: UPLOAD_LIMITS.image.bytes, maxSizeLabel: UPLOAD_LIMITS.image.label },
       { name: "videoFile", label: "Machine video", type: "file", apiField: "video", accept: "video/*", maxSize: UPLOAD_LIMITS.video.bytes, maxSizeLabel: UPLOAD_LIMITS.video.label, currentKey: "video", clearField: "removeVideo" },
+      { name: "description", label: "Description", type: "textarea", placeholder: "Describe the machine and its intended application." },
     ],
   },
   categories: {
