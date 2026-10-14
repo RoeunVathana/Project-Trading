@@ -6,8 +6,9 @@ import EngineeringSection from "./EngineeringSection";
 import { toSpecificationEntries } from "./specificationUtils";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000")
-  .replace(/\/$/, "");
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:3000"
+).replace(/\/$/, "");
 
 const toMediaUrl = (path) => {
   if (!path) return "";
@@ -15,12 +16,13 @@ const toMediaUrl = (path) => {
   return `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 };
 
-const toMachineTypeSlug = (value) => String(value || "")
-  .trim()
-  .toLowerCase()
-  .replace(/&/g, "and")
-  .replace(/[^a-z0-9]+/g, "-")
-  .replace(/^-+|-+$/g, "");
+const toMachineTypeSlug = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
 const MACHINE_TYPE_OPTIONS = [
   { slug: "main-power-distribution", label: "Main Power Distribution" },
@@ -75,18 +77,24 @@ const toProduct = (machine) => {
         : /mill|cnc/.test(machineTypeValue)
           ? "milling"
           : "",
-    power: powerValue.includes("heavy") || (Number.isFinite(powerNumber) && powerNumber > 60)
-      ? "heavyDuty"
-      : powerValue.includes("high") || (Number.isFinite(powerNumber) && powerNumber >= 25)
-        ? "highPower"
-        : powerValue
-          ? "standard"
+    power:
+      powerValue.includes("heavy") ||
+      (Number.isFinite(powerNumber) && powerNumber > 60)
+        ? "heavyDuty"
+        : powerValue.includes("high") ||
+            (Number.isFinite(powerNumber) && powerNumber >= 25)
+          ? "highPower"
+          : powerValue
+            ? "standard"
+            : "",
+    precision:
+      precisionValue.includes("sub-micron") ||
+      precisionValue.includes("submicron") ||
+      (Number.isFinite(precisionNumber) && precisionNumber <= 0.001)
+        ? "subMicron"
+        : precisionValue
+          ? "standardPrecision"
           : "",
-    precision: precisionValue.includes("sub-micron") || precisionValue.includes("submicron") || (Number.isFinite(precisionNumber) && precisionNumber <= 0.001)
-      ? "subMicron"
-      : precisionValue
-        ? "standardPrecision"
-        : "",
     availability: /stock|ready/.test(availabilityValue)
       ? "inStock"
       : /custom|order|lead/.test(availabilityValue)
@@ -98,15 +106,18 @@ const toProduct = (machine) => {
 const productContexts = {
   chint: {
     title: "PRODUCT CHINT",
-    description: "Explore CHINT low-voltage, power transmission, distribution, and metering solutions for industrial power systems.",
+    description:
+      "Explore CHINT low-voltage, power transmission, distribution, and metering solutions for industrial power systems.",
   },
   huawei: {
     title: "PRODUCT HUAWEI",
-    description: "Explore Huawei smart-energy solutions for residential, commercial, and industrial applications.",
+    description:
+      "Explore Huawei smart-energy solutions for residential, commercial, and industrial applications.",
   },
   factory: {
     title: "FACTORY",
-    description: "Explore factory power transmission, distribution, and power-quality automation capabilities.",
+    description:
+      "Explore factory power transmission, distribution, and power-quality automation capabilities.",
   },
 };
 
@@ -132,61 +143,73 @@ const ProductPage = () => {
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [topCategories, setTopCategories] = useState([]);
 
-  const loadMachines = useCallback(async (pageToLoad) => {
-    setLoading(true);
-    setLoadError("");
+  const loadMachines = useCallback(
+    async (pageToLoad) => {
+      setLoading(true);
+      setLoadError("");
 
-    try {
-      const query = new URLSearchParams({ page: String(pageToLoad) });
-      if (selectedMachineType) query.set("machineType", selectedMachineType);
+      try {
+        const query = new URLSearchParams({ page: String(pageToLoad) });
+        if (selectedMachineType) query.set("machineType", selectedMachineType);
 
-      const response = await fetch(
-        `${API_BASE_URL}/api/machines?${query.toString()}`,
-      );
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.message || "Unable to load machines.");
+        const response = await fetch(
+          `${API_BASE_URL}/api/machines?${query.toString()}`,
+        );
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.message || "Unable to load machines.");
+        }
+
+        const newMachines = Array.isArray(result.data)
+          ? result.data.map(toProduct)
+          : [];
+        const totalPages = Number(result.pagination?.totalPages);
+        const totalItems = Number(result.pagination?.totalItems);
+
+        setProducts((current) => {
+          if (pageToLoad === 1) return newMachines;
+
+          const loadedIds = new Set(current.map((machine) => machine.id));
+          return [
+            ...current,
+            ...newMachines.filter((machine) => !loadedIds.has(machine.id)),
+          ];
+        });
+        setTotalMachines(
+          Number.isFinite(totalItems) ? totalItems : newMachines.length,
+        );
+        setNextPage(pageToLoad + 1);
+        setHasMore(
+          Number.isFinite(totalPages)
+            ? pageToLoad < totalPages
+            : newMachines.length > 0,
+        );
+      } catch (error) {
+        setLoadError(
+          error.message || "Unable to connect to the machine server.",
+        );
+      } finally {
+        setLoading(false);
       }
-
-      const newMachines = Array.isArray(result.data)
-        ? result.data.map(toProduct)
-        : [];
-      const totalPages = Number(result.pagination?.totalPages);
-      const totalItems = Number(result.pagination?.totalItems);
-
-      setProducts((current) => {
-        if (pageToLoad === 1) return newMachines;
-
-        const loadedIds = new Set(current.map((machine) => machine.id));
-        return [
-          ...current,
-          ...newMachines.filter((machine) => !loadedIds.has(machine.id)),
-        ];
-      });
-      setTotalMachines(Number.isFinite(totalItems) ? totalItems : newMachines.length);
-      setNextPage(pageToLoad + 1);
-      setHasMore(
-        Number.isFinite(totalPages)
-          ? pageToLoad < totalPages
-          : newMachines.length > 0,
-      );
-    } catch (error) {
-      setLoadError(error.message || "Unable to connect to the machine server.");
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedMachineType]);
+    },
+    [selectedMachineType],
+  );
 
   const loadTopCategories = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/categories/top?limit=5`);
+      const response = await fetch(
+        `${API_BASE_URL}/api/categories/top?limit=5`,
+      );
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Unable to load top categories.");
+      if (!response.ok)
+        throw new Error(result.message || "Unable to load top categories.");
 
       setTopCategories(
         (Array.isArray(result.data) ? result.data : []).map((category) => ({
           ...category,
-          name: String(category.name || "UNCATEGORIZED").trim().toUpperCase(),
+          name: String(category.name || "UNCATEGORIZED")
+            .trim()
+            .toUpperCase(),
           machineCount: Number(category.machineCount || 0),
           viewCount: Number(category.viewCount || 0),
         })),
@@ -201,7 +224,8 @@ const ProductPage = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/categories`);
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Unable to load categories.");
+      if (!response.ok)
+        throw new Error(result.message || "Unable to load categories.");
 
       setCategoryOptions(
         (Array.isArray(result.data) ? result.data : [])
@@ -273,7 +297,6 @@ const ProductPage = () => {
       ...prev,
       [name]: !prev[name],
     }));
-
   };
 
   const handleCategoryFilter = (categoryId) => {
@@ -322,13 +345,16 @@ const ProductPage = () => {
     if (selectedMachineTypeOption) {
       const relatedCategoryIds = new Set(
         products
-          .filter((product) => product.machineTypeKey === selectedMachineTypeOption.slug)
+          .filter(
+            (product) =>
+              product.machineTypeKey === selectedMachineTypeOption.slug,
+          )
           .map((product) => String(product.categoryId || ""))
           .filter(Boolean),
       );
-      const relatedTopCategories = topCategories.filter((category) => (
-        relatedCategoryIds.has(String(category.id))
-      ));
+      const relatedTopCategories = topCategories.filter((category) =>
+        relatedCategoryIds.has(String(category.id)),
+      );
 
       if (relatedTopCategories.length > 0) return relatedTopCategories;
     } else if (topCategories.length > 0) {
@@ -338,22 +364,28 @@ const ProductPage = () => {
     const categoryMap = new Map();
 
     products
-      .filter((product) => (
-        !selectedMachineTypeOption
-        || product.machineTypeKey === selectedMachineTypeOption.slug
-      ))
+      .filter(
+        (product) =>
+          !selectedMachineTypeOption ||
+          product.machineTypeKey === selectedMachineTypeOption.slug,
+      )
       .forEach((product) => {
-      const name = product.category || "UNCATEGORIZED";
-      const current = categoryMap.get(name) || { name, machineCount: 0, viewCount: 0 };
-      current.machineCount += 1;
-      current.viewCount += Number(product.viewCount || 0);
-      categoryMap.set(name, current);
+        const name = product.category || "UNCATEGORIZED";
+        const current = categoryMap.get(name) || {
+          name,
+          machineCount: 0,
+          viewCount: 0,
+        };
+        current.machineCount += 1;
+        current.viewCount += Number(product.viewCount || 0);
+        categoryMap.set(name, current);
       });
 
     return [...categoryMap.values()]
       .sort(
         (left, right) =>
-          right.viewCount - left.viewCount || right.machineCount - left.machineCount,
+          right.viewCount - left.viewCount ||
+          right.machineCount - left.machineCount,
       )
       .slice(0, 5);
   }, [products, selectedMachineTypeOption, topCategories]);
@@ -363,12 +395,17 @@ const ProductPage = () => {
 
     const relatedCategoryIds = new Set(
       products
-        .filter((product) => product.machineTypeKey === selectedMachineTypeOption.slug)
+        .filter(
+          (product) =>
+            product.machineTypeKey === selectedMachineTypeOption.slug,
+        )
         .map((product) => String(product.categoryId || ""))
         .filter(Boolean),
     );
 
-    return categoryOptions.filter((category) => relatedCategoryIds.has(String(category.id)));
+    return categoryOptions.filter((category) =>
+      relatedCategoryIds.has(String(category.id)),
+    );
   }, [categoryOptions, products, selectedMachineTypeOption]);
 
   /* =================================================
@@ -392,49 +429,69 @@ const ProductPage = () => {
   const filteredProducts = useMemo(() => {
     return [...products]
       .sort((left, right) => {
-        const viewDifference = Number(right.viewCount || 0) - Number(left.viewCount || 0);
+        const viewDifference =
+          Number(right.viewCount || 0) - Number(left.viewCount || 0);
         return viewDifference || Number(right.id || 0) - Number(left.id || 0);
       })
       .filter((product) => {
-      const searchableProductText = [
-        product.name,
-        product.model,
-        product.category,
-        product.machineType,
-        product.description,
-      ].filter(Boolean).join(" ").toLowerCase();
-      const searchMatch = !normalizedSearch || searchableProductText.includes(normalizedSearch);
-      const categoryMatch = !selectedCategory || product.category === selectedCategory;
-      const apiCategoryMatch = !hasCategoryFilter || Boolean(
-        filters.categories[String(product.categoryId || product.category?.id)],
-      );
-      const machineTypeMatch = !selectedMachineTypeOption
-        || product.machineTypeKey === selectedMachineTypeOption.slug;
+        const searchableProductText = [
+          product.name,
+          product.model,
+          product.category,
+          product.machineType,
+          product.description,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        const searchMatch =
+          !normalizedSearch || searchableProductText.includes(normalizedSearch);
+        const categoryMatch =
+          !selectedCategory || product.category === selectedCategory;
+        const apiCategoryMatch =
+          !hasCategoryFilter ||
+          Boolean(
+            filters.categories[
+              String(product.categoryId || product.category?.id)
+            ],
+          );
+        const machineTypeMatch =
+          !selectedMachineTypeOption ||
+          product.machineTypeKey === selectedMachineTypeOption.slug;
 
-      /*
-       * MACHINE TYPE
-       */
-      /*
-       * POWER
-       */
-      const powerMatch = !hasPowerFilter || filters[product.power];
+        /*
+         * MACHINE TYPE
+         */
+        /*
+         * POWER
+         */
+        const powerMatch = !hasPowerFilter || filters[product.power];
 
-      /*
-       * PRECISION
-       */
-      const precisionMatch = !hasPrecisionFilter || filters[product.precision];
+        /*
+         * PRECISION
+         */
+        const precisionMatch =
+          !hasPrecisionFilter || filters[product.precision];
 
-      /*
-       * AVAILABILITY
-       */
-      const availabilityMatch =
-        !hasAvailabilityFilter || filters[product.availability];
+        /*
+         * AVAILABILITY
+         */
+        const availabilityMatch =
+          !hasAvailabilityFilter || filters[product.availability];
 
-      /*
-       * Product must match
-       * every active filter group
-       */
-      return searchMatch && machineTypeMatch && categoryMatch && apiCategoryMatch && powerMatch && precisionMatch && availabilityMatch;
+        /*
+         * Product must match
+         * every active filter group
+         */
+        return (
+          searchMatch &&
+          machineTypeMatch &&
+          categoryMatch &&
+          apiCategoryMatch &&
+          powerMatch &&
+          precisionMatch &&
+          availabilityMatch
+        );
       });
   }, [
     products,
@@ -468,9 +525,7 @@ const ProductPage = () => {
 
           <h1>{productContext.title}</h1>
 
-          <p>
-            {productContext.description}
-          </p>
+          <p>{productContext.description}</p>
         </div>
       </section>
 
@@ -492,18 +547,22 @@ const ProductPage = () => {
             <div className="filter-group">
               <h4>CATEGORY</h4>
 
-              {relatedCategoryOptions.length ? relatedCategoryOptions.map((category) => (
-                <label key={category.id}>
-                  <input
-                    type="checkbox"
-                    checked={Boolean(filters.categories[String(category.id)])}
-                    onChange={() => handleCategoryFilter(category.id)}
-                  />
+              {relatedCategoryOptions.length ? (
+                relatedCategoryOptions.map((category) => (
+                  <label key={category.id}>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(filters.categories[String(category.id)])}
+                      onChange={() => handleCategoryFilter(category.id)}
+                    />
 
-                  <span>{category.name}</span>
-                </label>
-              )) : (
-                <span className="product-filter-empty">No categories available.</span>
+                    <span>{category.name}</span>
+                  </label>
+                ))
+              ) : (
+                <span className="product-filter-empty">
+                  No categories available.
+                </span>
               )}
             </div>
 
@@ -626,8 +685,15 @@ const ProductPage = () => {
                     ================================================= */}
 
           <div className="product-content">
-            <form className="product-search" role="search" onSubmit={handleProductSearch}>
-              <label className="product-search-label" htmlFor="product-search-input">
+            <form
+              className="product-search"
+              role="search"
+              onSubmit={handleProductSearch}
+            >
+              <label
+                className="product-search-label"
+                htmlFor="product-search-input"
+              >
                 SEARCH PRODUCTS
               </label>
               <div className="product-search-controls">
@@ -656,7 +722,10 @@ const ProductPage = () => {
             </form>
 
             {popularCategories.length > 0 && (
-              <section className="product-popular-categories" aria-label="Most viewed categories">
+              <section
+                className="product-popular-categories"
+                aria-label="Most viewed categories"
+              >
                 <div className="product-popular-heading">
                   <span>TOP CATEGORIES</span>
                   <strong>Most viewed by customers</strong>
@@ -688,7 +757,8 @@ const ProductPage = () => {
 
             <div className="product-result-header">
               <span>
-                SHOWING {filteredProducts.length} MATCHING MACHINES OF {totalMachines}
+                SHOWING {filteredProducts.length} MATCHING MACHINES OF{" "}
+                {totalMachines}
               </span>
             </div>
 
@@ -727,19 +797,25 @@ const ProductPage = () => {
                       <h2>{product.name}</h2>
 
                       <div className="product-specs">
-                        {(product.specs || []).slice(0, 2).map(([label, value]) => (
-                          <div className="product-spec" key={label}>
-                            <span>{label}</span>
+                        {(product.specs || [])
+                          .slice(0, 2)
+                          .map(([label, value]) => (
+                            <div className="product-spec" key={label}>
+                              <span>{label}</span>
 
-                            <strong>{value}</strong>
-                          </div>
-                        ))}
+                              <strong>{value}</strong>
+                            </div>
+                          ))}
                       </div>
 
                       <button
                         type="button"
                         className="configure-button"
-                        onClick={() => navigate(`/product/${product.id}`, { state: { product } })}
+                        onClick={() =>
+                          navigate(`/product/${product.id}`, {
+                            state: { product },
+                          })
+                        }
                       >
                         CONFIGURE SPECIFICATION
                       </button>

@@ -40,6 +40,8 @@ const INFO_TABS = [
   ["video", "Video"],
 ];
 
+const SIMILAR_PRODUCTS_PER_SLIDE = 4;
+
 const normalizeApiProduct = (machine) => {
   const image = toMediaUrl(machine.image);
   const gallery = Array.isArray(machine.gallery)
@@ -87,7 +89,8 @@ const ProductDetail = () => {
       : "overview";
   });
   const [similarProducts, setSimilarProducts] = useState([]);
-  const [similarStartIndex, setSimilarStartIndex] = useState(0);
+  const [similarPage, setSimilarPage] = useState(0);
+  const [similarSlideDirection, setSimilarSlideDirection] = useState("next");
   const viewRequestRef = useRef("");
 
   useEffect(() => {
@@ -212,8 +215,9 @@ const ProductDetail = () => {
     const controller = new AbortController();
     const loadSimilarProducts = async () => {
       try {
+        // Load the catalog first so the section can still show useful
+        // recommendations when this product is the only item in its category.
         const query = new URLSearchParams({ page: "1" });
-        if (product.categoryId) query.set("categoryId", String(product.categoryId));
 
         const response = await fetch(`${API_BASE_URL}/api/machines?${query.toString()}`, {
           signal: controller.signal,
@@ -229,9 +233,43 @@ const ProductDetail = () => {
             .map((machine) => [machine.id, machine]),
         ).values()];
 
-        setSimilarProducts(uniqueMachines.map(normalizeApiProduct));
+        const sameCategoryMachines = product.categoryId
+          ? uniqueMachines.filter(
+              (machine) => String(machine.categoryId) === String(product.categoryId),
+            )
+          : [];
+        const sameCategoryIds = new Set(sameCategoryMachines.map((machine) => machine.id));
+        const orderedMachines = [
+          ...sameCategoryMachines,
+          ...uniqueMachines.filter((machine) => !sameCategoryIds.has(machine.id)),
+        ];
+        const normalizedMachines = orderedMachines.map(normalizeApiProduct);
+        const existingIds = new Set(normalizedMachines.map((machine) => String(machine.id)));
+        const fallbackProducts = DataProduct
+          .filter(
+            (machine) =>
+              String(machine.id) !== String(product.id) &&
+              !existingIds.has(String(machine.id)),
+          )
+          .slice(
+            0,
+            Math.max(
+              0,
+              SIMILAR_PRODUCTS_PER_SLIDE * 3 - normalizedMachines.length,
+            ),
+          )
+          .map(normalizeApiProduct);
+
+        setSimilarProducts([...normalizedMachines, ...fallbackProducts]);
       } catch (error) {
-        if (error.name !== "AbortError") setSimilarProducts([]);
+        if (error.name !== "AbortError") {
+          setSimilarProducts(
+            DataProduct
+              .filter((machine) => String(machine.id) !== String(product.id))
+              .slice(0, SIMILAR_PRODUCTS_PER_SLIDE)
+              .map(normalizeApiProduct),
+          );
+        }
       }
     };
 
@@ -241,22 +279,29 @@ const ProductDetail = () => {
   }, [product?.categoryId, product?.id]);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setSimilarStartIndex(0), 0);
+    const timer = window.setTimeout(() => {
+      setSimilarPage(0);
+      setSimilarSlideDirection("next");
+    }, 0);
 
     return () => window.clearTimeout(timer);
   }, [product?.id]);
 
+  const similarPageCount = Math.max(
+    1,
+    Math.ceil(similarProducts.length / SIMILAR_PRODUCTS_PER_SLIDE),
+  );
+
   useEffect(() => {
-    if (similarProducts.length <= 4) return undefined;
+    if (similarPageCount <= 1) return undefined;
 
     const timer = window.setInterval(() => {
-      setSimilarStartIndex((currentIndex) => (
-        (currentIndex + 1) % similarProducts.length
-      ));
+      setSimilarSlideDirection("next");
+      setSimilarPage((currentPage) => (currentPage + 1) % similarPageCount);
     }, 10000);
 
     return () => window.clearInterval(timer);
-  }, [similarProducts.length]);
+  }, [similarPageCount]);
 
   const handleImageMouseMove = (event) => {
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -393,13 +438,18 @@ const ProductDetail = () => {
             .toLowerCase()
             .includes(activeInfoTab),
         );
-  const safeSimilarStartIndex = similarProducts.length
-    ? similarStartIndex % similarProducts.length
+  const safeSimilarPage = similarPageCount > 0
+    ? similarPage % similarPageCount
     : 0;
-  const visibleSimilarProducts = similarProducts.length > 4
-    ? Array.from({ length: 4 }, (_, index) => (
-        similarProducts[(safeSimilarStartIndex + index) % similarProducts.length]
-      ))
+  const visibleSimilarProducts = similarProducts.length > SIMILAR_PRODUCTS_PER_SLIDE
+    ? Array.from(
+        { length: Math.min(SIMILAR_PRODUCTS_PER_SLIDE, similarProducts.length) },
+        (_, index) => (
+          similarProducts[
+            (safeSimilarPage * SIMILAR_PRODUCTS_PER_SLIDE + index) % similarProducts.length
+          ]
+        ),
+      )
     : similarProducts;
 
   return (
@@ -771,52 +821,70 @@ const ProductDetail = () => {
 
           <div className="similar-products-viewport">
             <div
-              key={safeSimilarStartIndex}
-              className={`similar-products-grid ${similarProducts.length > 4 ? "similar-products-grid--carousel" : ""}`}
+              key={safeSimilarPage}
+              className={`similar-products-grid ${similarPageCount > 1 ? `similar-products-grid--carousel similar-products-grid--${similarSlideDirection}` : ""}`}
             >
-            {visibleSimilarProducts.map((similarProduct) => (
-              <article className="similar-product-card" key={similarProduct.id}>
-                <div className="similar-product-image">
-                  <img
-                    src={similarProduct.image}
-                    alt={similarProduct.name || similarProduct.model}
-                  />
-                </div>
+              {visibleSimilarProducts.map((similarProduct) => (
+                <article className="similar-product-card" key={similarProduct.id}>
+                  <div className="similar-product-image">
+                    <img
+                      src={similarProduct.image}
+                      alt={similarProduct.name || similarProduct.model}
+                    />
+                  </div>
 
-                <div className="similar-product-copy">
-                  <span className="similar-product-category">
-                    {similarProduct.category || "PRODUCT"}
-                  </span>
-                  <h3>{similarProduct.name || similarProduct.model}</h3>
-                  {similarProduct.model && similarProduct.model !== similarProduct.name && (
-                    <span className="similar-product-model">{similarProduct.model}</span>
-                  )}
-                </div>
+                  <div className="similar-product-copy">
+                    <span className="similar-product-category">
+                      {similarProduct.category || "PRODUCT"}
+                    </span>
+                    <h3>{similarProduct.name || similarProduct.model}</h3>
+                    {similarProduct.model && similarProduct.model !== similarProduct.name && (
+                      <span className="similar-product-model">{similarProduct.model}</span>
+                    )}
+                  </div>
 
-                <div className="similar-product-actions">
-                  <button
-                    type="button"
-                    className="similar-product-view"
-                    onClick={() => navigate(`/product/${similarProduct.id}`, {
-                      state: { product: similarProduct },
-                    })}
-                  >
-                    View Details
-                  </button>
-                  <button
-                    type="button"
-                    className="similar-product-documents"
-                    onClick={() => navigate(`/product/${similarProduct.id}`, {
-                      state: { product: similarProduct, initialTab: "catalog" },
-                    })}
-                  >
-                    Documents <span aria-hidden="true">^</span>
-                  </button>
-                </div>
-              </article>
-            ))}
+                  <div className="similar-product-actions">
+                    <button
+                      type="button"
+                      className="similar-product-view"
+                      onClick={() => navigate(`/product/${similarProduct.id}`, {
+                        state: { product: similarProduct },
+                      })}
+                    >
+                      View Details
+                    </button>
+                    <button
+                      type="button"
+                      className="similar-product-documents"
+                      onClick={() => navigate(`/product/${similarProduct.id}`, {
+                        state: { product: similarProduct, initialTab: "catalog" },
+                      })}
+                    >
+                      Documents <span aria-hidden="true">^</span>
+                    </button>
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
+
+          {similarPageCount > 1 && (
+            <div className="similar-products-pagination" aria-label="Similar product pages">
+              {Array.from({ length: similarPageCount }, (_, pageIndex) => (
+                <button
+                  key={pageIndex}
+                  type="button"
+                  className={pageIndex === safeSimilarPage ? "is-active" : ""}
+                  aria-label={`Show similar products page ${pageIndex + 1}`}
+                  aria-current={pageIndex === safeSimilarPage ? "page" : undefined}
+                  onClick={() => {
+                    setSimilarSlideDirection(pageIndex > safeSimilarPage ? "next" : "prev");
+                    setSimilarPage(pageIndex);
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </section>
       )}
 

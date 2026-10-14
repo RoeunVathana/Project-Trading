@@ -8,6 +8,7 @@
     min-height: 100vh;
     background: var(--theme-surface-0);
     color: var(--theme-text-strong);
+    font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     overflow-x: clip;
     font-size: 15px;
 }
@@ -771,13 +772,13 @@
 
 .similar-products {
     width: 100%;
-    padding: clamp(36px, 5vw, 56px) clamp(16px, 3.5vw, 60px) clamp(48px, 5vw, 70px);
+    padding: clamp(42px, 5vw, 64px) clamp(20px, 5.75vw, 100px) clamp(62px, 5vw, 82px);
     background: var(--theme-surface-0);
     border-top: 1px solid var(--theme-border);
 }
 
 .similar-products-heading {
-    margin-bottom: 35px;
+    margin-bottom: clamp(34px, 4.2vw, 60px);
 }
 
 .similar-products-heading h2 {
@@ -786,7 +787,7 @@
     gap: 11px;
     margin: 0;
     color: var(--theme-text-strong);
-    font-size: clamp(28px, 3vw, 40px);
+    font-size: clamp(28px, 2.4vw, 38px);
     line-height: 1.1;
     font-weight: 700;
 }
@@ -802,16 +803,29 @@
 .similar-products-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: clamp(16px, 2.2vw, 38px);
+    gap: clamp(16px, 2.25vw, 38px);
 }
 
 .similar-products-viewport {
     width: 100%;
     overflow: hidden;
+    padding: 8px 1px 12px;
+    margin: -8px -1px -12px;
 }
 
 .similar-products-grid--carousel {
-    animation: similarProductsSlide 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    will-change: transform, opacity;
+    animation-duration: 650ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-fill-mode: both;
+}
+
+.similar-products-grid--next {
+    animation-name: similarProductsSlideNext;
+}
+
+.similar-products-grid--prev {
+    animation-name: similarProductsSlidePrev;
 }
 
 .similar-products-grid:has(.similar-product-card:only-child) {
@@ -822,16 +836,15 @@
 .similar-product-card {
     position: relative;
     min-width: 0;
-    min-height: 440px;
+    height: 460px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border: 1px solid color-mix(in srgb, #00d9e8 24%, var(--theme-border));
+    border: 1px solid color-mix(in srgb, var(--theme-border) 62%, transparent);
     border-radius: 18px;
-    background: linear-gradient(155deg,
-        color-mix(in srgb, var(--theme-surface-1) 88%, #00d9e8 12%),
-        var(--theme-surface-1) 52%);
-    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.18);
+    background: color-mix(in srgb, var(--theme-surface-1) 90%, #287eff 10%);
+    box-shadow: 0 10px 25px rgba(25, 62, 101, 0.09),
+        0 2px 5px rgba(25, 62, 101, 0.04);
     transform: translateY(0);
     animation: similarProductReveal 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
     transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
@@ -849,83 +862,102 @@
     animation-delay: 210ms;
 }
 
+:root:not([data-theme="light"]) .similar-product-card {
+    border-color: #1b3a42;
+    background: linear-gradient(155deg, #0d2328 0%, #0a1b20 100%);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+:root:not([data-theme="light"]) .similar-product-image {
+    background: #091a20;
+}
+
+:root[data-theme="light"] .similar-product-card {
+    border-color: #e1eaf4;
+    background: #ffffff;
+    box-shadow: 0 10px 25px rgba(25, 62, 101, 0.09),
+        0 2px 5px rgba(25, 62, 101, 0.04);
+}
+
+:root[data-theme="light"] .similar-product-image {
+    background: #f8fbff;
+}
+
 .similar-product-card:hover,
 .similar-product-card:focus-within {
-    border-color: color-mix(in srgb, #00d9e8 70%, var(--theme-border));
-    box-shadow: 0 22px 44px rgba(0, 217, 232, 0.16);
-    transform: translateY(-8px);
+    border-color: color-mix(in srgb, #287eff 42%, var(--theme-border));
+    box-shadow: 0 18px 34px rgba(25, 62, 101, 0.16),
+        0 0 0 3px color-mix(in srgb, #287eff 10%, transparent);
+    transform: translateY(-6px);
 }
 
 .similar-product-image {
-    height: clamp(190px, 18vw, 255px);
+    height: 200px;
     flex: 0 0 auto;
     display: grid;
     place-items: center;
-    margin: 14px 14px 0;
-    padding: 12px;
-    border: 1px solid color-mix(in srgb, var(--theme-border) 72%, transparent);
+    margin: 10px 17px 0;
+    padding: 11px;
     border-radius: 12px;
-    background: var(--theme-surface-0);
+    background: color-mix(in srgb, var(--theme-surface-0) 92%, #287eff 8%);
     overflow: hidden;
 }
 
 .similar-product-image img {
-    width: 100%;
+    width: 96%;
     height: 100%;
     display: block;
     object-fit: contain;
-    border-radius: 8px;
     transform: scale(1);
-    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    filter: drop-shadow(0 8px 8px rgba(19, 44, 74, 0.12));
+    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), filter 320ms ease;
 }
 
 .similar-product-card:hover .similar-product-image img,
 .similar-product-card:focus-within .similar-product-image img {
+    filter: drop-shadow(0 12px 11px rgba(19, 44, 74, 0.2));
     transform: scale(1.06);
 }
 
 .similar-product-copy {
-    min-height: 112px;
+    min-height: 115px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 5px;
-    padding: 16px 20px 14px;
+    padding: 15px 20px 17px;
     text-align: center;
 }
 
 .similar-product-category {
-    color: var(--theme-cyan-text);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
+    display: none;
 }
 
 .similar-product-copy h3 {
-    min-height: 0;
+    min-height: 44px;
+    max-width: 100%;
     display: grid;
     place-items: center;
     margin: 0;
     color: var(--theme-text-strong);
-    font-size: clamp(15px, 1.25vw, 18px);
+    font-size: clamp(15px, 1.15vw, 18px);
     line-height: 1.35;
     font-weight: 700;
 }
 
 .similar-product-model {
-    color: var(--theme-text-muted);
-    font-size: 12px;
-    letter-spacing: 0.4px;
+    display: none;
 }
 
 .similar-product-actions {
     display: grid;
     gap: 10px;
     margin-top: auto;
-    padding: 16px 20px 20px;
-    border-top: 1px solid color-mix(in srgb, var(--theme-border) 78%, transparent);
+    padding: 20px clamp(20px, 5vw, 88px) 20px;
+    border-top: 1px solid color-mix(in srgb, var(--theme-border) 84%, transparent);
+    background: color-mix(in srgb, var(--theme-surface-1) 64%, transparent);
 }
 
 .similar-product-actions button {
@@ -935,6 +967,7 @@
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
+    letter-spacing: 0.05px;
     transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
 }
 
@@ -969,6 +1002,35 @@
     font-size: 13px;
 }
 
+.similar-products-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 9px;
+    margin-top: 34px;
+}
+
+.similar-products-pagination button {
+    width: 40px;
+    height: 4px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: #cfcfcf;
+    outline-offset: 5px;
+    cursor: pointer;
+    transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.similar-products-pagination button:hover,
+.similar-products-pagination button:focus-visible {
+    background: #8e8e8e;
+    transform: scaleY(1.5);
+}
+
+.similar-products-pagination button.is-active {
+    background: #2860e8;
+}
+
 @keyframes similarProductReveal {
     from {
         opacity: 0;
@@ -981,10 +1043,22 @@
     }
 }
 
-@keyframes similarProductsSlide {
+@keyframes similarProductsSlideNext {
     from {
         opacity: 0.25;
         transform: translateX(36px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes similarProductsSlidePrev {
+    from {
+        opacity: 0.25;
+        transform: translateX(-36px);
     }
 
     to {
@@ -1002,7 +1076,6 @@
     width: 100%;
     padding: clamp(42px, 5vw, 62px) clamp(16px, 3.5vw, 60px) clamp(52px, 5vw, 80px);
     background: var(--theme-surface-0);
-    border-top: 1px solid var(--theme-border);
 }
 
 .helpful-links-heading {
@@ -1249,6 +1322,11 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .similar-product-actions {
+        padding-right: clamp(18px, 3.5vw, 54px);
+        padding-left: clamp(18px, 3.5vw, 54px);
+    }
+
     .helpful-links {
         padding-right: 40px;
         padding-left: 40px;
@@ -1320,6 +1398,22 @@
     .similar-products-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 24px;
+    }
+
+    .similar-product-card {
+        height: 440px;
+    }
+
+    .similar-product-image {
+        height: 180px;
+    }
+
+    .similar-product-copy {
+        min-height: 110px;
+    }
+
+    .similar-product-actions {
+        padding: 16px 28px;
     }
 
     .helpful-links {
@@ -1450,6 +1544,28 @@
     .similar-products-grid {
         grid-template-columns: 1fr;
         gap: 18px;
+    }
+
+    .similar-product-card {
+        height: 430px;
+    }
+
+    .similar-product-image {
+        height: 180px;
+        margin-right: 16px;
+        margin-left: 16px;
+    }
+
+    .similar-product-copy {
+        min-height: 110px;
+    }
+
+    .similar-product-actions {
+        padding: 14px clamp(24px, 12vw, 88px);
+    }
+
+    .similar-products-pagination {
+        margin-top: 26px;
     }
 
     .helpful-links {
@@ -1645,6 +1761,34 @@
         padding-left: 15px;
     }
 
+    .similar-product-card {
+        height: 415px;
+        border-radius: 14px;
+    }
+
+    .similar-product-image {
+        height: 165px;
+    }
+
+    .similar-product-copy {
+        min-height: 105px;
+        padding-right: 14px;
+        padding-left: 14px;
+    }
+
+    .similar-product-actions {
+        padding: 12px 24px;
+    }
+
+    .similar-product-actions button {
+        min-height: 40px;
+        font-size: 14px;
+    }
+
+    .similar-products-pagination button {
+        width: 30px;
+    }
+
     .helpful-links {
         padding-right: 15px;
         padding-left: 15px;
@@ -1790,8 +1934,10 @@
     }
 
     .similar-product-card,
+    .similar-products-grid,
     .similar-product-image img,
     .similar-product-actions button,
+    .similar-products-pagination button,
     .helpful-link-card,
     .helpful-link-action {
         animation: none;
