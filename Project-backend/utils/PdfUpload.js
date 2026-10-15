@@ -56,6 +56,14 @@ const getPdfMetadata = (file) => ({
   fileSize: file.size,
 });
 
+const getProductPdfMetadata = (file) => ({
+  originalFileName: path.basename(file.originalname.replace(/\\/g, "/")) || "document.pdf",
+  storedFileName: file.filename,
+  filePath: getPdfUrl(file),
+  fileSizeBytes: file.size,
+  mimeType: "application/pdf",
+});
+
 const isPdfFile = (filePath) => {
   let descriptor;
   try {
@@ -100,5 +108,6 @@ module.exports = {
   MAX_PDF_FILE_SIZE,
   getPdfUrl,
   getPdfMetadata,
+  getProductPdfMetadata,
   removePdf,
 };

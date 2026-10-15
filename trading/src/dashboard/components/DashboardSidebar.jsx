@@ -12,7 +12,10 @@ const DashboardSidebar = ({
   loadIssues,
   account,
 }) => {
-  const [machinesOpen, setMachinesOpen] = useState(activeSection !== "overview");
+  const [openGroups, setOpenGroups] = useState({
+    machines: ["machines", "categories", "gallery", "specs", "pdfs"].includes(activeSection),
+    huawei: activeSection.startsWith("huawei"),
+  });
   const accountName = displayAccountName(account, "EFSAN Workspace");
 
   return (
@@ -57,7 +60,7 @@ const DashboardSidebar = ({
 
           return (
             <div
-              className={`dashboard-nav-group ${item.children ? "has-submenu" : ""} ${machinesOpen || childActive ? "is-open" : ""}`}
+              className={`dashboard-nav-group ${item.children ? "has-submenu" : ""} ${openGroups[item.key] || childActive ? "is-open" : ""}`}
               key={item.key}
             >
               <button
@@ -65,13 +68,13 @@ const DashboardSidebar = ({
                 className={`dashboard-nav-item ${itemActive ? "active" : ""} ${item.children ? "has-children" : ""}`}
                 onClick={() => {
                   if (item.children) {
-                    setMachinesOpen((isOpen) => !isOpen);
+                    setOpenGroups((groups) => ({ ...groups, [item.key]: !groups[item.key] }));
                     if (!itemActive) setCurrentSection(item.key, { closeSidebar: false });
                     return;
                   }
                   setCurrentSection(item.key);
                 }}
-                aria-expanded={item.children ? machinesOpen : undefined}
+                aria-expanded={item.children ? Boolean(openGroups[item.key]) : undefined}
               >
                 <span className="dashboard-nav-icon">{item.icon}</span>
                 <span>{item.label}</span>

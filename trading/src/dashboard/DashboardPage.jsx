@@ -27,6 +27,13 @@ import {
   recordTitle,
 } from "./dashboardUtils";
 
+const toCategorySlug = (value) => String(value || "")
+  .trim()
+  .toLowerCase()
+  .replace(/&/g, "and")
+  .replace(/[^a-z0-9]+/g, "-")
+  .replace(/^-+|-+$/g, "") || "category";
+
 const DashboardPage = () => {
   const { theme, toggleTheme } = useTheme();
   const [activeSection, setActiveSection] = useState("overview");
@@ -93,6 +100,10 @@ const DashboardPage = () => {
             (result) => result.data || [],
           ),
       ],
+      ["huawei", () => requestApi("/api/huawei", { token }).then((result) => result.data || [])],
+      ["huaweiCategories", () => requestApi("/api/huawei-categories", { token }).then((result) => result.data || [])],
+      ["huaweiImages", () => requestApi("/api/huawei-product-images", { token }).then((result) => result.data || [])],
+      ["huaweiPdfs", () => requestApi("/api/huawei-product-pdfs", { token }).then((result) => result.data || [])],
     ];
 
     const results = await Promise.allSettled(loaders.map(([, load]) => load()));
@@ -292,6 +303,12 @@ const DashboardPage = () => {
       }
     });
 
+    // Slugs remain an internal database key, but are generated from the name
+    // so dashboard users no longer need to maintain a separate slug field.
+    if (resource === "huaweiCategories" && form.name) {
+      payload.slug = toCategorySlug(form.name);
+    }
+
     if (!record) {
       const missingRequired = config.fields.find((field) => {
         if (field.type === "file")
@@ -320,7 +337,7 @@ const DashboardPage = () => {
     try {
       const savedResult = await requestApi(
         record
-          ? `${config.endpoint}/${record.id}`
+          ? `${config.endpoint}/${config.recordPath ? config.recordPath(record) : record.id}`
           : config.createEndpoint || config.endpoint,
         { method: record ? "PUT" : "POST", body, token },
       );
@@ -349,7 +366,7 @@ const DashboardPage = () => {
     const config = RESOURCE_CONFIG[resource];
     setBusy(true);
     try {
-      await requestApi(`${config.endpoint}/${record.id}`, {
+      await requestApi(`${config.endpoint}/${config.recordPath ? config.recordPath(record) : record.id}`, {
         method: "DELETE",
         token,
       });
@@ -448,6 +465,16 @@ const DashboardPage = () => {
       : `Machine #${machineId}`;
   };
 
+  const huaweiProductName = (productId) => {
+    const product = records.huawei.find((item) => Number(item.id) === Number(productId));
+    return product ? `${product.productName} - ${product.modelCode}` : `Product #${productId}`;
+  };
+
+  const huaweiCategoryName = (categoryId) => {
+    const category = records.huaweiCategories.find((item) => Number(item.id) === Number(categoryId));
+    return category?.name || `Category #${categoryId}`;
+  };
+
   const renderCell = (resource, key, record) => {
     if (resource === "users" && key === "name") {
       return displayAccountName(record, `User #${record.id}`);
@@ -461,6 +488,8 @@ const DashboardPage = () => {
       );
     }
     if (key === "machine") return machineName(record.machineId);
+    if (key === "parent") return record.parent?.name || (record.parentId ? huaweiCategoryName(record.parentId) : "-");
+    if (key === "product") return record.product?.productName ? `${record.product.productName} - ${record.product.modelCode}` : huaweiProductName(record.productId);
     if (resource === "specs" && key === "section") {
       return record.section || "General";
     }
@@ -520,13 +549,22 @@ const DashboardPage = () => {
           target="_blank"
           rel="noreferrer"
         >
-          {record.fileName || "Open PDF"}
+          {record.fileName || record.originalFileName || "Open PDF"}
         </a>
       ) : (
         "—"
       );
     }
+    if (key === "fileUrl" || key === "filePath") {
+      const filePath = record[key];
+      return filePath ? (
+        <a className="dashboard-file-link" href={publicFileUrl(filePath)} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>
+          Open file
+        </a>
+      ) : "-";
+    }
     if (key === "fileSize") return bytesLabel(record.fileSize);
+    if (key === "fileSizeBytes") return bytesLabel(record.fileSizeBytes);
     if (key === "status")
       return (
         <span className={`status-pill status-${record.status}`}>
@@ -534,6 +572,7 @@ const DashboardPage = () => {
         </span>
       );
     const value = record[key];
+    if (typeof value === "boolean") return value ? "Yes" : "No";
     return value === null || value === undefined || value === ""
       ? "—"
       : String(value);

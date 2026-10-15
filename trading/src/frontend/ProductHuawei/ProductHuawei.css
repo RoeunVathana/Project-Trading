@@ -1,0 +1,206 @@
+@import "../ProductPage/style/ProductPage.css";
+@import "../ProductPage/style/ProductDetail.css";
+
+.huawei-product-page .product-hero {
+  background-image: linear-gradient(90deg, rgba(3, 15, 17, 0.32), rgba(3, 15, 17, 0.82)), url("https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=1800&q=85");
+  background-position: center;
+}
+
+.huawei-product-page .product-category,
+.huawei-product-page .product-card-category,
+.huawei-product-page .product-popular-heading span,
+.huawei-product-detail .product-detail-label,
+.huawei-product-detail .product-info-item-label {
+  color: #45c9a0;
+}
+
+.huawei-product-page .filter-group h4 {
+  color: #45c9a0;
+}
+
+.huawei-product-page .filter-group input:checked {
+  border-color: #45c9a0;
+  background: #45c9a0;
+}
+
+.huawei-product-page .filter-group input:hover,
+.huawei-product-page .filter-group input:focus-visible {
+  border-color: #45c9a0;
+}
+
+.huawei-product-page .product-badge,
+.huawei-product-page .configure-button,
+.huawei-product-page .product-pagination .pagination-active,
+.huawei-product-page .product-load-more button {
+  border-color: #45c9a0;
+  background: #45c9a0;
+  color: #06201a;
+}
+
+.huawei-product-page .product-card:hover,
+.huawei-product-page .product-search-controls input:focus,
+.huawei-product-page .product-popular-category:hover,
+.huawei-product-page .product-popular-category.active,
+.huawei-product-page .compare-button:hover,
+.huawei-product-page .reset-filter-button:hover {
+  border-color: #45c9a0;
+}
+
+/* Keep Huawei cards close to the compact catalogue card layout. */
+.huawei-product-page .product-card {
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  border-radius: 2px;
+  background: var(--theme-surface-1);
+  box-shadow: none;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.huawei-product-page .product-card:hover {
+  border-color: var(--theme-border);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.huawei-product-page .product-card-body {
+  padding: 14px 16px 15px;
+  background: var(--theme-surface-1);
+}
+
+.huawei-product-page .configure-button:hover,
+.huawei-product-page .product-load-more button:hover:not(:disabled) {
+  border-color: #2da982;
+  background: #2da982;
+}
+
+.huawei-product-page .technical-support {
+  border-left-color: #45c9a0;
+}
+
+.huawei-product-page .technical-support button,
+.huawei-product-detail .product-detail-contact,
+.huawei-product-detail .product-info-tabs button.active,
+.huawei-product-detail .product-document-row a {
+  color: #45c9a0;
+}
+
+.huawei-product-model {
+  margin: 0 0 5px;
+  color: var(--theme-text-strong);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.huawei-product-category {
+  margin: 0;
+  color: #8997a3;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.huawei-product-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 12px;
+}
+
+.huawei-product-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--theme-text-strong);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+.huawei-product-actions button span {
+  color: #7d8b96;
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 160ms ease, color 160ms ease;
+}
+
+.huawei-product-actions button:hover {
+  color: #45c9a0;
+}
+
+.huawei-product-actions button:hover span {
+  color: #45c9a0;
+  transform: translateX(3px);
+}
+
+.huawei-product-actions button:disabled {
+  color: #6f7b82;
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.huawei-product-actions button:disabled span {
+  color: #6f7b82;
+}
+
+.huawei-product-image-placeholder,
+.huawei-detail-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  padding: 20px;
+  box-sizing: border-box;
+  background: linear-gradient(145deg, #102b2a, #071412);
+  color: #45c9a0;
+  text-align: center;
+}
+
+.huawei-product-image-placeholder span,
+.huawei-detail-image-placeholder span {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.huawei-product-image-placeholder strong,
+.huawei-detail-image-placeholder strong {
+  color: var(--theme-text-strong);
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.huawei-product-detail.product-detail-page {
+  background: var(--theme-surface-0);
+}
+
+.huawei-product-detail .product-detail-main-image {
+  background: linear-gradient(145deg, #102b2a, #071412);
+}
+
+.huawei-product-detail .product-detail-main-image > img {
+  object-fit: contain;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.huawei-product-detail .product-detail-contact {
+  border-color: #45c9a0;
+}
+
+.huawei-product-detail .product-detail-contact:hover {
+  background: #45c9a0;
+  color: #06201a;
+}
+
+.huawei-product-detail .product-document-row a:hover {
+  color: #7de5c2;
+}
+
+.huawei-product-detail .gallery-arrow:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}

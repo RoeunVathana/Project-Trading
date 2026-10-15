@@ -1,0 +1,242 @@
+.huawei-download-page {
+  min-height: calc(100vh - 76px);
+  padding: clamp(56px, 8vw, 118px) clamp(24px, 8vw, 128px);
+  box-sizing: border-box;
+  background: var(--theme-surface-0);
+  color: var(--theme-text-strong);
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.huawei-download-shell {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.88fr) minmax(420px, 1.2fr);
+  align-items: center;
+  gap: clamp(56px, 8vw, 140px);
+  width: min(100%, 1280px);
+  min-height: min(620px, calc(100vh - 210px));
+  margin: 0 auto;
+}
+
+.huawei-download-image-wrap {
+  display: grid;
+  place-items: center;
+  min-height: 470px;
+  border-radius: 8px;
+  background: var(--theme-surface-1);
+}
+
+.huawei-download-image {
+  display: block;
+  width: 100%;
+  max-width: 500px;
+  height: min(58vh, 520px);
+  object-fit: contain;
+}
+
+.huawei-download-image-placeholder {
+  display: grid;
+  place-content: center;
+  gap: 10px;
+  width: min(100%, 500px);
+  height: min(58vh, 520px);
+  background: var(--theme-surface-2);
+  color: var(--theme-success-text);
+  text-align: center;
+}
+
+.huawei-download-image-placeholder span {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.huawei-download-image-placeholder strong {
+  color: var(--theme-text-strong);
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.huawei-download-panel {
+  width: 100%;
+  max-width: 720px;
+}
+
+.huawei-download-panel h1 {
+  margin: 0 0 36px;
+  color: var(--theme-text-strong);
+  font-size: clamp(34px, 4vw, 54px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.huawei-download-model {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 36px;
+  border-radius: 999px;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface-2);
+  color: var(--theme-text-primary);
+  font-size: 16px;
+}
+
+.huawei-download-list {
+  margin-top: 4px;
+}
+
+.huawei-download-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  min-height: 58px;
+  border-bottom: 1px solid var(--theme-border);
+  color: var(--theme-text-primary);
+}
+
+.huawei-download-row strong {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.huawei-download-row a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--theme-success-text);
+  font-size: 16px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.huawei-download-row a:hover {
+  color: var(--theme-cyan-text);
+  text-decoration: underline;
+}
+
+.huawei-download-row a span {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.huawei-download-empty {
+  padding: 28px 0;
+  border-bottom: 1px solid var(--theme-border);
+  color: var(--theme-text-muted);
+  font-size: 15px;
+}
+
+.huawei-download-more {
+  display: block;
+  width: min(100%, 250px);
+  min-height: 46px;
+  margin: 52px 0 0 auto;
+  border: 1px solid var(--theme-text-strong);
+  border-radius: 999px;
+  background: var(--theme-surface-1);
+  color: var(--theme-text-strong);
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.huawei-download-more:hover {
+  background: var(--theme-text-strong);
+  color: var(--theme-surface-0);
+  transform: translateY(-1px);
+}
+
+.huawei-download-state {
+  display: grid;
+  min-height: calc(100vh - 76px);
+  place-content: center;
+  padding: 32px;
+  background: var(--theme-surface-0);
+  color: var(--theme-text-strong);
+  text-align: center;
+}
+
+.huawei-download-state h1 {
+  margin: 0 0 12px;
+  font-size: 34px;
+}
+
+.huawei-download-state p {
+  margin: 0 0 22px;
+  color: var(--theme-text-muted);
+}
+
+.huawei-download-state button {
+  min-height: 42px;
+  padding: 0 22px;
+  border: 1px solid var(--theme-text-strong);
+  border-radius: 999px;
+  background: var(--theme-text-strong);
+  color: var(--theme-surface-0);
+  font: inherit;
+  cursor: pointer;
+}
+
+@media (max-width: 850px) {
+  .huawei-download-shell {
+    grid-template-columns: 1fr;
+    gap: 34px;
+    min-height: 0;
+  }
+
+  .huawei-download-image-wrap {
+    min-height: 320px;
+  }
+
+  .huawei-download-image,
+  .huawei-download-image-placeholder {
+    height: min(52vh, 420px);
+  }
+
+  .huawei-download-panel {
+    max-width: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .huawei-download-page {
+    padding: 42px 20px 64px;
+  }
+
+  .huawei-download-image-wrap {
+    min-height: 250px;
+  }
+
+  .huawei-download-image,
+  .huawei-download-image-placeholder {
+    height: 300px;
+  }
+
+  .huawei-download-panel h1 {
+    margin-bottom: 24px;
+    font-size: 34px;
+  }
+
+  .huawei-download-model {
+    padding: 0 20px;
+    font-size: 14px;
+  }
+
+  .huawei-download-row {
+    min-height: 54px;
+    gap: 12px;
+  }
+
+  .huawei-download-row strong,
+  .huawei-download-row a {
+    font-size: 14px;
+  }
+
+  .huawei-download-more {
+    width: 100%;
+    margin-top: 36px;
+  }
+}

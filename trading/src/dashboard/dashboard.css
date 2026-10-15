@@ -4445,3 +4445,29 @@ img.profile-avatar {
   line-height: 1;
 }
 
+/* Compact form controls for boolean fields such as "Primary image". */
+.dashboard-form-modal .dashboard-field.field-boolean {
+  align-content: start;
+}
+
+.dashboard-form-modal .dashboard-field.field-boolean > input[type="checkbox"] {
+  width: 18px;
+  min-width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 3px 0 0;
+  padding: 0;
+  border: 1px solid var(--theme-border);
+  border-radius: 4px;
+  accent-color: var(--dash-accent);
+  cursor: pointer;
+}
+
+.dashboard-form-huaweiImages .dashboard-modal-heading {
+  background: color-mix(in srgb, var(--dash-accent-soft) 30%, var(--theme-surface-1));
+}
+
+.dashboard-form-huaweiImages .dashboard-modal-footer {
+  background: color-mix(in srgb, var(--theme-surface-2) 42%, transparent);
+}
+

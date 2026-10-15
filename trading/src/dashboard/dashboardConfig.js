@@ -1,4 +1,8 @@
-export const RESOURCE_KEYS = ["machines", "categories", "gallery", "specs", "pdfs", "users"];
+export const RESOURCE_KEYS = [
+  "machines", "categories", "gallery", "specs", "pdfs",
+  "huawei", "huaweiCategories", "huaweiImages", "huaweiPdfs",
+  "users",
+];
 export const CATEGORY_COLORS = ["#1a788c", "#48a6a0", "#7abcb4", "#e0a05f", "#8b9bd1"];
 export const UPLOAD_LIMITS = {
   image: { bytes: 100 * 1024 * 1024, label: "100 MB" },
@@ -97,6 +101,73 @@ export const RESOURCE_CONFIG = {
       { name: "pdfFile", label: "PDF file", type: "file", apiField: "file", accept: ".pdf,application/pdf", requiredOnCreate: true, maxSize: UPLOAD_LIMITS.pdf.bytes, maxSizeLabel: UPLOAD_LIMITS.pdf.label },
     ],
   },
+  huawei: {
+    title: "Huawei Products",
+    singular: "Huawei product",
+    description: "Manage Huawei products and their catalog relationships.",
+    endpoint: "/api/huawei",
+    icon: "H",
+    fields: [
+      { name: "categoryId", label: "Category", type: "relation", resource: "huaweiCategories", required: true },
+      { name: "brandName", label: "Brand", defaultValue: "Huawei" },
+      { name: "modelCode", label: "Model code", required: true, placeholder: "SUN2000-600W-PA0" },
+      { name: "productName", label: "Product name", required: true, placeholder: "SUN2000-600W-PA0" },
+      { name: "slug", label: "Slug", required: true, normalize: "lowercase", placeholder: "sun2000-600w-pa0" },
+      { name: "shortDescription", label: "Short description", type: "textarea" },
+      { name: "description", label: "Description", type: "textarea" },
+      { name: "status", label: "Status", type: "select", required: true, defaultValue: "PUBLISHED", options: [
+        { value: "DRAFT", label: "Draft" }, { value: "PUBLISHED", label: "Published" }, { value: "ARCHIVED", label: "Archived" },
+      ] },
+      { name: "displayOrder", label: "Display order", type: "number", min: 0, defaultValue: 0 },
+    ],
+  },
+  huaweiCategories: {
+    title: "Huawei Categories",
+    singular: "Huawei category",
+    description: "Build the Huawei category tree used by products and site pages.",
+    endpoint: "/api/huawei-categories",
+    icon: "C",
+    fields: [
+      { name: "parentId", label: "Parent category", type: "relation", resource: "huaweiCategories", nullable: true },
+      { name: "name", label: "Category name", required: true },
+      { name: "displayOrder", label: "Display order", type: "number", min: 0, defaultValue: 0 },
+      { name: "isActive", label: "Active", type: "select", defaultValue: "true", options: [
+        { value: "true", label: "Active" }, { value: "false", label: "Inactive" },
+      ] },
+      { name: "description", label: "Description", type: "textarea" },
+    ],
+  },
+  huaweiImages: {
+    title: "Huawei Gallery",
+    singular: "Huawei product image",
+    description: "Attach and order product images for the Huawei catalog.",
+    endpoint: "/api/huawei-product-images",
+    icon: "G",
+    fields: [
+      { name: "productId", label: "Product", type: "relation", resource: "huawei", required: true },
+      { name: "imageFile", label: "Product image", type: "file", apiField: "image", accept: "image/*", requiredOnCreate: true, maxSize: UPLOAD_LIMITS.image.bytes, maxSizeLabel: UPLOAD_LIMITS.image.label, currentKey: "imageUrl", currentLabel: "Open image" },
+      { name: "altText", label: "Alt text" },
+      { name: "isPrimary", label: "Primary image", type: "select", defaultValue: "false", options: [
+        { value: "true", label: "Yes" }, { value: "false", label: "No" },
+      ] },
+      { name: "displayOrder", label: "Display order", type: "number", min: 0, defaultValue: 0 },
+      { name: "description", label: "Description", type: "textarea" },
+    ],
+  },
+  huaweiPdfs: {
+    title: "Huawei PDF Library",
+    singular: "Huawei PDF",
+    description: "Store product PDF metadata for datasheets and technical documents.",
+    endpoint: "/api/huawei-product-pdfs",
+    icon: "P",
+    fields: [
+      { name: "productId", label: "Product", type: "relation", resource: "huawei", required: true },
+      { name: "title", label: "Title", required: true },
+      { name: "description", label: "Description", type: "textarea" },
+      { name: "pdfFile", label: "PDF file", type: "file", apiField: "file", accept: ".pdf,application/pdf", requiredOnCreate: true, maxSize: UPLOAD_LIMITS.pdf.bytes, maxSizeLabel: UPLOAD_LIMITS.pdf.label, currentKey: "filePath", currentLabel: "Open PDF" },
+      { name: "isPublished", label: "Published", type: "boolean", defaultValue: true },
+    ],
+  },
   users: {
     title: "Users",
     singular: "user",
@@ -120,6 +191,16 @@ export const NAV_ITEMS = [
     label: RESOURCE_CONFIG.machines.title,
     icon: RESOURCE_CONFIG.machines.icon,
       children: ["machines", "categories", "gallery", "specs", "pdfs"].map((key) => ({
+      key,
+      label: RESOURCE_CONFIG[key].title,
+      icon: RESOURCE_CONFIG[key].icon,
+    })),
+  },
+  {
+    key: "huawei",
+    label: "Huawei",
+    icon: RESOURCE_CONFIG.huawei.icon,
+    children: ["huawei", "huaweiCategories", "huaweiImages", "huaweiPdfs"].map((key) => ({
       key,
       label: RESOURCE_CONFIG[key].title,
       icon: RESOURCE_CONFIG[key].icon,
@@ -162,6 +243,18 @@ export const TABLE_COLUMNS = {
     { key: "document", label: "Document" },
     { key: "fileSize", label: "Size" },
   ],
+  huawei: [
+    { key: "productName", label: "Product" }, { key: "modelCode", label: "Model code" }, { key: "category", label: "Category" }, { key: "status", label: "Status" }, { key: "displayOrder", label: "Order" },
+  ],
+  huaweiCategories: [
+    { key: "name", label: "Category" }, { key: "parent", label: "Parent" }, { key: "isActive", label: "Active" }, { key: "displayOrder", label: "Order" },
+  ],
+  huaweiImages: [
+    { key: "image", label: "Image" }, { key: "product", label: "Product" }, { key: "altText", label: "Alt text" }, { key: "description", label: "Description" }, { key: "isPrimary", label: "Primary" }, { key: "displayOrder", label: "Order" },
+  ],
+  huaweiPdfs: [
+    { key: "product", label: "Product" }, { key: "title", label: "Title" }, { key: "description", label: "Description" }, { key: "document", label: "PDF" }, { key: "fileSizeBytes", label: "Size" }, { key: "isPublished", label: "Published" },
+  ],
   users: [
     { key: "image", label: "Profile" },
     { key: "name", label: "Name" },
@@ -176,4 +269,8 @@ export const emptyRecords = () => ({
   specs: [],
   pdfs: [],
   users: [],
+  huawei: [],
+  huaweiCategories: [],
+  huaweiImages: [],
+  huaweiPdfs: [],
 });

@@ -1,4 +1,22 @@
-# React + Vite
+# Trading frontend
+
+## Local development
+
+Copy `.env.example` to `.env.local` and set `VITE_API_URL` to the backend URL.
+
+```bash
+npm install
+npm run dev
+```
+
+## Deployment
+
+Set `VITE_API_URL` in the frontend hosting provider before building. For Vercel,
+use `trading` as the project root directory and run `npm run build`.
+
+The backend has its own environment template at
+`../Project-backend/.env.example`. Configure `DATABASE_URL`, `TOKEN_SECRET`,
+and `CORS_ORIGINS` in the backend hosting provider.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

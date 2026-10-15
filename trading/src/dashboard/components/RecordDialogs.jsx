@@ -20,6 +20,12 @@ const handleFileChange = (event, field, setForm) => {
   }));
 };
 
+const relationLabel = (item, resource) => {
+  if (resource === "huawei") return item.productName ? `${item.productName} - ${item.modelCode}` : `Product #${item.id}`;
+  if (resource === "huaweiCategories") return item.name || `Category #${item.id}`;
+  return item.name || item.model || item.title || `Record #${item.id}`;
+};
+
 const ImagePreviewDialog = ({ imageTarget, onCloseImage }) => (
   <div className="dashboard-modal-backdrop dashboard-image-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onCloseImage()}>
     <section className="dashboard-image-modal" role="dialog" aria-modal="true" aria-labelledby="image-preview-title">
@@ -122,7 +128,7 @@ const RecordDialogs = ({
 
     {dialog && (
       <div className="dashboard-modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-        <section className="dashboard-modal" role="dialog" aria-modal="true" aria-labelledby="record-dialog-title">
+        <section className={`dashboard-modal dashboard-form-modal dashboard-form-${dialog.resource}`} role="dialog" aria-modal="true" aria-labelledby="record-dialog-title">
           <div className="dashboard-modal-heading">
             <div>
               <span className="dashboard-eyebrow">{dialog.record ? "EDIT RECORD" : "NEW RECORD"}</span>
@@ -134,7 +140,7 @@ const RecordDialogs = ({
           <form className="dashboard-form" onSubmit={onSave}>
             <div className="dashboard-form-grid">
               {RESOURCE_CONFIG[dialog.resource].fields.map((field) => (
-                <label className={`dashboard-field ${field.type === "textarea" ? "field-wide" : ""}`} key={field.name}>
+                <label className={`dashboard-field ${field.type === "textarea" ? "field-wide" : ""} ${field.type === "boolean" ? "field-boolean" : ""}`} key={field.name}>
                   <span>{field.label}{(field.required || field.requiredOnCreate) && !dialog.record ? <b> *</b> : null}</span>
                   {field.type === "textarea" ? (
                     <textarea value={form[field.name] || ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: field.normalize === "lowercase" ? event.target.value.toLowerCase() : event.target.value }))} placeholder={field.placeholder} rows="3" />
@@ -143,10 +149,16 @@ const RecordDialogs = ({
                       <option value="">Select {field.label.toLowerCase()}</option>
                       {field.options.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
                     </select>
+                  ) : field.type === "boolean" ? (
+                    <input
+                      type="checkbox"
+                      checked={form[field.name] === true || form[field.name] === "true"}
+                      onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.checked }))}
+                    />
                   ) : field.type === "relation" ? (
                     <select value={form[field.name] || ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} required={field.required}>
                       <option value="">Select {field.label.toLowerCase()}</option>
-                      {(records[field.resource] || []).map((item) => (
+                      {(records[field.resource] || []).map((item) => ({ ...item, name: relationLabel(item, field.resource) })).map((item) => (
                         <option value={item.id} key={item.id}>{item.name || item.model || `Machine #${item.id}`}{field.resource === "machines" && item.name ? ` · ${item.model}` : ""}</option>
                       ))}
                     </select>
@@ -161,7 +173,7 @@ const RecordDialogs = ({
                       <small>{form[field.name]?.name || (dialog.record ? "Choose a replacement file (optional)" : "Choose a file")}</small>
                       {field.currentKey && dialog.record?.[field.currentKey] && (
                         <small className="file-current-note">
-                          Current file: <a href={publicFileUrl(dialog.record[field.currentKey])} target="_blank" rel="noreferrer">Open video</a>
+                          Current file: <a href={publicFileUrl(dialog.record[field.currentKey])} target="_blank" rel="noreferrer">{field.currentLabel || "Open file"}</a>
                         </small>
                       )}
                       {field.maxSizeLabel && <small className="file-limit-note">Maximum {field.maxSizeLabel}</small>}

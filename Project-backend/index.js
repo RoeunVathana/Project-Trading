@@ -8,9 +8,17 @@ const { logError } = require("./middlewares/LogError");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const corsOrigins = (process.env.CORS_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+if (process.env.NODE_ENV === "production" && !process.env.TOKEN_SECRET) {
+  throw new Error("TOKEN_SECRET must be configured in production.");
+}
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: corsOrigins.length ? corsOrigins : true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -25,8 +33,10 @@ const MachineRoute = require("./routes/Machine.route");
 const MachineGalleryRoute = require("./routes/MachineGallery.route");
 const MachineSpecRoute = require("./routes/MachineSpec.route");
 const MachinePdfRoute = require("./routes/MachinePdf.route");
-const ProcessRoute = require("./routes/Process.route");
 const UserRoute = require("./routes/User.route");
+const HuaweiRoute = require("./routes/Huawei.route");
+const HuaweiCategoryRoute = require("./routes/HuaweiCategory.route");
+const HuaweiCatalogRoute = require("./routes/HuaweiCatalog.route");
 // Routes
 ProductRoute(app);
 CategoryRoute(app);
@@ -34,8 +44,10 @@ MachineRoute(app);
 MachineGalleryRoute(app);
 MachineSpecRoute(app);
 MachinePdfRoute(app);
-ProcessRoute(app);
 UserRoute(app);
+HuaweiRoute(app);
+HuaweiCategoryRoute(app);
+HuaweiCatalogRoute(app);
 
 // Sync database
 db.sequelize

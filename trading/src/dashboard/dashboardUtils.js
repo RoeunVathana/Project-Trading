@@ -3,9 +3,10 @@ import { API_BASE_URL } from "./dashboardApi";
 export const defaultForm = (config, record) => {
   const values = {};
   config.fields.forEach((field) => {
-    values[field.name] = field.type === "file"
-      ? null
-      : String(record?.[field.name] ?? field.defaultValue ?? (field.name === "sortOrder" ? 0 : ""));
+    if (field.type === "file") values[field.name] = null;
+    else if (field.type === "boolean") values[field.name] = record?.[field.name] ?? field.defaultValue ?? false;
+    else if (field.type === "date") values[field.name] = record?.[field.name] ? String(record[field.name]).slice(0, 10) : "";
+    else values[field.name] = String(record?.[field.name] ?? field.defaultValue ?? ((field.name === "sortOrder" || field.name === "displayOrder") ? 0 : ""));
     if (field.clearField) values[field.clearField] = false;
   });
   return values;
@@ -17,6 +18,10 @@ export const recordTitle = (resource, record) => {
   if (resource === "gallery") return `Gallery image #${record.id}`;
   if (resource === "specs") return record.label || record.value || record.specName || `Specification #${record.id}`;
   if (resource === "pdfs") return record.fileName || `PDF #${record.id}`;
+  if (resource === "huawei") return record.productName || record.modelCode || `Huawei product #${record.id}`;
+  if (resource === "huaweiCategories") return record.name || `Huawei category #${record.id}`;
+  if (resource === "huaweiImages") return record.altText || `Huawei image #${record.id}`;
+  if (resource === "huaweiPdfs") return record.title || record.originalFileName || `Huawei PDF #${record.id}`;
   if (resource === "users") return displayAccountName(record, `User #${record.id}`);
   return `Record #${record.id}`;
 };

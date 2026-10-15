@@ -19,6 +19,10 @@ const DashboardTopbar = ({
     gallery: "gallery",
     specs: "specifications",
     pdfs: "PDF library",
+    huawei: "Huawei products",
+    huaweiCategories: "Huawei categories",
+    huaweiImages: "Huawei gallery",
+    huaweiPdfs: "Huawei PDF library",
     users: "users",
   }[activeSection] || "records";
 

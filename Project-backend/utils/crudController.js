@@ -24,6 +24,8 @@ const createCrudController = ({
   removeUploadedFile,
   cleanupFileFields = [],
   removeStoredFile = removeImage,
+  parentResourceName = "Machine",
+  include,
   order = [["id", "DESC"]],
 }) => {
   const getRequestBody = (req) => {
@@ -78,6 +80,32 @@ const createCrudController = ({
         continue;
       }
 
+      if (definition.type === "boolean") {
+        const booleanValue =
+          typeof value === "boolean"
+            ? value
+            : value === "true"
+              ? true
+              : value === "false"
+                ? false
+                : null;
+        if (booleanValue === null) return { error: `${field} must be a boolean.` };
+        values[field] = booleanValue;
+        continue;
+      }
+
+      if (definition.type === "date") {
+        if (typeof value !== "string" || !value.trim()) {
+          return { error: `${field} must be a date string.` };
+        }
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+          return { error: `${field} must be a valid date.` };
+        }
+        values[field] = date.toISOString();
+        continue;
+      }
+
       const normalized = parseId(value);
       if (definition.type === "integer") {
         const integer =
@@ -123,6 +151,7 @@ const createCrudController = ({
     ) {
       return true;
     }
+    if (values[parentField] === null) return true;
     return Boolean(await parentModel.findByPk(values[parentField]));
   };
 
@@ -149,6 +178,7 @@ const createCrudController = ({
 
         const records = await model.findAll({
           where: Object.keys(where).length ? where : undefined,
+          include,
           order,
         });
         return res.status(200).json({ success: true, data: records });
@@ -167,7 +197,7 @@ const createCrudController = ({
           });
         }
 
-        const record = await model.findByPk(id);
+        const record = await model.findByPk(id, { include });
         if (!record) {
           return res
             .status(404)
@@ -189,9 +219,10 @@ const createCrudController = ({
 
         if (!(await validateParent(values))) {
           discardUploadedFile(req);
-          return res
-            .status(404)
-            .json({ success: false, message: "Machine not found." });
+          return res.status(404).json({
+            success: false,
+            message: `${parentResourceName} not found.`,
+          });
         }
         const record = await model.create(values);
         return res.status(201).json({ success: true, data: record });
@@ -227,9 +258,10 @@ const createCrudController = ({
         }
         if (!(await validateParent(values))) {
           discardUploadedFile(req);
-          return res
-            .status(404)
-            .json({ success: false, message: "Machine not found." });
+          return res.status(404).json({
+            success: false,
+            message: `${parentResourceName} not found.`,
+          });
         }
 
         const previousFiles = cleanupFileFields.map((field) => record[field]);

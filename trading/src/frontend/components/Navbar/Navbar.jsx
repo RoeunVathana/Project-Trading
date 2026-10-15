@@ -5,6 +5,11 @@ import { useTheme } from "../ThemeContext";
 import "./Navbar.css";
 
 const productPath = (parameters) => {
+  if (parameters.collection === "huawei") {
+    if (parameters.product) return `/product-huawei/${parameters.product}`;
+    return "/product-huawei";
+  }
+
   const search = new URLSearchParams(
     Object.entries(parameters).filter(([, value]) => value),
   ).toString();
@@ -227,7 +232,7 @@ const Navbar = () => {
     const { pathname } = location;
 
     if (name === "home") return pathname === "/";
-    if (name === "product") return pathname === "/product" || pathname.startsWith("/product/");
+    if (name === "product") return pathname === "/product" || pathname.startsWith("/product/") || pathname === "/product-huawei" || pathname.startsWith("/product-huawei/");
 
     return pathname === "/" + name;
   };
@@ -316,7 +321,7 @@ const Navbar = () => {
                     <Link to="/product?division=trd&collection=chint" onClick={closeMenu}>
                       Product CHINT
                     </Link>
-                    <Link to="/product?division=trd&collection=huawei" onClick={closeMenu}>
+                    <Link to="/product-huawei" onClick={closeMenu}>
                       Product HUAWEI
                     </Link>
                   </div>

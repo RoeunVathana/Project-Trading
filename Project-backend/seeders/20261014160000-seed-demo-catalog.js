@@ -88,12 +88,6 @@ const specificationsByModel = {
   ],
 };
 
-const processesToSeed = [
-  { name: "Precision machining", description: "High-accuracy cutting and finishing for critical components.", status: "active", sortOrder: 0 },
-  { name: "Assembly and testing", description: "Assembly, inspection, and functional testing before delivery.", status: "active", sortOrder: 1 },
-  { name: "Power system integration", description: "Configure and verify equipment for industrial power systems.", status: "active", sortOrder: 2 },
-];
-
 const toPublicMediaPath = (value, folder) => {
   if (!value) return null;
   const normalized = String(value).trim().replace(/\\/g, "/");
@@ -137,7 +131,7 @@ module.exports = {
     const transaction = await queryInterface.sequelize.transaction();
     const now = new Date();
     const media = getSeedMachineMedia();
-    let counts = { categories: 0, machines: 0, specifications: 0, processes: 0, users: 0, gallery: 0, pdfs: 0 };
+    let counts = { categories: 0, machines: 0, specifications: 0, users: 0, gallery: 0, pdfs: 0 };
 
     try {
       counts.categories = await insertMissing(
@@ -227,15 +221,6 @@ module.exports = {
       }
       counts.specifications = specificationRows.length;
 
-      counts.processes = await insertMissing(
-        queryInterface,
-        Sequelize,
-        "processes",
-        processesToSeed.map((process) => ({ ...process, createdAt: now, updatedAt: now })),
-        (row) => row.name.toLowerCase(),
-        transaction,
-      );
-
       if (process.env.SEED_ADMIN_PASSWORD) {
         const existingUsers = await selectRows(queryInterface, Sequelize, "Users", transaction);
         const adminEmail = "admin@example.com";
@@ -306,9 +291,6 @@ module.exports = {
         await queryInterface.bulkDelete("machines", { id: { [Sequelize.Op.in]: machineIds } }, { transaction });
       }
 
-      await queryInterface.bulkDelete("processes", {
-        name: { [Sequelize.Op.in]: processesToSeed.map((process) => process.name) },
-      }, { transaction });
       await queryInterface.bulkDelete("categories", {
         name: { [Sequelize.Op.in]: categoriesToSeed.map((category) => category.name) },
       }, { transaction });
