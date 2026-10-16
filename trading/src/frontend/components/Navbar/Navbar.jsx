@@ -6,6 +6,18 @@ import "./Navbar.css";
 
 const productPath = (parameters) => {
   if (parameters.collection === "huawei") {
+    const huaweiSolutionPaths = {
+      "smart-string-ess": "/product-huawei/smart-string-ess",
+      "smart-energy-controller": "/product-huawei/smart-energy-controller",
+      "smart-module-controller": "/product-huawei/smart-module-controller",
+      "smart-guard": "/product-huawei/smart-guard",
+      "product-huawei-all": "/product-huawei",
+    };
+
+    if (huaweiSolutionPaths[parameters.product]) {
+      return huaweiSolutionPaths[parameters.product];
+    }
+
     if (parameters.product) return `/product-huawei/${parameters.product}`;
     return "/product-huawei";
   }

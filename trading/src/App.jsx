@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useSearchParams } from "react-router-dom";
+import { Navigate, Route, Routes, useParams, useSearchParams } from "react-router-dom";
 
 import Layout from "./frontend/components/Layout";
 
@@ -18,6 +18,7 @@ import ProductHuaweiDetail from "./frontend/ProductHuawei/ProductHuaweiDetail";
 import SmartModuleController from "./frontend/ProductHuawei/SmartModule/SmartModuleController";
 import SmartEnergyController from "./frontend/ProductHuawei/SmartEnergy/SmartEnergyController";
 import SmartStringESS from "./frontend/ProductHuawei/SmartStringESS/SmartStringESS";
+import SmartGuard from "./frontend/ProductHuawei/SmartGuard/SmartGuard";
 import DashboardLayout from "./dashboard/components/Layout";
 import DashboardPage from "./dashboard/DashboardPage";
 
@@ -26,6 +27,17 @@ const ProductRoute = () => {
   return searchParams.get("collection") === "huawei"
     ? <Navigate to="/product-huawei" replace />
     : <ProductPage />;
+};
+
+const HuaweiProductRoute = () => {
+  const { id } = useParams();
+
+  if (id === "smart-string-ess") return <SmartStringESS />;
+  if (id === "smart-energy-controller") return <SmartEnergyController />;
+  if (id === "smart-module-controller") return <SmartModuleController />;
+  if (id === "smart-guard") return <SmartGuard />;
+
+  return <ProductHuawei />;
 };
 
 const App = () => {
@@ -48,7 +60,7 @@ const App = () => {
         <Route path="/product-huawei/:id/learn-more" element={<SmartModuleController />} />
         <Route path="/product-huawei/:id/learn-more-energy" element={<SmartEnergyController />} />
         <Route path="/product-huawei/:id/learn-more-string-ess" element={<SmartStringESS />} />
-        <Route path="/product-huawei/:id" element={<ProductHuawei />} />
+        <Route path="/product-huawei/:id" element={<HuaweiProductRoute />} />
 
         <Route path="/distribution" element={<DistributionPage />} />
 

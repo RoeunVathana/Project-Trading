@@ -18,6 +18,14 @@ const fallbackImages = [
   "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=1600&q=88",
 ];
 
+const fallbackProduct = {
+  productName: "Smart String ESS",
+  category: "Smart String ESS",
+  modelCode: "LUNA S1",
+  image: "",
+  images: [],
+};
+
 const protectionLayers = [
   ["cell", "Cell level protection"],
   ["electrical", "Electrical protection"],
@@ -112,14 +120,16 @@ const SmartStringESS = () => {
     const loadProduct = async () => {
       setLoading(true);
       setError("");
+
       try {
         const [productRow, imageRows, categoryRows] = await Promise.all([
           getJson(`/api/huawei/${id}`, controller.signal),
           getJson("/api/huawei-product-images", controller.signal),
           getJson("/api/huawei-categories", controller.signal),
         ]);
+        const productId = productRow.id || id;
         const images = (Array.isArray(imageRows) ? imageRows : [])
-          .filter((image) => Number(image.productId) === Number(id))
+          .filter((image) => Number(image.productId) === Number(productId))
           .sort((left, right) => Number(left.displayOrder || 0) - Number(right.displayOrder || 0))
           .map((image) => ({ ...image, imageUrl: toMediaUrl(image.imageUrl) }));
         const primaryImage = images.find((image) => image.isPrimary) || images[0];
@@ -131,7 +141,13 @@ const SmartStringESS = () => {
           images,
         });
       } catch (loadError) {
-        if (loadError.name !== "AbortError") setError(loadError.message || "Unable to load this Huawei product.");
+        if (loadError.name !== "AbortError") {
+          if (id === "smart-string-ess") {
+            setProduct(fallbackProduct);
+          } else {
+            setError(loadError.message || "Unable to load this Huawei product.");
+          }
+        }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }

@@ -19,6 +19,15 @@ const getJson = async (path, signal) => {
   return result.data;
 };
 
+const fallbackProduct = {
+  category: "Smart Module Controller",
+  productName: "Smart Module Controller",
+  modelCode: "SUN2000 Series",
+  description: "Smart module control for dependable Huawei solar-energy performance.",
+  image: "",
+  images: [],
+};
+
 const benefitCards = [
   { title: "Higher Yields", description: "Improve power generation and make better use of every solar panel.", image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&q=85" },
   { title: "Active Safety", description: "Monitor the system and respond quickly to abnormal operating conditions.", image: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=1200&q=85" },
@@ -52,14 +61,16 @@ const SmartModuleController = () => {
     const loadProduct = async () => {
       setLoading(true);
       setError("");
+
       try {
         const [productRow, imageRows, categoryRows] = await Promise.all([
           getJson(`/api/huawei/${id}`, controller.signal),
           getJson("/api/huawei-product-images", controller.signal),
           getJson("/api/huawei-categories", controller.signal),
         ]);
+        const productId = productRow.id || id;
         const images = (Array.isArray(imageRows) ? imageRows : [])
-          .filter((image) => Number(image.productId) === Number(id))
+          .filter((image) => Number(image.productId) === Number(productId))
           .sort((left, right) => Number(left.displayOrder || 0) - Number(right.displayOrder || 0));
         const primaryImage = images.find((image) => image.isPrimary) || images[0];
         const imageAltText = primaryImage?.altText || primaryImage?.alt_text || "";
@@ -78,7 +89,13 @@ const SmartModuleController = () => {
           })),
         });
       } catch (loadError) {
-        if (loadError.name !== "AbortError") setError(loadError.message || "Unable to load this Huawei product.");
+        if (loadError.name !== "AbortError") {
+          if (id === "smart-module-controller") {
+            setProduct(fallbackProduct);
+          } else {
+            setError(loadError.message || "Unable to load this Huawei product.");
+          }
+        }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
