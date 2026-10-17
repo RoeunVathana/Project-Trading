@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { fetchCachedJson } from "../apiCache";
 import "./ProductHuawei.css";
 
 const API_BASE_URL = (
@@ -46,22 +47,42 @@ const isSmartEnergyCategory = (categoryName) => normalizeCategoryName(categoryNa
 const isSmartStringESSCategory = (categoryName) => ["smartstringess", "smartstringenergystorage"]
   .includes(normalizeCategoryName(categoryName));
 
+const isSmartGuardCategory = (categoryName) => normalizeCategoryName(categoryName)
+  === "smartguard";
+
 const getLearnMorePath = (product) => {
+  if (!product?.id) return "";
+
   const categoryValues = [
     product.category,
     product.categoryName,
     product.categorySlug,
     product.category?.slug,
   ];
+  if (categoryValues.some(isSmartGuardCategory)) return `/product-huawei/${product.id}/learn-more-smart-guard`;
   if (categoryValues.some(isSmartModuleCategory)) return `/product-huawei/${product.id}/learn-more`;
   if (categoryValues.some(isSmartEnergyCategory)) return `/product-huawei/${product.id}/learn-more-energy`;
   if (categoryValues.some(isSmartStringESSCategory)) return `/product-huawei/${product.id}/learn-more-string-ess`;
-  return "";
+  // Products without a dedicated page use the Smart Module Controller layout.
+  return `/product-huawei/${product.id}/learn-more`;
+};
+
+const indexRowsByProductId = (rows = []) => {
+  const index = new Map();
+  rows.forEach((row) => {
+    const key = String(row.productId);
+    const productRows = index.get(key) || [];
+    productRows.push(row);
+    index.set(key, productRows);
+  });
+  return index;
 };
 
 const normalizeHuaweiProduct = (product, categories = [], imageRows = [], pdfRows = []) => {
-  const images = imageRows
-    .filter((image) => Number(image.productId) === Number(product.id))
+  const images = (imageRows instanceof Map
+    ? imageRows.get(String(product.id)) || []
+    : imageRows.filter((image) => Number(image.productId) === Number(product.id)))
+    .slice()
     .sort((left, right) => Number(left.displayOrder || 0) - Number(right.displayOrder || 0));
   const primaryImage = images.find((image) => image.isPrimary) || images[0];
   const imageAltText = primaryImage?.altText || primaryImage?.alt_text || "";
@@ -69,10 +90,14 @@ const normalizeHuaweiProduct = (product, categories = [], imageRows = [], pdfRow
     ...image,
     imageUrl: toMediaUrl(image.imageUrl),
   })).filter((image) => image.imageUrl);
-  const productPdfs = pdfRows
-    .filter((pdf) => Number(pdf.productId) === Number(product.id) && pdf.isPublished !== false)
+  const productPdfs = (pdfRows instanceof Map
+    ? pdfRows.get(String(product.id)) || []
+    : pdfRows.filter((pdf) => Number(pdf.productId) === Number(product.id)))
+    .filter((pdf) => pdf.isPublished !== false)
     .map((pdf) => ({ ...pdf, filePath: toMediaUrl(pdf.filePath) }));
   const categoryName = getCategoryName(product, categories);
+  const productName = product.productName || product.name || product.modelCode;
+  const productModel = product.modelCode || product.model || "";
   const categoryRecord = product.category && typeof product.category === "object"
     ? product.category
     : categories.find((category) => Number(category.id) === Number(product.categoryId));
@@ -80,8 +105,8 @@ const normalizeHuaweiProduct = (product, categories = [], imageRows = [], pdfRow
   return {
     ...product,
     id: product.id ?? product.productId,
-    name: product.productName || product.name || product.modelCode,
-    model: product.modelCode || product.model || "—",
+    name: productName,
+    model: productModel,
     category: categoryName,
     categorySlug: categoryRecord?.slug || "",
     displayCategory: categoryName,
@@ -90,6 +115,10 @@ const normalizeHuaweiProduct = (product, categories = [], imageRows = [], pdfRow
     gallery,
     pdfs: productPdfs,
     description: product.description || product.shortDescription || "",
+    searchText: [productName, productModel, categoryName, product.description, product.shortDescription]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase(),
     specs: [
       ["BRAND", product.brandName || "Huawei"],
       ["STATUS", product.status || "PUBLISHED"],
@@ -97,10 +126,8 @@ const normalizeHuaweiProduct = (product, categories = [], imageRows = [], pdfRow
   };
 };
 
-const fetchJson = async (path, signal) => {
-  const response = await fetch(`${API_BASE_URL}${path}`, { signal });
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.message || "Unable to load Huawei products.");
+const fetchJson = async (path) => {
+  const result = await fetchCachedJson(`${API_BASE_URL}${path}`);
   return result.data;
 };
 
@@ -115,32 +142,36 @@ const HuaweiCatalog = () => {
   const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
-    const controller = new AbortController();
+    let active = true;
     const loadCatalog = async () => {
       setLoading(true);
       setLoadError("");
       try {
         const [productRows, categoryRows, imageRows] = await Promise.all([
-          fetchJson("/api/huawei", controller.signal),
-          fetchJson("/api/huawei-categories", controller.signal),
-          fetchJson("/api/huawei-product-images", controller.signal),
+          fetchJson("/api/huawei"),
+          fetchJson("/api/huawei-categories"),
+          fetchJson("/api/huawei-product-images"),
         ]);
+        if (!active) return;
         const safeCategories = Array.isArray(categoryRows) ? categoryRows : [];
         const safeImages = Array.isArray(imageRows) ? imageRows : [];
+        const imagesByProductId = indexRowsByProductId(safeImages);
         const publicProducts = (Array.isArray(productRows) ? productRows : [])
           .filter((product) => String(product.status || "PUBLISHED").toUpperCase() === "PUBLISHED")
-          .map((product) => normalizeHuaweiProduct(product, safeCategories, safeImages));
+          .map((product) => normalizeHuaweiProduct(product, safeCategories, imagesByProductId));
         setCategories(safeCategories.filter((category) => category.isActive !== false));
         setProducts(publicProducts);
       } catch (error) {
-        if (error.name !== "AbortError") setLoadError(error.message || "Unable to load Huawei products.");
+        if (active) setLoadError(error.message || "Unable to load Huawei products.");
       } finally {
-        if (!controller.signal.aborted) setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     loadCatalog();
-    return () => controller.abort();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const categoriesWithProducts = useMemo(() => {
@@ -149,23 +180,26 @@ const HuaweiCatalog = () => {
       .sort((left, right) => Number(left.displayOrder || 0) - Number(right.displayOrder || 0) || Number(left.id) - Number(right.id));
   }, [categories]);
 
-  const popularCategories = useMemo(() => categoriesWithProducts
+  const popularCategories = useMemo(() => {
+    const productCounts = new Map();
+    products.forEach((product) => {
+      const key = String(product.categoryId);
+      productCounts.set(key, (productCounts.get(key) || 0) + 1);
+    });
+
+    return categoriesWithProducts
     .map((category) => ({
       ...category,
-      productCount: products.filter((product) => Number(product.categoryId) === Number(category.id)).length,
+      productCount: productCounts.get(String(category.id)) || 0,
     }))
-    .sort((left, right) => right.productCount - left.productCount || Number(left.displayOrder) - Number(right.displayOrder)),
-  [categoriesWithProducts, products]);
+    .sort((left, right) => right.productCount - left.productCount || Number(left.displayOrder) - Number(right.displayOrder));
+  }, [categoriesWithProducts, products]);
 
   const filteredProducts = useMemo(() => {
     const normalizedSearch = appliedSearch.trim().toLowerCase();
     const activeCategoryIds = Object.keys(selectedCategories).filter((id) => selectedCategories[id]);
     return products.filter((product) => {
-      const searchableText = [product.name, product.model, product.category, product.displayCategory, product.description]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      const searchMatch = !normalizedSearch || searchableText.includes(normalizedSearch);
+      const searchMatch = !normalizedSearch || product.searchText.includes(normalizedSearch);
       const categoryMatch = !activeCategoryIds.length || activeCategoryIds.includes(String(product.categoryId));
       return searchMatch && categoryMatch;
     });
@@ -276,13 +310,13 @@ const HuaweiCatalog = () => {
                   <article className="product-card" key={product.id}>
                     <div className="product-image">
                       {product.status && <span className="product-badge">{product.status}</span>}
-                      {product.image ? <img src={product.image} alt={product.name} /> : <div className="huawei-product-image-placeholder"><span>HUAWEI</span><strong>{product.model}</strong></div>}
+                      {product.image ? <img src={product.image} alt={product.name} loading="lazy" decoding="async" /> : <div className="huawei-product-image-placeholder"><span>HUAWEI</span><strong>{product.model}</strong></div>}
                     </div>
                     <div className="product-card-body">
                       <div className="huawei-product-model">Model: {product.model}</div>
                       <div className="huawei-product-category">{product.displayCategory}</div>
                       <div className="huawei-product-actions">
-                        <button type="button" disabled={!getLearnMorePath(product)} title={getLearnMorePath(product) ? "Open product details" : "Learn More is available for supported Huawei categories only"} onClick={() => { const path = getLearnMorePath(product); if (path) navigate(path, { state: { product } }); }}>Learn More <span aria-hidden="true">›</span></button>
+                        <button type="button" disabled={!getLearnMorePath(product)} title={getLearnMorePath(product) ? "Open product details" : "Product details are unavailable"} onClick={() => { const path = getLearnMorePath(product); if (path) navigate(path, { state: { product } }); }}>Learn More <span aria-hidden="true">›</span></button>
                         <button type="button" onClick={() => navigate(`/product-huawei/${product.id}/downloads`, { state: { product } })}>Downloads <span aria-hidden="true">›</span></button>
                       </div>
                     </div>
@@ -313,33 +347,38 @@ const HuaweiProductDetail = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const controller = new AbortController();
+    let active = true;
     const loadProduct = async () => {
       setLoading(true);
       try {
         const [productRow, imageRows, pdfRows, productRows, categoryRows] = await Promise.all([
-          fetchJson(`/api/huawei/${id}`, controller.signal),
-          fetchJson("/api/huawei-product-images", controller.signal),
-          fetchJson("/api/huawei-product-pdfs", controller.signal),
-          fetchJson("/api/huawei", controller.signal),
-          fetchJson("/api/huawei-categories", controller.signal),
+          fetchJson(`/api/huawei/${id}`),
+          fetchJson("/api/huawei-product-images"),
+          fetchJson("/api/huawei-product-pdfs"),
+          fetchJson("/api/huawei"),
+          fetchJson("/api/huawei-categories"),
         ]);
+        if (!active) return;
         const safeCategories = Array.isArray(categoryRows) ? categoryRows : [];
-        const normalized = normalizeHuaweiProduct(productRow, safeCategories, imageRows || [], pdfRows || []);
+        const imagesByProductId = indexRowsByProductId(imageRows || []);
+        const pdfsByProductId = indexRowsByProductId(pdfRows || []);
+        const normalized = normalizeHuaweiProduct(productRow, safeCategories, imagesByProductId, pdfsByProductId);
         setProduct(normalized);
         setActiveImage(normalized.image || normalized.gallery[0]?.imageUrl || "");
         const allProducts = (Array.isArray(productRows) ? productRows : [])
           .filter((item) => String(item.status || "PUBLISHED").toUpperCase() === "PUBLISHED")
-          .map((item) => normalizeHuaweiProduct(item, safeCategories, imageRows || []));
+          .map((item) => normalizeHuaweiProduct(item, safeCategories, imagesByProductId));
         setSimilarProducts(allProducts.filter((item) => String(item.id) !== String(id) && Number(item.categoryId) === Number(normalized.categoryId)).slice(0, 4));
       } catch (loadError) {
-        if (loadError.name !== "AbortError") setError(loadError.message || "Unable to load this Huawei product.");
+        if (active) setError(loadError.message || "Unable to load this Huawei product.");
       } finally {
-        if (!controller.signal.aborted) setLoading(false);
+        if (active) setLoading(false);
       }
     };
     loadProduct();
-    return () => controller.abort();
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   const gallery = useMemo(() => {
@@ -424,7 +463,7 @@ const HuaweiProductDetail = () => {
         <div className="specification-table-wrapper has-specifications"><table className="specification-table"><thead><tr><th>FIELD</th><th>VALUE</th></tr></thead><tbody><tr><td>Product</td><td className="cyan-value">{product.name}</td></tr><tr><td>Model code</td><td className="cyan-value">{product.model}</td></tr><tr><td>Category</td><td className="cyan-value">{product.category}</td></tr><tr><td>PDF documents</td><td className="cyan-value">{product.pdfs?.length || 0}</td></tr></tbody></table></div>
       </section>
 
-      {similarProducts.length > 0 && <section className="similar-products" aria-labelledby="huawei-similar-products-title"><div className="similar-products-heading"><h2 id="huawei-similar-products-title"><span aria-hidden="true" /> Similar Huawei Products</h2></div><div className="similar-products-grid">{similarProducts.map((similarProduct) => <article className="similar-product-card" key={similarProduct.id}><div className="similar-product-image">{similarProduct.image ? <img src={similarProduct.image} alt={similarProduct.name} /> : <div className="huawei-product-image-placeholder"><span>HUAWEI</span></div>}</div><div className="similar-product-copy"><span className="similar-product-category">{similarProduct.category}</span><h3>{similarProduct.name}</h3><span className="similar-product-model">{similarProduct.model}</span></div><div className="similar-product-actions"><button type="button" className="similar-product-view" onClick={() => navigate(`/product-huawei/${similarProduct.id}/learn-more`)}>View Details</button><button type="button" className="similar-product-documents" onClick={() => navigate(`/product-huawei/${similarProduct.id}/downloads`)}>PDF Library <span aria-hidden="true">↓</span></button></div></article>)}</div></section>}
+      {similarProducts.length > 0 && <section className="similar-products" aria-labelledby="huawei-similar-products-title"><div className="similar-products-heading"><h2 id="huawei-similar-products-title"><span aria-hidden="true" /> Similar Huawei Products</h2></div><div className="similar-products-grid">{similarProducts.map((similarProduct) => <article className="similar-product-card" key={similarProduct.id}><div className="similar-product-image">{similarProduct.image ? <img src={similarProduct.image} alt={similarProduct.name} loading="lazy" decoding="async" /> : <div className="huawei-product-image-placeholder"><span>HUAWEI</span></div>}</div><div className="similar-product-copy"><span className="similar-product-category">{similarProduct.category}</span><h3>{similarProduct.name}</h3><span className="similar-product-model">{similarProduct.model}</span></div><div className="similar-product-actions"><button type="button" className="similar-product-view" onClick={() => { const path = getLearnMorePath(similarProduct); navigate(path || `/product-huawei/${similarProduct.id}`, { state: { product: similarProduct } }); }}>View Details</button><button type="button" className="similar-product-documents" onClick={() => navigate(`/product-huawei/${similarProduct.id}/downloads`)}>PDF Library <span aria-hidden="true">↓</span></button></div></article>)}</div></section>}
     </div>
   );
 };

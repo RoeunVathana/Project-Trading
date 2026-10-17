@@ -138,9 +138,11 @@
 
 .smart-module-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  column-gap: clamp(24px, 5vw, 96px);
   align-items: center;
   min-height: clamp(620px, calc(100vh - 76px), 820px);
+  padding: clamp(48px, 7vh, 92px) clamp(32px, 6vw, 96px);
   background:
     radial-gradient(circle at 78% 18%, rgba(57, 119, 101, 0.15), transparent 34%),
     repeating-linear-gradient(102deg, transparent 0 13px, rgba(255, 255, 255, 0.018) 14px 15px, transparent 16px 38px),
@@ -151,18 +153,18 @@
   display: grid;
   grid-column: 1;
   grid-row: 1;
-  place-items: end center;
-  min-height: 600px;
-  padding: 40px 9% 0;
-  background: linear-gradient(120deg, rgba(7, 21, 18, 0.06), rgba(7, 21, 18, 0.3));
+  place-items: center;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
 }
 
 .smart-module-hero-image-wrap img {
   display: block;
-  width: min(100%, 660px);
-  height: min(78vh, 700px);
+  width: min(100%, 620px);
+  height: min(64vh, 520px);
   object-fit: contain;
-  object-position: center bottom;
+  object-position: center;
   mix-blend-mode: normal;
 }
 
@@ -194,11 +196,12 @@
   justify-content: center;
   grid-column: 2;
   grid-row: 1;
-  width: auto;
-  min-height: inherit;
+  width: min(100%, 640px);
+  min-height: 0;
   box-sizing: border-box;
   margin: 0;
-  padding: 80px clamp(40px, 7vw, 140px) 80px 4%;
+  padding: 0;
+  justify-self: start;
 }
 
 .smart-module-brand {
@@ -241,9 +244,11 @@
 
 :root[data-theme="light"] .smart-module-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  column-gap: clamp(24px, 5vw, 96px);
   align-items: center;
   min-height: clamp(620px, calc(100vh - 76px), 820px);
+  padding: clamp(48px, 7vh, 92px) clamp(32px, 6vw, 96px);
   background:
     radial-gradient(circle at 70% 22%, rgba(255, 255, 255, 0.98), transparent 38%),
     repeating-linear-gradient(102deg, transparent 0 13px, rgba(16, 24, 32, 0.025) 14px 15px, transparent 16px 38px),
@@ -254,29 +259,30 @@
   display: grid;
   grid-column: 1;
   grid-row: 1;
-  place-items: end center;
-  min-height: 600px;
-  padding: 40px 9% 0;
-  background: linear-gradient(120deg, rgba(255, 255, 255, 0.12), rgba(220, 226, 231, 0.36));
+  place-items: center;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
 }
 
 :root[data-theme="light"] .smart-module-hero-image-wrap img {
   display: block;
-  width: min(100%, 660px);
-  height: min(78vh, 700px);
+  width: min(100%, 620px);
+  height: min(64vh, 520px);
   object-fit: contain;
-  object-position: center bottom;
+  object-position: center;
   mix-blend-mode: multiply;
 }
 
 :root[data-theme="light"] .smart-module-hero-copy {
   grid-column: 2;
   grid-row: 1;
-  width: auto;
-  min-height: inherit;
+  width: min(100%, 640px);
+  min-height: 0;
   margin: 0;
   justify-content: center;
-  padding: 80px clamp(40px, 7vw, 140px) 80px 4%;
+  padding: 0;
+  justify-self: start;
 }
 
 :root[data-theme="light"] .smart-module-hero-copy h1 {
@@ -720,12 +726,12 @@
   .smart-module-hero {
     grid-template-columns: 1fr;
     min-height: 500px;
-    padding-bottom: 60px;
+    padding: 48px 0 60px;
   }
 
   .smart-module-hero-image-wrap {
     min-height: 450px;
-    padding-top: 35px;
+    padding: 0 24px;
   }
 
   .smart-module-hero-image-wrap img {
@@ -750,7 +756,7 @@
     grid-column: 1;
     grid-row: 1;
     min-height: 420px;
-    padding: 35px 24px 0;
+    padding: 0 24px;
   }
 
   :root[data-theme="light"] .smart-module-hero-copy {

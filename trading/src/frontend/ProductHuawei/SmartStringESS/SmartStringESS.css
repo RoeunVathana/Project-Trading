@@ -1,8 +1,10 @@
 .smart-string-page {
   overflow: hidden;
-  background: #000;
-  color: #fff;
+  background: var(--theme-surface-0, #000);
+  color: var(--theme-text-strong, #fff);
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 .smart-string-container {
@@ -37,20 +39,12 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: center;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 30% 50%, rgba(20, 58, 70, 0.2), transparent 38%),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.34), #000 88%);
+  background: var(--theme-surface-0, #000);
+  color: var(--theme-text-strong, #fff);
 }
 
 .smart-string-hero::before {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.48), rgba(0, 0, 0, 0.9)),
-    url("https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=2400&q=88") center / cover;
-  content: "";
-  opacity: 0.24;
-  pointer-events: none;
+  display: none;
 }
 
 .smart-string-hero-product,
@@ -66,7 +60,7 @@
   width: min(78%, 620px);
   aspect-ratio: 1.08 / 1;
   overflow: hidden;
-  background: #050505;
+  background: var(--theme-surface-1, var(--theme-surface-0, #050505));
 }
 
 .smart-string-hero-product img {
@@ -112,7 +106,7 @@
 
 .smart-string-category {
   margin: 0 0 12px;
-  color: #7c929c;
+  color: var(--theme-text-muted, #7c929c);
   font-size: clamp(13px, 1.15vw, 17px);
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -122,15 +116,16 @@
 .smart-string-hero h1 {
   max-width: 700px;
   margin: 0 0 22px;
-  color: #f8f8f8;
+  color: var(--theme-text-strong, #f8f8f8);
   font-size: clamp(40px, 4.4vw, 70px);
+  font-weight: 800;
   line-height: 1.04;
   letter-spacing: -0.055em;
 }
 
 .smart-string-model {
   margin: 0;
-  color: #eef2f3;
+  color: var(--theme-text-primary, #eef2f3);
   font-size: clamp(20px, 2vw, 32px);
 }
 
@@ -169,7 +164,7 @@
   height: clamp(310px, 52vw, 650px);
   object-fit: cover;
   border-radius: 18px;
-  background: #080b0d;
+  background: var(--theme-surface-1, #080b0d);
 }
 
 .smart-string-charge-details {
@@ -287,7 +282,7 @@
   height: 520px;
   object-fit: cover;
   border-radius: 14px;
-  background: #060708;
+  background: var(--theme-surface-1, #060708);
 }
 
 .smart-string-story.image-copy img { grid-column: 1; }
@@ -401,7 +396,7 @@
   display: flex;
   align-items: flex-start;
   overflow: hidden;
-  background: #070a16;
+  background: var(--theme-surface-0, #070a16);
 }
 
 .smart-string-final::after {
@@ -447,8 +442,8 @@
   min-height: calc(100vh - 76px);
   place-content: center;
   padding: 32px;
-  background: #000;
-  color: #fff;
+  background: var(--theme-surface-0, #000);
+  color: var(--theme-text-strong, #fff);
   text-align: center;
 }
 

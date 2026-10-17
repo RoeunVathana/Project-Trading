@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import SnttLogo from "../../../assets/SNTT.png";
 import { useTheme } from "../ThemeContext";
 import "./Navbar.css";
 
 const productPath = (parameters) => {
   if (parameters.collection === "huawei") {
+    if (parameters.solution === "residential-solution") {
+      return "/product-huawei/residential-solution";
+    }
+
     const huaweiSolutionPaths = {
       "smart-string-ess": "/product-huawei/smart-string-ess",
       "smart-energy-controller": "/product-huawei/smart-energy-controller",
@@ -116,9 +120,9 @@ const productCollections = [
 ];
 
 const locationLinks = [
-  { id: "bangkok", label: "Bangkok" },
-  { id: "chiang-mai", label: "Chiang Mai" },
-  { id: "phuket", label: "Phuket" },
+  { id: "Phnom Penh", label: "Phnom Penh" },
+  { id: "Shiem Reap", label: "Shiem Rea" },
+  { id: "Kompot", label: "Kompot" },
 ];
 
 const referenceLinks = [
@@ -137,6 +141,7 @@ const Navbar = () => {
   const [activeCollection, setActiveCollection] = useState(productCollections[0].id);
   const [activeSolution, setActiveSolution] = useState(productCollections[0].solutions[0].id);
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const nextTheme = theme === "dark" ? "light" : "dark";
 
@@ -392,7 +397,14 @@ const Navbar = () => {
                     key={solution.id}
                     onMouseEnter={() => setActiveSolution(solution.id)}
                     onFocus={() => setActiveSolution(solution.id)}
-                    onClick={() => setActiveSolution(solution.id)}
+                    onClick={() => {
+                      setActiveSolution(solution.id);
+
+                      if (selectedCollection.id === "huawei" && solution.id === "residential-solution") {
+                        closeMenu();
+                        navigate("/product-huawei/residential-solution");
+                      }
+                    }}
                   >
                     <span>{solution.label}</span>
                     <span className="product-mega-arrow" aria-hidden="true">{"\u2192"}</span>

@@ -112,12 +112,6 @@ export const RESOURCE_CONFIG = {
       { name: "brandName", label: "Brand", defaultValue: "Huawei" },
       { name: "modelCode", label: "Model code", required: true, placeholder: "SUN2000-600W-PA0" },
       { name: "productName", label: "Product name", required: true, placeholder: "SUN2000-600W-PA0" },
-      { name: "slug", label: "Slug", required: true, normalize: "lowercase", placeholder: "sun2000-600w-pa0" },
-      { name: "shortDescription", label: "Short description", type: "textarea" },
-      { name: "description", label: "Description", type: "textarea" },
-      { name: "status", label: "Status", type: "select", required: true, defaultValue: "PUBLISHED", options: [
-        { value: "DRAFT", label: "Draft" }, { value: "PUBLISHED", label: "Published" }, { value: "ARCHIVED", label: "Archived" },
-      ] },
       { name: "displayOrder", label: "Display order", type: "number", min: 0, defaultValue: 0 },
     ],
   },

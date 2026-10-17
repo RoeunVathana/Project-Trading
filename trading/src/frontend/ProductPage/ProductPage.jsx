@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./style/ProductPage.css";
+import { fetchCachedJson } from "../apiCache";
 
 import fallbackProducts from "./DataProduct";
 import EngineeringSection from "./EngineeringSection";
@@ -65,6 +66,10 @@ const toProduct = (machine) => {
     image: toMediaUrl(machine.image) || fallbackProducts[0]?.image || "",
     gallery: (machine.gallery || []).map((image) => toMediaUrl(image.imageUrl)),
     category: categoryName.toUpperCase(),
+    searchText: [machine.name, machine.model, categoryName, rawMachineType, machine.description]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase(),
     specificationRows: specificationEntries,
     specificationEntries,
     specs,
@@ -142,9 +147,11 @@ const ProductPage = () => {
   const [appliedSearch, setAppliedSearch] = useState("");
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [topCategories, setTopCategories] = useState([]);
+  const loadRequestRef = useRef(0);
 
   const loadMachines = useCallback(
     async (pageToLoad) => {
+      const requestId = ++loadRequestRef.current;
       setLoading(true);
       setLoadError("");
 
@@ -152,13 +159,10 @@ const ProductPage = () => {
         const query = new URLSearchParams({ page: String(pageToLoad) });
         if (selectedMachineType) query.set("machineType", selectedMachineType);
 
-        const response = await fetch(
+        const result = await fetchCachedJson(
           `${API_BASE_URL}/api/machines?${query.toString()}`,
         );
-        const result = await response.json();
-        if (!response.ok) {
-          throw new Error(result.message || "Unable to load machines.");
-        }
+        if (requestId !== loadRequestRef.current) return;
 
         const newMachines = Array.isArray(result.data)
           ? result.data.map(toProduct)
@@ -185,11 +189,13 @@ const ProductPage = () => {
             : newMachines.length > 0,
         );
       } catch (error) {
-        setLoadError(
-          error.message || "Unable to connect to the machine server.",
-        );
+        if (requestId === loadRequestRef.current) {
+          setLoadError(
+            error.message || "Unable to connect to the machine server.",
+          );
+        }
       } finally {
-        setLoading(false);
+        if (requestId === loadRequestRef.current) setLoading(false);
       }
     },
     [selectedMachineType],
@@ -197,12 +203,9 @@ const ProductPage = () => {
 
   const loadTopCategories = useCallback(async () => {
     try {
-      const response = await fetch(
+      const result = await fetchCachedJson(
         `${API_BASE_URL}/api/categories/top?limit=5`,
       );
-      const result = await response.json();
-      if (!response.ok)
-        throw new Error(result.message || "Unable to load top categories.");
 
       setTopCategories(
         (Array.isArray(result.data) ? result.data : []).map((category) => ({
@@ -222,10 +225,7 @@ const ProductPage = () => {
 
   const loadCategories = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/categories`);
-      const result = await response.json();
-      if (!response.ok)
-        throw new Error(result.message || "Unable to load categories.");
+      const result = await fetchCachedJson(`${API_BASE_URL}/api/categories`);
 
       setCategoryOptions(
         (Array.isArray(result.data) ? result.data : [])
@@ -421,31 +421,23 @@ const ProductPage = () => {
 
   const hasAvailabilityFilter = filters.inStock || filters.customOrder;
   const normalizedSearch = appliedSearch.toLowerCase();
+  const orderedProducts = useMemo(
+    () => [...products].sort((left, right) => {
+      const viewDifference = Number(right.viewCount || 0) - Number(left.viewCount || 0);
+      return viewDifference || Number(right.id || 0) - Number(left.id || 0);
+    }),
+    [products],
+  );
 
   /* =================================================
        FILTER PRODUCTS
     ================================================= */
 
   const filteredProducts = useMemo(() => {
-    return [...products]
-      .sort((left, right) => {
-        const viewDifference =
-          Number(right.viewCount || 0) - Number(left.viewCount || 0);
-        return viewDifference || Number(right.id || 0) - Number(left.id || 0);
-      })
+    return orderedProducts
       .filter((product) => {
-        const searchableProductText = [
-          product.name,
-          product.model,
-          product.category,
-          product.machineType,
-          product.description,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
         const searchMatch =
-          !normalizedSearch || searchableProductText.includes(normalizedSearch);
+          !normalizedSearch || product.searchText.includes(normalizedSearch);
         const categoryMatch =
           !selectedCategory || product.category === selectedCategory;
         const apiCategoryMatch =
@@ -494,7 +486,7 @@ const ProductPage = () => {
         );
       });
   }, [
-    products,
+    orderedProducts,
     filters,
     hasCategoryFilter,
     hasPowerFilter,
@@ -780,7 +772,7 @@ const ProductPage = () => {
                         <span className="product-badge">{product.badge}</span>
                       )}
 
-                      <img src={product.image} alt={product.name} />
+                      <img src={product.image} alt={product.name} loading="lazy" decoding="async" />
                     </div>
 
                     {/* BODY */}

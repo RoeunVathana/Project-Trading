@@ -35,9 +35,14 @@ export const fetchAllMachines = async (token) => {
   const machines = [...(firstPage.data || [])];
   const totalPages = firstPage.pagination?.totalPages || 1;
 
-  for (let page = 2; page <= totalPages; page += 1) {
-    const result = await requestApi(`/api/machines?page=${page}`, { token });
-    machines.push(...(result.data || []));
-  }
+  if (totalPages <= 1) return machines;
+
+  const remainingPages = await Promise.all(
+    Array.from({ length: totalPages - 1 }, (_, index) =>
+      requestApi(`/api/machines?page=${index + 2}`, { token }),
+    ),
+  );
+
+  remainingPages.forEach((result) => machines.push(...(result.data || [])));
   return machines;
 };

@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "../frontend/components/ThemeContext";
+import { clearCachedJson } from "../frontend/apiCache";
 import "./dashboard.css";
 
 import AuthGate from "./components/AuthGate";
@@ -10,6 +11,7 @@ import RecordDialogs from "./components/RecordDialogs";
 import ResourceSection from "./components/ResourceSection";
 import {
   CATEGORY_COLORS,
+  RESOURCE_KEYS,
   RESOURCE_CONFIG,
   emptyRecords,
 } from "./dashboardConfig";
@@ -40,6 +42,7 @@ const DashboardPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [records, setRecords] = useState(emptyRecords);
   const [loading, setLoading] = useState(true);
+  const [loadingResources, setLoadingResources] = useState(() => new Set(RESOURCE_KEYS));
   const [loadIssues, setLoadIssues] = useState([]);
   const [search, setSearch] = useState("");
   const [dialog, setDialog] = useState(null);
@@ -60,9 +63,14 @@ const DashboardPage = () => {
     password: "",
     profileImage: null,
   });
+  const deferredSearch = useDeferredValue(search);
+  const loadGenerationRef = useRef(0);
 
   const loadData = useCallback(async () => {
+    const loadGeneration = loadGenerationRef.current + 1;
+    loadGenerationRef.current = loadGeneration;
     setLoading(true);
+    setLoadingResources(new Set(RESOURCE_KEYS));
     const loaders = [
       ["machines", () => fetchAllMachines(token)],
       [
@@ -106,22 +114,50 @@ const DashboardPage = () => {
       ["huaweiPdfs", () => requestApi("/api/huawei-product-pdfs", { token }).then((result) => result.data || [])],
     ];
 
-    const results = await Promise.allSettled(loaders.map(([, load]) => load()));
-    const nextRecords = emptyRecords();
+    const coreResourceKeys = new Set(["machines", "categories", "gallery", "pdfs"]);
+    const coreLoaders = loaders.filter(([resource]) => coreResourceKeys.has(resource));
+    const backgroundLoaders = loaders.filter(([resource]) => !coreResourceKeys.has(resource));
     const issues = [];
-    results.forEach((result, index) => {
-      const resource = loaders[index][0];
-      if (result.status === "fulfilled") {
-        nextRecords[resource] = result.value;
-      } else {
-        issues.push(
-          `${RESOURCE_CONFIG[resource].title}: ${result.reason?.message || "request failed"}`,
-        );
-      }
-    });
-    setRecords(nextRecords);
-    setLoadIssues(issues);
+
+    const applyResults = (results, scopedLoaders) => {
+      if (loadGeneration !== loadGenerationRef.current) return false;
+
+      results.forEach((result, index) => {
+        if (result.status === "rejected") {
+          const resource = scopedLoaders[index][0];
+          issues.push(
+            `${RESOURCE_CONFIG[resource].title}: ${result.reason?.message || "request failed"}`,
+          );
+        }
+      });
+
+      setRecords((currentRecords) => {
+        const nextRecords = { ...currentRecords };
+        results.forEach((result, index) => {
+          const resource = scopedLoaders[index][0];
+          if (result.status === "fulfilled") {
+            nextRecords[resource] = result.value;
+          }
+        });
+        return nextRecords;
+      });
+      setLoadIssues([...issues]);
+      setLoadingResources((currentResources) => {
+        const nextResources = new Set(currentResources);
+        scopedLoaders.forEach(([resource]) => nextResources.delete(resource));
+        return nextResources;
+      });
+      return true;
+    };
+
+    const corePromise = Promise.allSettled(coreLoaders.map(([, load]) => load()));
+    const backgroundPromise = Promise.allSettled(backgroundLoaders.map(([, load]) => load()));
+    const coreResults = await corePromise;
+    if (!applyResults(coreResults, coreLoaders)) return;
     setLoading(false);
+
+    const backgroundResults = await backgroundPromise;
+    applyResults(backgroundResults, backgroundLoaders);
   }, [token]);
 
   useEffect(() => {
@@ -193,6 +229,51 @@ const DashboardPage = () => {
       ),
     [categoryStats],
   );
+  const machinesById = useMemo(
+    () => new Map(records.machines.map((machine) => [machine.id, machine])),
+    [records.machines],
+  );
+  const categoriesById = useMemo(
+    () => new Map(records.categories.map((category) => [category.id, category])),
+    [records.categories],
+  );
+  const huaweiProductsById = useMemo(
+    () => new Map(records.huawei.map((product) => [product.id, product])),
+    [records.huawei],
+  );
+  const huaweiCategoriesById = useMemo(
+    () => new Map(records.huaweiCategories.map((category) => [category.id, category])),
+    [records.huaweiCategories],
+  );
+  const searchIndex = useMemo(() => {
+    const index = {};
+
+    RESOURCE_KEYS.forEach((resource) => {
+      index[resource] = records[resource].map((record) => {
+        const machine = machinesById.get(record.machineId);
+        const category = categoriesById.get(record.categoryId);
+        const product = huaweiProductsById.get(record.productId);
+        const parentCategory = huaweiCategoriesById.get(record.parentId);
+        const searchable = [
+          ...Object.values(record).map((value) => String(value ?? "")),
+          machine?.name,
+          machine?.model,
+          category?.name,
+          record.category?.name,
+          product?.productName,
+          product?.modelCode,
+          parentCategory?.name,
+        ];
+
+        return {
+          record,
+          text: searchable.filter(Boolean).join(" ").toLowerCase(),
+        };
+      });
+    });
+
+    return index;
+  }, [categoriesById, huaweiCategoriesById, huaweiProductsById, machinesById, records]);
   const largestCategoryViewCount = Math.max(
     1,
     ...topCategoryStats.map((category) => category.viewCount),
@@ -217,29 +298,12 @@ const DashboardPage = () => {
   }, [categoryStats, categoryTotal]);
   const filteredRecords = useMemo(() => {
     const activeRecords = activeConfig ? records[activeSection] : [];
-    const term = search.trim().toLowerCase();
+    const term = deferredSearch.trim().toLowerCase();
     if (!term || !activeConfig) return activeRecords;
-    return activeRecords.filter((record) => {
-      const machine = records.machines.find(
-        (item) => item.id === record.machineId,
-      );
-      const category = records.categories.find(
-        (item) => item.id === record.categoryId,
-      );
-      const searchable = [
-        ...Object.values(record).map((value) => String(value ?? "")),
-        machine?.name,
-        machine?.model,
-        category?.name,
-        record.category?.name,
-      ];
-      return searchable.some((value) =>
-        String(value || "")
-          .toLowerCase()
-          .includes(term),
-      );
-    });
-  }, [activeSection, activeConfig, records, search]);
+    return (searchIndex[activeSection] || [])
+      .filter(({ text }) => text.includes(term))
+      .map(({ record }) => record);
+  }, [activeSection, activeConfig, deferredSearch, records, searchIndex]);
 
   const setCurrentSection = (section, options = {}) => {
     setActiveSection(section);
@@ -309,6 +373,13 @@ const DashboardPage = () => {
       payload.slug = toCategorySlug(form.name);
     }
 
+    if (resource === "huawei") {
+      // Keep internal catalog fields automatic so the form stays focused on
+      // the product information dashboard users actually maintain.
+      payload.slug = record?.slug || toCategorySlug(form.modelCode || form.productName);
+      payload.status = record?.status || "PUBLISHED";
+    }
+
     if (!record) {
       const missingRequired = config.fields.find((field) => {
         if (field.type === "file")
@@ -344,6 +415,7 @@ const DashboardPage = () => {
       if (resource === "users" && record?.id === account?.id && savedResult.data) {
         setAccount(savedResult.data);
       }
+      clearCachedJson();
       setDialog(null);
       setNotice({
         type: "success",
@@ -370,6 +442,7 @@ const DashboardPage = () => {
         method: "DELETE",
         token,
       });
+      clearCachedJson();
       setDeleteTarget(null);
       setNotice({ type: "success", message: `${config.singular} deleted.` });
       await loadData();
@@ -457,21 +530,19 @@ const DashboardPage = () => {
   };
 
   const machineName = (machineId) => {
-    const machine = records.machines.find(
-      (item) => item.id === Number(machineId),
-    );
+    const machine = machinesById.get(Number(machineId));
     return machine
       ? `${machine.name} · ${machine.model}`
       : `Machine #${machineId}`;
   };
 
   const huaweiProductName = (productId) => {
-    const product = records.huawei.find((item) => Number(item.id) === Number(productId));
+    const product = huaweiProductsById.get(Number(productId));
     return product ? `${product.productName} - ${product.modelCode}` : `Product #${productId}`;
   };
 
   const huaweiCategoryName = (categoryId) => {
-    const category = records.huaweiCategories.find((item) => Number(item.id) === Number(categoryId));
+    const category = huaweiCategoriesById.get(Number(categoryId));
     return category?.name || `Category #${categoryId}`;
   };
 
@@ -482,8 +553,7 @@ const DashboardPage = () => {
     if (key === "category") {
       return (
         record.category?.name ||
-        records.categories.find((item) => item.id === record.categoryId)
-          ?.name ||
+        categoriesById.get(record.categoryId)?.name ||
         "—"
       );
     }
@@ -629,7 +699,7 @@ const DashboardPage = () => {
           {activeSection === "overview" ? (
             <DashboardOverview
               records={records}
-              loading={loading}
+              loading={loading || loadingResources.has(activeSection)}
               categoryStats={categoryStats}
               topCategoryStats={topCategoryStats}
               categoryTotal={categoryTotal}
@@ -640,12 +710,11 @@ const DashboardPage = () => {
             />
           ) : (
             <ResourceSection
-              key={`${activeSection}:${search}`}
               activeSection={activeSection}
               activeConfig={activeConfig}
               filteredRecords={filteredRecords}
               loading={loading}
-              search={search}
+              search={deferredSearch}
               loadData={loadData}
               renderCell={renderCell}
               recordTitle={recordTitle}

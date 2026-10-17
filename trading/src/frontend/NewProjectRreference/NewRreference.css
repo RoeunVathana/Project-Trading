@@ -17,7 +17,7 @@
   overflow-x: clip;
   background: var(--np-bg);
   color: var(--np-text);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-family);
 }
 
 .new-reference-page *,
@@ -103,7 +103,7 @@
 .np-metric { min-height: 78px; display: flex; flex-direction: column; justify-content: center; padding: 12px 16px; border-left: 3px solid; background: var(--np-panel); }
 .np-metric-green { border-color: var(--np-green); }
 .np-metric-orange { border-color: var(--np-orange); }
-.np-metric strong { color: var(--np-text); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: clamp(23px, 2.7vw, 30px); font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+.np-metric strong { color: var(--np-text); font-family: var(--font-family); font-size: clamp(23px, 2.7vw, 30px); font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
 .np-metric span { margin-top: 8px; color: var(--np-muted); font-size: 8px; font-weight: 750; letter-spacing: 0.16em; }
 
 .np-performance { margin-top: 39px; }
@@ -117,7 +117,7 @@
 .np-legend-active { background: var(--np-green); }
 .np-chart-svg { display: block; width: 100%; height: 220px; margin-top: 25px; overflow: visible; }
 .np-chart-grid path { fill: none; stroke: rgba(155, 166, 179, 0.16); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.np-chart-axis-labels { fill: #87909c; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; }
+.np-chart-axis-labels { fill: #87909c; font-family: var(--font-family); font-size: 10px; }
 .np-chart-standard { fill: none; stroke: #526071; stroke-width: 2; stroke-dasharray: 2 5; vector-effect: non-scaling-stroke; }
 .np-chart-fill { fill: rgba(0, 183, 101, 0.3); }
 .np-chart-adts { fill: none; stroke: var(--np-green); stroke-width: 2; vector-effect: non-scaling-stroke; }
@@ -127,7 +127,7 @@
 .np-machine-image::after { position: absolute; inset: 0; content: ""; pointer-events: none; background: linear-gradient(180deg, rgba(3, 8, 13, 0.05) 35%, rgba(3, 8, 13, 0.72) 100%), linear-gradient(90deg, rgba(0, 81, 112, 0.16), transparent 45%); }
 .np-machine-image > img { display: block; width: 100%; height: 100%; min-height: inherit; position: absolute; inset: 0; object-fit: cover; object-position: center; filter: saturate(0.82) contrast(1.06); }
 .np-telemetry { position: absolute; z-index: 1; right: 4%; bottom: 4%; left: 4%; padding: 15px 16px; border: 1px solid rgba(132, 148, 160, 0.21); background: rgba(6, 10, 13, 0.89); backdrop-filter: blur(8px); }
-.np-telemetry-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; color: var(--np-green); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 8px; letter-spacing: 0.12em; }
+.np-telemetry-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; color: var(--np-green); font-family: var(--font-family); font-size: 8px; letter-spacing: 0.12em; }
 .np-telemetry-heading i { display: flex; gap: 4px; }
 .np-telemetry-heading b { width: 4px; height: 4px; background: var(--np-green); }
 .np-telemetry-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; color: #8f9aa4; font-size: 10px; }
@@ -156,7 +156,7 @@
 .np-project-body h3 { min-height: 48px; margin: 12px 0 8px; color: var(--np-text); font-size: 16px; font-weight: 680; line-height: 1.4; }
 .np-project-divider { height: 1px; margin: 10px 0 12px; background: #262c34; }
 .np-project-label { color: #747f8d; font-size: 8px; font-weight: 750; letter-spacing: 0.14em; }
-.np-achievement { margin: 7px 0 9px; color: #00a857; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; line-height: 1.55; }
+.np-achievement { margin: 7px 0 9px; color: #00a857; font-family: var(--font-family); font-size: 10px; line-height: 1.55; }
 .np-project-detail { margin: 0; color: #8d97a3; font-size: 11px; line-height: 1.65; }
 
 .np-resource-wrap { padding: 61px clamp(18px, 4.8vw, 76px) 70px; border-top: 1px solid rgba(0, 183, 101, 0.16); background: linear-gradient(100deg, rgba(0, 183, 101, 0.035), transparent 24%, transparent 78%, rgba(0, 183, 101, 0.025)); }
@@ -170,15 +170,15 @@
 .np-download-button { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 13px; padding: 0 19px; background: #00a958; color: #fff; font-size: 10px; font-weight: 800; text-decoration: none; transition: background-color 180ms ease, transform 180ms ease; }
 .np-download-button:hover { transform: translateY(-1px); background: #00bf66; }
 .np-download-button svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
-.np-file-specs { display: flex; flex-direction: column; gap: 4px; color: #c2c9d1; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 9px; letter-spacing: 0.04em; }
+.np-file-specs { display: flex; flex-direction: column; gap: 4px; color: #c2c9d1; font-family: var(--font-family); font-size: 9px; letter-spacing: 0.04em; }
 .np-file-specs small { color: #7b8590; font-family: inherit; font-size: 8px; letter-spacing: 0.14em; }
 .np-paper { width: 100%; max-width: 210px; padding: 10px; border: 1px solid #252c34; background: #11161c; box-shadow: 0 10px 28px rgba(0,0,0,.25); }
 .np-paper-inner { position: relative; min-height: 235px; display: flex; flex-direction: column; align-items: flex-start; padding: 16px 15px; border: 1px solid #2a3038; background: #080b0e; }
 .np-paper-mark { width: 30px; height: 3px; margin-bottom: 13px; background: var(--np-green); }
 .np-paper-inner strong { color: #f2f4f5; font-size: 8px; line-height: 1.15; }
-.np-paper-inner small { margin-top: 13px; color: #69737e; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 5px; line-height: 1.5; letter-spacing: 0.06em; }
+.np-paper-inner small { margin-top: 13px; color: #69737e; font-family: var(--font-family); font-size: 5px; line-height: 1.5; letter-spacing: 0.06em; }
 .np-paper-emblem { margin-top: auto; color: var(--np-green); font-size: 18px; }
-.np-paper-inner em { position: absolute; right: 12px; bottom: 12px; color: #626d78; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 5px; font-style: normal; }
+.np-paper-inner em { position: absolute; right: 12px; bottom: 12px; color: #626d78; font-family: var(--font-family); font-size: 5px; font-style: normal; }
 
 :root[data-theme="light"] .new-reference-page {
   --np-bg: var(--theme-surface-1);

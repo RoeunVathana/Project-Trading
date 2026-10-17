@@ -13,13 +13,13 @@
 /* Keep the product catalog easy to scan while the page reveal animation runs. */
 .product-page .scroll-reveal {
   transform: translate3d(0, 14px, 0);
-  transition-duration: 360ms;
+  transition-duration: 480ms;
 }
 
 .product-page .product-card.scroll-reveal {
-  transform: translate3d(0, 8px, 0);
+  transform: translate3d(0, 16px, 0);
   transition-delay: 0ms;
-  transition-duration: 260ms;
+  transition-duration: 420ms;
 }
 
 /* =====================================================*

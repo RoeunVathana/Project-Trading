@@ -1,9 +1,5 @@
-import React from 'react'
+import HuaweiShowcase from "../HuaweiShowcase/HuaweiShowcase";
 
-const SmartGuard = () => {
-  return (
-    <div>SmartGuard</div>
-  )
-}
+const SmartGuard = () => <HuaweiShowcase categorySlug="smart-guard" />;
 
-export default SmartGuard
+export default SmartGuard;

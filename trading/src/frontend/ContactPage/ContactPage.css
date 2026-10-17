@@ -14,7 +14,7 @@
   width: 100%;
   background: var(--theme-surface-0);
   color: var(--contact-text);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-family);
   transition: background-color 180ms ease, color 180ms ease;
 }
 
@@ -156,7 +156,7 @@
   display: block;
   margin: 4px 0 5px;
   color: var(--contact-text);
-  font-family: "Courier New", monospace;
+  font-family: var(--font-family);
   font-size: 19px;
   letter-spacing: 0.025em;
   line-height: 1.05;
@@ -507,7 +507,7 @@
 
 .contact-map-tag span {
   color: var(--theme-success-text);
-  font-family: "Courier New", monospace;
+  font-family: var(--font-family);
   font-size: 6px;
 }
 
@@ -552,7 +552,7 @@
 
 .contact-network-stats strong {
   color: var(--contact-text);
-  font-family: "Courier New", monospace;
+  font-family: var(--font-family);
   font-size: 15px;
   font-weight: 400;
   line-height: 1;
@@ -560,7 +560,7 @@
 
 .contact-network-stats strong small {
   color: var(--contact-muted);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-family);
   font-size: 9px;
 }
 
@@ -609,7 +609,7 @@
   width: fit-content;
   margin-top: 4px;
   color: var(--theme-success-text);
-  font-family: "Courier New", monospace;
+  font-family: var(--font-family);
   font-size: 9px;
   text-decoration: none;
 }

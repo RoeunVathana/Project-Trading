@@ -96,6 +96,12 @@
   min-height: 48px;
   color: var(--nav-text-strong);
   text-decoration: none;
+  transition: opacity var(--motion-fast), transform var(--motion-fast);
+}
+
+.navbar-logo:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .navbar-logo-image {
@@ -1472,5 +1478,82 @@
   .navbar *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+  }
+}
+
+/* Smooth navigation feedback and lightweight menu choreography. */
+.navbar-menu > a,
+.navbar-dropdown-trigger {
+  transition:
+    color var(--motion-fast),
+    background-color var(--motion-fast),
+    border-color var(--motion-fast),
+    box-shadow var(--motion-fast),
+    transform var(--motion-fast);
+}
+
+.navbar-submenu > * {
+  will-change: opacity, transform;
+}
+
+@media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
+  .navbar-menu > a:not(.mobile-get-started)::after,
+  .navbar-dropdown-trigger::after {
+    position: absolute;
+    right: 12px;
+    bottom: 3px;
+    left: 12px;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--nav-accent);
+    content: "";
+    opacity: 0;
+    transform: scaleX(0.35);
+    transition: opacity var(--motion-fast), transform var(--motion-fast);
+  }
+
+  .navbar-menu > a:not(.mobile-get-started):hover,
+  .navbar-dropdown-trigger:hover {
+    transform: translate3d(0, -1px, 0);
+  }
+
+  .navbar-menu > a:not(.mobile-get-started):hover::after,
+  .navbar-menu > a:not(.mobile-get-started).active::after,
+  .navbar-dropdown-trigger:hover::after,
+  .navbar-dropdown-trigger.active::after,
+  .navbar-dropdown.is-open .navbar-dropdown-trigger::after {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+.navbar-dropdown.is-open .navbar-submenu > * {
+  animation: navbar-panel-item-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.navbar-dropdown.is-open .navbar-submenu > *:nth-child(2) {
+  animation-delay: 45ms;
+}
+
+.navbar-dropdown.is-open .navbar-submenu > *:nth-child(3) {
+  animation-delay: 90ms;
+}
+
+@keyframes navbar-panel-item-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar-submenu > * {
+    animation: none !important;
+    transition: none !important;
   }
 }

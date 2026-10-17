@@ -74,11 +74,6 @@ const AuthGate = ({
                   <input required placeholder="Enter your name" value={accountForm.name} onChange={(event) => setAccountForm((current) => ({ ...current, name: event.target.value }))} autoComplete="username" />
                 </label>
                 <label className="dashboard-field">
-                  <span>Profile image <small>(optional)</small></span>
-                  <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={handleProfileImageChange} />
-                  <small>Maximum {UPLOAD_LIMITS.image.label}</small>
-                </label>
-                <label className="dashboard-field">
                   <span>Email</span>
                   <input type="email" required placeholder="name@example.com" value={accountForm.email} onChange={(event) => setAccountForm((current) => ({ ...current, email: event.target.value }))} autoComplete="email" />
                 </label>
@@ -93,6 +88,14 @@ const AuthGate = ({
               <span>Password</span>
               <input type="password" required minLength="8" placeholder={accountMode === "login" ? "Enter your password" : "Create a password (8+ characters)"} value={accountForm.password} onChange={(event) => setAccountForm((current) => ({ ...current, password: event.target.value }))} autoComplete={accountMode === "login" ? "current-password" : "new-password"} />
             </label>
+
+            {accountMode === "register" && (
+              <label className="dashboard-field">
+                <span>Profile image <small>(optional)</small></span>
+                <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={handleProfileImageChange} />
+                <small>Maximum {UPLOAD_LIMITS.image.label}</small>
+              </label>
+            )}
 
             <button type="submit" className="dashboard-primary-button dashboard-auth-submit" disabled={busy}>
               {busy ? "Please wait..." : accountMode === "login" ? "Sign in" : "Create account"}

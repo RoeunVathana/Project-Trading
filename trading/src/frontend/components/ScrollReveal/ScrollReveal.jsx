@@ -10,14 +10,28 @@ const ScrollReveal = ({ children }) => {
 
     if (!scope) return undefined;
 
-    const targets = [...scope.querySelectorAll("section, article, header, [data-scroll-reveal]")];
-    const revealTargets = targets.length ? targets : [scope.firstElementChild].filter(Boolean);
+    const customRevealRoots = ".smart-string-page, .smart-energy-page, .smart-module-page, .huawei-showcase";
+    const hasCustomReveal = Boolean(scope.querySelector(customRevealRoots));
+    const targets = [...scope.querySelectorAll(
+      "section, article, header, [data-scroll-reveal], " +
+      ".hardware-card, .spec-tag, .table-row, .analytics-card, .product-card, " +
+      ".reference-card, .compliance-card, .lifecycle-card, .np-chart-card, " +
+      ".np-project-card, .contact-network-card, .contact-office, " +
+      ".contact-training-card, .smart-module-feature-card, .smart-module-benefit-card, " +
+      ".smart-energy-benefit-card, .similar-product-card, .helpful-link-card, " +
+      ".dashboard-metric-card, .dashboard-panel, .dashboard-auth-card",
+    )].filter((target) => !target.closest(customRevealRoots));
+    const revealTargets = targets.length
+      ? targets
+      : hasCustomReveal
+        ? []
+        : [scope.firstElementChild].filter(Boolean);
 
     if (!revealTargets.length) return undefined;
 
     revealTargets.forEach((target, index) => {
       target.classList.add("scroll-reveal");
-      target.style.setProperty("--reveal-delay", `${Math.min(index * 45, 220)}ms`);
+      target.style.setProperty("--reveal-delay", `${Math.min(index * 55, 300)}ms`);
     });
 
     const showAll = () => revealTargets.forEach((target) => target.classList.add("is-visible"));
@@ -49,7 +63,7 @@ const ScrollReveal = ({ children }) => {
         target.style.removeProperty("--reveal-delay");
       });
     };
-  }, [location.hash, location.pathname, location.search]);
+  }, [location.pathname, location.search]);
 
   return (
     <div ref={scopeRef} className="scroll-reveal-scope">

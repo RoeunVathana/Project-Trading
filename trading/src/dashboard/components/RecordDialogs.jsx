@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { RESOURCE_CONFIG, TABLE_COLUMNS } from "../dashboardConfig";
 import { publicFileUrl, recordTitle } from "../dashboardUtils";
 
@@ -119,8 +120,9 @@ const RecordDialogs = ({
   deleteTarget,
   onCancelDelete,
   onConfirmDelete,
-}) => (
-  <>
+}) => {
+  const dialogLayer = (
+    <>
     {imageTarget && <ImagePreviewDialog imageTarget={imageTarget} onCloseImage={onCloseImage} />}
     {viewTarget && (
       <RecordViewDialog viewTarget={viewTarget} onCloseView={onCloseView} onImageView={onImageView} renderCell={renderCell} />
@@ -226,7 +228,12 @@ const RecordDialogs = ({
         </section>
       </div>
     )}
-  </>
-);
+    </>
+  );
+
+  return typeof document === "undefined"
+    ? dialogLayer
+    : createPortal(dialogLayer, document.body);
+};
 
 export default RecordDialogs;

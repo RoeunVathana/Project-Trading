@@ -16,17 +16,21 @@ const ResourceSection = ({
   onEdit,
   onDelete,
 }) => {
-  const [page, setPage] = useState(1);
+  const filterKey = `${activeSection}:${search}`;
+  const [pageState, setPageState] = useState({ key: filterKey, page: 1 });
   const shouldPaginate = true;
   const pageSize = 10;
   const pageCount = Math.max(1, Math.ceil(filteredRecords.length / pageSize));
-  const currentPage = Math.min(page, pageCount);
+  const currentPage = Math.min(pageState.key === filterKey ? pageState.page : 1, pageCount);
   const visibleRecords = shouldPaginate
     ? filteredRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     : filteredRecords;
 
   const goToPage = (nextPage) => {
-    setPage(Math.min(Math.max(nextPage, 1), pageCount));
+    setPageState({
+      key: filterKey,
+      page: Math.min(Math.max(nextPage, 1), pageCount),
+    });
   };
 
   return (

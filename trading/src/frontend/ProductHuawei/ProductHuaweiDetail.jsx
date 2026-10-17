@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { fetchCachedJson } from "../apiCache";
 import "./ProductHuaweiDetail.css";
 
 const API_BASE_URL = (
@@ -19,34 +20,37 @@ const formatFileSize = (value) => {
   return `${(size / (1024 * 1024)).toFixed(2)} MB`;
 };
 
-const getJson = async (path, signal) => {
-  const response = await fetch(`${API_BASE_URL}${path}`, { signal });
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.message || "Unable to load Huawei downloads.");
+const getJson = async (path) => {
+  const result = await fetchCachedJson(`${API_BASE_URL}${path}`);
   return result.data;
 };
 
 const ProductHuaweiDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [product, setProduct] = useState(null);
-  const [image, setImage] = useState("");
+  const location = useLocation();
+  const routeProduct = location.state?.product || null;
+  const [product, setProduct] = useState(routeProduct);
+  const [image, setImage] = useState(routeProduct?.image || "");
   const [documents, setDocuments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!routeProduct);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const controller = new AbortController();
+    let active = true;
 
     const loadDownloadPage = async () => {
-      setLoading(true);
+      setLoading(!routeProduct);
       setError("");
       try {
-        const [productRow, imageRows, pdfRows] = await Promise.all([
-          getJson(`/api/huawei/${id}`, controller.signal),
-          getJson("/api/huawei-product-images", controller.signal),
-          getJson("/api/huawei-product-pdfs", controller.signal),
-        ]);
+        const [productRow, imageRows, pdfRows] = routeProduct
+          ? [routeProduct, [], await getJson("/api/huawei-product-pdfs")]
+          : await Promise.all([
+              getJson(`/api/huawei/${id}`),
+              getJson("/api/huawei-product-images"),
+              getJson("/api/huawei-product-pdfs"),
+            ]);
+        if (!active) return;
         const productImages = (Array.isArray(imageRows) ? imageRows : [])
           .filter((item) => Number(item.productId) === Number(id))
           .sort((left, right) => Number(left.displayOrder || 0) - Number(right.displayOrder || 0));
@@ -56,18 +60,20 @@ const ProductHuaweiDetail = () => {
           .map((item) => ({ ...item, filePath: toMediaUrl(item.filePath) }));
 
         setProduct(productRow);
-        setImage(toMediaUrl(primaryImage?.imageUrl));
+        setImage(routeProduct?.image || toMediaUrl(primaryImage?.imageUrl));
         setDocuments(productDocuments);
       } catch (loadError) {
-        if (loadError.name !== "AbortError") setError(loadError.message || "Unable to load this Huawei product.");
+        if (active) setError(loadError.message || "Unable to load this Huawei product.");
       } finally {
-        if (!controller.signal.aborted) setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     loadDownloadPage();
-    return () => controller.abort();
-  }, [id]);
+    return () => {
+      active = false;
+    };
+  }, [id, routeProduct]);
 
   if (loading) {
     return <div className="huawei-download-state">Loading Huawei downloads...</div>;

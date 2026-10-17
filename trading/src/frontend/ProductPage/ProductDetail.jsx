@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import DataProduct from "./DataProduct";
+import { fetchCachedJson } from "../apiCache";
 import {
   groupSpecificationEntries,
   toSpecificationEntries,
@@ -133,57 +134,37 @@ const ProductDetail = () => {
   }, [id]);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let active = true;
 
-    fetch(`${API_BASE_URL}/api/machines/${id}`, { signal: controller.signal })
-      .then(async (response) => {
-        const result = await response.json();
-        if (!response.ok || !result.data) {
-          throw new Error(result.message || "Unable to load this product.");
-        }
-        let specs = Array.isArray(result.data.specs) ? result.data.specs : [];
-        try {
-          const specificationResponse = await fetch(
-            `${API_BASE_URL}/api/machine-specs?machineId=${id}`,
-            { signal: controller.signal },
-          );
-          const specificationResult = await specificationResponse.json();
-          if (
-            specificationResponse.ok &&
-            Array.isArray(specificationResult.data)
-          ) {
-            specs = specificationResult.data;
-          }
-        } catch (specificationError) {
-          if (specificationError.name === "AbortError")
-            throw specificationError;
+    Promise.allSettled([
+      fetchCachedJson(`${API_BASE_URL}/api/machines/${id}`),
+      fetchCachedJson(`${API_BASE_URL}/api/machine-specs?machineId=${id}`),
+      fetchCachedJson(`${API_BASE_URL}/api/machine-pdfs?machineId=${id}`),
+    ])
+      .then(([productResult, specificationResult, pdfResult]) => {
+        if (!active) return;
+        if (productResult.status !== "fulfilled" || !productResult.value?.data) {
+          throw productResult.reason || new Error("Unable to load this product.");
         }
 
-        let pdfs = [];
-        try {
-          const pdfResponse = await fetch(
-            `${API_BASE_URL}/api/machine-pdfs?machineId=${id}`,
-            { signal: controller.signal },
-          );
-          const pdfResult = await pdfResponse.json();
-          if (pdfResponse.ok && Array.isArray(pdfResult.data)) {
-            pdfs = pdfResult.data;
-          }
-        } catch (pdfError) {
-          if (pdfError.name === "AbortError") throw pdfError;
-        }
+        const machine = productResult.value.data;
+        const specs = specificationResult.status === "fulfilled" && Array.isArray(specificationResult.value?.data)
+          ? specificationResult.value.data
+          : Array.isArray(machine.specs) ? machine.specs : [];
+        const pdfs = pdfResult.status === "fulfilled" && Array.isArray(pdfResult.value?.data)
+          ? pdfResult.value.data
+          : [];
 
-        return { ...result.data, specs, pdfs };
-      })
-      .then((machine) => {
-        setApiProduct(normalizeApiProduct(machine));
+        setApiProduct(normalizeApiProduct({ ...machine, specs, pdfs }));
         setApiStatus("ready");
       })
-      .catch((error) => {
-        if (error.name !== "AbortError") setApiStatus("error");
+      .catch(() => {
+        if (active) setApiStatus("error");
       });
 
-    return () => controller.abort();
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   const fallbackProduct = DataProduct.find(
@@ -212,19 +193,16 @@ const ProductDetail = () => {
   useEffect(() => {
     if (!product?.id) return undefined;
 
-    const controller = new AbortController();
+    let active = true;
     const loadSimilarProducts = async () => {
       try {
         // Load the catalog first so the section can still show useful
         // recommendations when this product is the only item in its category.
         const query = new URLSearchParams({ page: "1" });
 
-        const response = await fetch(`${API_BASE_URL}/api/machines?${query.toString()}`, {
-          signal: controller.signal,
-        });
-        const result = await response.json();
-        if (!response.ok || !Array.isArray(result.data)) {
-          throw new Error(result.message || "Unable to load similar products.");
+        const result = await fetchCachedJson(`${API_BASE_URL}/api/machines?${query.toString()}`);
+        if (!Array.isArray(result.data)) {
+          throw new Error("Unable to load similar products.");
         }
 
         const uniqueMachines = [...new Map(
@@ -260,9 +238,9 @@ const ProductDetail = () => {
           )
           .map(normalizeApiProduct);
 
-        setSimilarProducts([...normalizedMachines, ...fallbackProducts]);
-      } catch (error) {
-        if (error.name !== "AbortError") {
+        if (active) setSimilarProducts([...normalizedMachines, ...fallbackProducts]);
+      } catch {
+        if (active) {
           setSimilarProducts(
             DataProduct
               .filter((machine) => String(machine.id) !== String(product.id))
@@ -275,7 +253,9 @@ const ProductDetail = () => {
 
     loadSimilarProducts();
 
-    return () => controller.abort();
+    return () => {
+      active = false;
+    };
   }, [product?.categoryId, product?.id]);
 
   useEffect(() => {
