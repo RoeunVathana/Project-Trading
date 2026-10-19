@@ -101,7 +101,7 @@ const Footer = () => (
 
     <div className="footer-bottom">
       <p>© 2026 CHINT POWER SYSTEMS. ALL RIGHTS RESERVED.</p>
-      <p>TRD / MAN / POWER SYSTEMS</p>
+      <p>SchneiTec Trading / Manufacturing / POWER SYSTEMS</p>
     </div>
   </footer>
 );

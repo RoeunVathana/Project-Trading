@@ -122,8 +122,30 @@ const productCollections = [
 
 const locationLinks = [
   { id: "Phnom Penh", label: "Phnom Penh" },
-  { id: "Shiem Reap", label: "Shiem Rea" },
-  { id: "Kompot", label: "Kompot" },
+  { id: "Banteay Meanchey", label: "Banteay Meanchey" },
+  { id: "Battambang", label: "Battambang" },
+  { id: "Kampong Cham", label: "Kampong Cham" },
+  { id: "Kampong Chhnang", label: "Kampong Chhnang" },
+  { id: "Kampong Speu", label: "Kampong Speu" },
+  { id: "Kampong Thom", label: "Kampong Thom" },
+  { id: "Kampot", label: "Kampot" },
+  { id: "Kandal", label: "Kandal" },
+  { id: "Kep", label: "Kep" },
+  { id: "Koh Kong", label: "Koh Kong" },
+  { id: "Kratie", label: "Kratie" },
+  { id: "Mondulkiri", label: "Mondulkiri" },
+  { id: "Oddar Meanchey", label: "Oddar Meanchey" },
+  { id: "Pailin", label: "Pailin" },
+  { id: "Preah Vihear", label: "Preah Vihear" },
+  { id: "Prey Veng", label: "Prey Veng" },
+  { id: "Pursat", label: "Pursat" },
+  { id: "Ratanakiri", label: "Ratanakiri" },
+  { id: "Siem Reap", label: "Siem Reap" },
+  { id: "Preah Sihanouk", label: "Preah Sihanouk" },
+  { id: "Stung Treng", label: "Stung Treng" },
+  { id: "Svay Rieng", label: "Svay Rieng" },
+  { id: "Takeo", label: "Takeo" },
+  { id: "Tbong Khmum", label: "Tbong Khmum" },
 ];
 
 const referenceLinks = [
@@ -333,7 +355,7 @@ const Navbar = () => {
               <div className="home-nav-tree__branches">
                 <div className="home-nav-tree__branch">
                   <button type="button" className="home-nav-tree__branch-title">
-                    TRD <span aria-hidden="true">{"\u2192"}</span>
+                    SchneiTec Trading <span aria-hidden="true">{"\u2192"}</span>
                   </button>
                   <div className="home-nav-tree__links">
                     <Link to="/product?division=trd&collection=chint" onClick={closeMenu}>
@@ -346,7 +368,7 @@ const Navbar = () => {
                 </div>
                 <div className="home-nav-tree__branch">
                   <button type="button" className="home-nav-tree__branch-title">
-                    MAN <span aria-hidden="true">{"\u2192"}</span>
+                    Manufacturing <span aria-hidden="true">{"\u2192"}</span>
                   </button>
                   <div className="home-nav-tree__links">
                     <Link to="/product?division=man&collection=factory" onClick={closeMenu}>
@@ -480,8 +502,8 @@ const Navbar = () => {
           {renderDropdown("about", "About Us", (
             <div className="nav-tree-menu">
               <div className="nav-tree-menu__links">
-                <Link to="/about?profile=trd" onClick={closeMenu}>Profile Company TRD</Link>
-                <Link to="/about?profile=man" onClick={closeMenu}>Profile Company MAN</Link>
+                <Link to="/about?profile=trd" onClick={closeMenu}>Profile Company SchneiTec Trading</Link>
+                <Link to="/about?profile=man" onClick={closeMenu}>Profile Company Manufacturing</Link>
               </div>
             </div>
           ))}

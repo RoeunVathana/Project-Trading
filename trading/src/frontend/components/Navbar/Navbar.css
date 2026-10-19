@@ -568,6 +568,13 @@
   padding: 3px;
 }
 
+.navbar-dropdown--distribution .nav-tree-menu {
+  max-height: min(86vh, 760px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
 .navbar-menu .nav-tree-menu__heading {
   display: flex;
   align-items: center;
@@ -647,10 +654,20 @@
   }
 
   .nav-tree-menu--progressive:hover .nav-tree-menu__links,
-  .nav-tree-menu--progressive:focus-within .nav-tree-menu__links,
+  .nav-tree-menu--progressive:focus-within .nav-tree-menu__links {
+    max-height: min(72vh, 520px);
+    margin-top: 3px;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
   .nav-tree-menu--progressive:hover .nav-tree-menu__note,
   .nav-tree-menu--progressive:focus-within .nav-tree-menu__note {
-    max-height: 260px;
+    max-height: 40px;
     margin-top: 3px;
     opacity: 1;
     visibility: visible;
