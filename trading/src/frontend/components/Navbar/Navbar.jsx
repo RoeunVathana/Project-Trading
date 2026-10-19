@@ -6,10 +6,6 @@ import "./Navbar.css";
 
 const productPath = (parameters) => {
   if (parameters.collection === "huawei") {
-    if (parameters.solution === "residential-solution") {
-      return "/product-huawei/residential-solution";
-    }
-
     const huaweiSolutionPaths = {
       "smart-string-ess": "/product-huawei/smart-string-ess",
       "smart-energy-controller": "/product-huawei/smart-energy-controller",
@@ -18,8 +14,13 @@ const productPath = (parameters) => {
       "product-huawei-all": "/product-huawei",
     };
 
+    // Product links must take precedence over their parent solution page.
     if (huaweiSolutionPaths[parameters.product]) {
       return huaweiSolutionPaths[parameters.product];
+    }
+
+    if (parameters.solution === "residential-solution") {
+      return "/product-huawei/residential-solution";
     }
 
     if (parameters.product) return `/product-huawei/${parameters.product}`;
