@@ -133,17 +133,17 @@ export const RESOURCE_CONFIG = {
       { name: "brandName", label: "Brand", defaultValue: "Huawei" },
       { name: "modelCode", label: "Model code", required: true, placeholder: "SUN2000-600W-PA0" },
       { name: "productName", label: "Product name", required: true, placeholder: "SUN2000-600W-PA0" },
+      { name: "baseImageFile", label: "Base image", type: "file", apiField: "baseImageUrl", accept: "image/*", maxSize: UPLOAD_LIMITS.image.bytes, maxSizeLabel: UPLOAD_LIMITS.image.label, currentKey: "baseImageUrl", currentLabel: "Open base image", helpText: "Used as the main image on Huawei product cards." },
       { name: "displayOrder", label: "Display order", type: "number", min: 0, defaultValue: 0 },
     ],
   },
   huaweiCategories: {
     title: "Huawei Categories",
     singular: "Huawei category",
-    description: "Build the Huawei category tree used by products and site pages.",
+    description: "Manage the Huawei product categories used by products and site pages.",
     endpoint: "/api/huawei-categories",
     icon: "C",
     fields: [
-      { name: "parentId", label: "Parent category", type: "relation", resource: "huaweiCategories", nullable: true },
       { name: "name", label: "Category name", required: true },
       { name: "displayOrder", label: "Display order", type: "number", min: 0, defaultValue: 0 },
       { name: "isActive", label: "Active", type: "select", defaultValue: "true", options: [
@@ -288,7 +288,7 @@ export const TABLE_COLUMNS = {
     { key: "image", label: "Image" }, { key: "productName", label: "Product" }, { key: "modelCode", label: "Model code" }, { key: "category", label: "Category" }, { key: "galleryCount", label: "Gallery" }, { key: "status", label: "Status" }, { key: "displayOrder", label: "Order" },
   ],
   huaweiCategories: [
-    { key: "name", label: "Category" }, { key: "parent", label: "Parent" }, { key: "isActive", label: "Active" }, { key: "displayOrder", label: "Order" },
+    { key: "name", label: "Category" }, { key: "isActive", label: "Active" }, { key: "displayOrder", label: "Order" },
   ],
   huaweiImages: [
     { key: "image", label: "Image" }, { key: "product", label: "Product" }, { key: "altText", label: "Alt text" }, { key: "description", label: "Description" }, { key: "isPrimary", label: "Primary" }, { key: "displayOrder", label: "Order" },

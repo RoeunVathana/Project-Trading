@@ -7,6 +7,8 @@ const API_BASE_URL = (
   import.meta.env.VITE_API_URL || "http://localhost:3000"
 ).replace(/\/$/, "");
 
+const publicAsset = (fileName) => `${import.meta.env.BASE_URL}iconNavbar/${fileName}`;
+
 const fallbackImages = [
   "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=2400&q=88",
   "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=2400&q=88",
@@ -18,11 +20,21 @@ const fallbackImages = [
   "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=2400&q=88",
 ];
 
+const staticProductImages = {
+  "smart-string-ess": publicAsset("luna2000-7_14_21-s1.png"),
+  "smart-energy-controller": publicAsset("sun2000-12_15_17_20_25k-mb0.png"),
+  "smart-module-controller": publicAsset("merc-600w-pa0.png"),
+  "smart-guard": publicAsset("smartguard-63a-s0-aus0.png"),
+  "smart-pv-controller": publicAsset("sun2000-150k-mg0.png"),
+  "hybrid-cooling-grid-forming-ess": publicAsset("luna2000-215-series.png"),
+  "accessories": publicAsset("ci-smartdongle-4g.png"),
+};
+
 const categoryConfigs = {
   "smart-guard": {
     label: "Smart Guard",
     fallbackModel: "SmartGuard-63A-S0/AUS0",
-    heroImage: fallbackImages[0],
+    heroImage: staticProductImages["smart-guard"],
     allocationImage: fallbackImages[7],
     allocationTitle: "Intelligent Allocation",
     allocationCopy: "The intelligent allocation system prioritizes essential appliances automatically, helping your home stay comfortable and powered through changing grid conditions.",
@@ -47,7 +59,7 @@ const categoryConfigs = {
   "smart-string-ess": {
     label: "Smart String ESS",
     fallbackModel: "LUNA S1",
-    heroImage: fallbackImages[0],
+    heroImage: staticProductImages["smart-string-ess"],
     allocationImage: fallbackImages[4],
     allocationTitle: "Charge and Discharge, Faster than You’ve Ever Expected",
     allocationCopy: "Independent module-level management enables fast charge and discharge for an efficient, dependable energy storage experience.",
@@ -72,7 +84,7 @@ const categoryConfigs = {
   "smart-module-controller": {
     label: "Smart Module Controller",
     fallbackModel: "SUN2000 Series",
-    heroImage: fallbackImages[0],
+    heroImage: staticProductImages["smart-module-controller"],
     allocationImage: fallbackImages[0],
     allocationTitle: "More Energy, Power All Your Appliances",
     allocationCopy: "Each panel can work independently to deliver maximum power, even when partial shading or module failure affects the rooftop.",
@@ -97,7 +109,7 @@ const categoryConfigs = {
   "smart-energy-controller": {
     label: "Smart Energy Controller",
     fallbackModel: "SUN5000 Series",
-    heroImage: fallbackImages[0],
+    heroImage: staticProductImages["smart-energy-controller"],
     allocationImage: fallbackImages[7],
     allocationTitle: "Grid Goes Off, Life Goes On",
     allocationCopy: "Smart control keeps priority appliances running and coordinates solar, storage, and household loads for a more resilient home.",
@@ -177,9 +189,11 @@ const getConfig = (categorySlug) => {
 
   const baseConfig = categoryConfigs["smart-module-controller"];
   const label = toCategoryLabel(categorySlug);
+  const staticImage = staticProductImages[categorySlug];
   const config = {
     ...baseConfig,
     label,
+    heroImage: staticImage || baseConfig.heroImage,
     fallbackModel: "Huawei product",
     allocationTitle: `${label} for a More Connected Home`,
     allocationCopy: `Explore the ${label} solution and its role in a dependable Huawei smart-energy system.`,
@@ -361,7 +375,7 @@ const HuaweiShowcase = ({ categorySlug = "smart-string-ess" }) => {
   const model = product.modelCode || config.fallbackModel;
   const productImages = product.images || [];
   const getProductImage = (fallback, index = 0) => productImages[index]?.imageUrl || fallback;
-  const heroImage = product.image || config.heroImage;
+  const heroImage = staticProductImages[categorySlug] || product.image || config.heroImage;
 
   return (
     <main className={`huawei-showcase huawei-showcase--${categorySlug}`} style={{ "--showcase-hero-image": `url("${config.heroImage}")` }}>

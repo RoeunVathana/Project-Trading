@@ -1,5 +1,7 @@
 const { Huawei, HuaweiCategory } = require("../models");
 const createCrudController = require("../utils/crudController");
+const { removeImage } = require("../utils/Upload");
+const { Op } = require("sequelize");
 
 const include = [{ model: HuaweiCategory, as: "category", attributes: ["id", "name", "slug"] }];
 
@@ -10,15 +12,20 @@ module.exports = createCrudController({
   parentField: "categoryId",
   parentResourceName: "Huawei category",
   include,
+  uploadedImageField: "baseImageUrl",
+  cleanupFileFields: ["baseImageUrl"],
+  removeStoredFile: removeImage,
   requiredFields: ["categoryId", "modelCode", "productName", "slug"],
   fields: {
     categoryId: { type: "id" },
+    categoryIds: { type: "idArray", nullable: true },
     brandName: { type: "string", nullable: true },
     modelCode: { type: "string" },
     productName: { type: "string" },
     slug: { type: "string" },
     shortDescription: { type: "string", nullable: true },
     description: { type: "string", nullable: true },
+    baseImageUrl: { type: "string", nullable: true },
     status: { type: "string", allowedValues: ["DRAFT", "PUBLISHED", "ARCHIVED"] },
     displayOrder: { type: "integer", min: 0 },
   },
@@ -41,7 +48,13 @@ module.exports.getById = async (req, res) => {
     }
 
     const record = await Huawei.findOne({
-      where: { categoryId: category.id, status: "PUBLISHED" },
+      where: {
+        status: "PUBLISHED",
+        [Op.or]: [
+          { categoryId: category.id },
+          { categoryIds: { [Op.contains]: [category.id] } },
+        ],
+      },
       include,
       order: [["displayOrder", "ASC"], ["id", "ASC"]],
     });

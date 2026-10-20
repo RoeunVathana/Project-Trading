@@ -3,15 +3,30 @@
 const SCHEMA = "huawei_catalog";
 const table = (name) => `"${SCHEMA}"."${name}"`;
 
+const rootCategories = [
+  ["Residential", "residential", 1],
+  ["Commercial & Industrial", "commercial-industrial", 2],
+  ["Utility Scale", "utility-scale", 3],
+  ["Smart String Grid Forming ESS", "smart-string-grid-forming-ess", 4],
+  ["Smart Microgrid", "smart-microgrid", 5],
+];
+
 const childCategories = [
   ["Smart Module Controller", "smart-module-controller", 1],
-  ["Smart Energy Controller", "smart-energy-controller", 2],
-  ["Smart String ESS", "smart-string-ess", 3],
-  ["Smart Charger", "smart-charger", 4],
-  ["Smart Guard", "smart-guard", 5],
-  ["SmartAssistant", "smartassistant", 6],
-  ["Accessories", "accessories", 7],
-  ["Solar Inverter", "solar-inverter", 8],
+  ["Smart PV Controller", "smart-pv-controller", 2],
+  ["Smart Energy Controller", "smart-energy-controller", 3],
+  ["C&I Hybrid Cooling Grid Forming ESS", "c-and-i-hybrid-cooling-grid-forming-ess", 4],
+  ["Smart String ESS", "smart-string-ess", 5],
+  ["Smart Charger", "smart-charger", 6],
+  ["Smart Guard", "smart-guard", 7],
+  ["SmartAssistant", "smartassistant", 8],
+  ["Accessories", "accessories", 9],
+  ["Solar Inverter", "solar-inverter", 10],
+  ["Management System", "management-system", 11],
+  ["Digital Characteristic", "digital-characteristic", 12],
+  ["Product Comparison", "product-comparison", 13],
+  ["Product Configuration", "product-configuration", 14],
+  ["Frequently Asked Questions", "frequently-asked-questions", 15],
 ];
 
 const products = [
@@ -78,18 +93,20 @@ const upsertCategory = async (queryInterface, values, transaction) => {
 const upsertProduct = async (queryInterface, values, transaction) => {
   const rows = await queryRows(queryInterface, `
     INSERT INTO ${table("huawei")} (
-      category_id, brand_name, model_code, product_name, slug,
-      short_description, status, display_order
+      category_id, category_ids, brand_name, model_code, product_name, slug,
+      short_description, base_image_url, status, display_order
     ) VALUES (
-      :categoryId, 'Huawei', :modelCode, :productName, :slug,
-      :shortDescription, :status, :displayOrder
+      :categoryId, ARRAY[:categoryId]::bigint[], 'Huawei', :modelCode, :productName, :slug,
+      :shortDescription, :imageUrl, :status, :displayOrder
     )
     ON CONFLICT (model_code) DO UPDATE SET
       category_id = EXCLUDED.category_id,
+      category_ids = EXCLUDED.category_ids,
       brand_name = EXCLUDED.brand_name,
       product_name = EXCLUDED.product_name,
       slug = EXCLUDED.slug,
       short_description = EXCLUDED.short_description,
+      base_image_url = EXCLUDED.base_image_url,
       status = EXCLUDED.status,
       display_order = EXCLUDED.display_order
     RETURNING product_id
@@ -101,17 +118,20 @@ module.exports = {
   async up(queryInterface) {
     const transaction = await queryInterface.sequelize.transaction();
     try {
-      const rootId = await upsertCategory(queryInterface, {
-        parentId: null,
-        name: "Residential",
-        slug: "residential",
-        displayOrder: 1,
-      }, transaction);
+      const rootIds = {};
+      for (const [name, slug, displayOrder] of rootCategories) {
+        rootIds[slug] = await upsertCategory(queryInterface, {
+          parentId: null,
+          name,
+          slug,
+          displayOrder,
+        }, transaction);
+      }
 
       const categoryIds = {};
       for (const [name, slug, displayOrder] of childCategories) {
         categoryIds[slug] = await upsertCategory(queryInterface, {
-          parentId: rootId,
+          parentId: rootIds.residential,
           name,
           slug,
           displayOrder,
@@ -125,6 +145,7 @@ module.exports = {
           productName: product.productName,
           slug: product.slug,
           shortDescription: product.shortDescription,
+          imageUrl: product.imageUrl,
           status: product.status,
           displayOrder: product.displayOrder,
         }, transaction);
@@ -186,11 +207,14 @@ module.exports = {
 
       await queryInterface.sequelize.query(`
         DELETE FROM ${table("category_huawei")} root
-        WHERE root.slug = 'residential'
+        WHERE root.slug IN (:rootSlugs)
           AND NOT EXISTS (
             SELECT 1 FROM ${table("category_huawei")} child WHERE child.parent_id = root.category_id
           )
-      `, { transaction });
+      `, {
+        replacements: { rootSlugs: rootCategories.map(([, slug]) => slug) },
+        transaction,
+      });
 
       await transaction.commit();
     } catch (error) {

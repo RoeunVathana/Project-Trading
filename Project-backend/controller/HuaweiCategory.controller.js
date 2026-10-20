@@ -17,5 +17,5 @@ module.exports = createCrudController({
     displayOrder: { type: "integer", min: 0 },
     isActive: { type: "boolean", nullable: true },
   },
-  order: [["displayOrder", "ASC"], ["id", "ASC"]],
+  order: [["parentId", "ASC"], ["displayOrder", "ASC"], ["id", "ASC"]],
 });

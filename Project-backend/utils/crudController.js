@@ -12,6 +12,27 @@ const parseId = (value) => {
   return Number.isSafeInteger(id) && id > 0 ? id : null;
 };
 
+const parseIdArray = (value) => {
+  let rawValues = value;
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+    try {
+      const parsed = JSON.parse(trimmed);
+      rawValues = Array.isArray(parsed) ? parsed : trimmed.split(",");
+    } catch {
+      rawValues = trimmed.split(",");
+    }
+  }
+
+  if (!Array.isArray(rawValues)) rawValues = [rawValues];
+
+  const ids = rawValues.map(parseId);
+  if (ids.some((id) => !id)) return null;
+  return [...new Set(ids)];
+};
+
 const createCrudController = ({
   model,
   resourceName,
@@ -126,6 +147,15 @@ const createCrudController = ({
           return { error: `${field} must be a positive integer.` };
         }
         values[field] = normalized;
+        continue;
+      }
+
+      if (definition.type === "idArray") {
+        const ids = parseIdArray(value);
+        if (!ids || (requiredFields.includes(field) && !ids.length)) {
+          return { error: `${field} must contain positive integers.` };
+        }
+        values[field] = ids;
       }
     }
 

@@ -589,11 +589,6 @@ const DashboardPage = () => {
     return product ? `${product.productName} - ${product.modelCode}` : `Product #${productId}`;
   };
 
-  const huaweiCategoryName = (categoryId) => {
-    const category = huaweiCategoriesById.get(Number(categoryId));
-    return category?.name || `Category #${categoryId}`;
-  };
-
   const renderCell = (resource, key, record) => {
     if (resource === "users" && key === "name") {
       return displayAccountName(record, `User #${record.id}`);
@@ -606,7 +601,6 @@ const DashboardPage = () => {
       );
     }
     if (key === "machine") return machineName(record.machineId);
-    if (key === "parent") return record.parent?.name || (record.parentId ? huaweiCategoryName(record.parentId) : "-");
     if (key === "product") return record.product?.productName ? `${record.product.productName} - ${record.product.modelCode}` : huaweiProductName(record.productId);
     if (resource === "specs" && key === "section") {
       return formatSpecificationSection(record.section);
@@ -650,7 +644,7 @@ const DashboardPage = () => {
       const path = resource === "machines"
         ? record.image
         : resource === "huawei"
-          ? huaweiImagesByProductId.get(Number(record.id))?.[0]?.imageUrl
+          ? record.baseImageUrl || huaweiImagesByProductId.get(Number(record.id))?.[0]?.imageUrl
         : resource === "users"
           ? record.profileImage
           : record.imageUrl;

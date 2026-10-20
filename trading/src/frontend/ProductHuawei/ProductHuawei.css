@@ -93,7 +93,7 @@
 
 .huawei-product-category {
   margin: 0;
-  color: #8997a3;
+  color: var(--theme-text-muted);
   font-size: 13px;
   line-height: 1.35;
 }
@@ -120,7 +120,7 @@
 }
 
 .huawei-product-actions button span {
-  color: #7d8b96;
+  color: var(--theme-text-muted);
   font-size: 18px;
   line-height: 1;
   transition: transform 160ms ease, color 160ms ease;
@@ -143,6 +143,99 @@
 
 .huawei-product-actions button:disabled span {
   color: #6f7b82;
+}
+
+/* Huawei category tree: top-level families expand into selectable subcategories. */
+.huawei-product-page .huawei-category-tree {
+  display: grid;
+  gap: 0;
+}
+
+.huawei-product-page .huawei-category-branch {
+  border-bottom: 1px solid color-mix(in srgb, var(--theme-border) 78%, transparent);
+}
+
+.huawei-product-page .huawei-category-parent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 10px;
+  padding: 11px 0;
+  border: 0;
+  background: transparent;
+  color: var(--huawei-card-text);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.huawei-product-page .huawei-category-parent:hover,
+.huawei-product-page .huawei-category-branch.is-expanded .huawei-category-parent,
+.huawei-product-page .huawei-category-branch.is-selected .huawei-category-parent {
+  color: var(--huawei-red);
+}
+
+.huawei-product-page .huawei-category-parent small {
+  color: var(--huawei-card-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.huawei-product-page .huawei-category-toggle {
+  flex: 0 0 auto;
+  color: currentColor;
+  font-size: 21px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.huawei-product-page .huawei-category-children {
+  display: grid;
+  gap: 3px;
+  padding: 0 0 10px 12px;
+  border-left: 1px solid color-mix(in srgb, var(--huawei-red) 20%, var(--theme-border));
+}
+
+.huawei-product-page .huawei-category-child {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 5px 0;
+  border: 0;
+  background: transparent;
+  color: var(--huawei-card-muted);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+}
+
+.huawei-product-page .huawei-category-child span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.huawei-product-page .huawei-category-child:hover,
+.huawei-product-page .huawei-category-child.is-selected {
+  color: var(--huawei-card-text);
+}
+
+.huawei-product-page .huawei-category-child.is-selected {
+  color: var(--huawei-red);
+  font-weight: 600;
+}
+
+@media (max-width: 850px) {
+  .huawei-product-page .huawei-category-children {
+    padding-left: 14px;
+  }
 }
 
 .huawei-product-image-placeholder,
@@ -208,16 +301,16 @@
 /* Compact Huawei catalogue cards inspired by the reference product grid. */
 .huawei-product-page {
   --huawei-red: #c8102e;
-  --huawei-card-surface: #f7f7f7;
-  --huawei-card-border: #e9e9e9;
-  --huawei-card-text: #1d1d1f;
-  --huawei-card-muted: #777777;
-  background: #ffffff;
-  color: var(--huawei-card-text);
+  --huawei-card-surface: color-mix(in srgb, var(--theme-surface-2) 55%, var(--theme-surface-1));
+  --huawei-card-border: var(--theme-border);
+  --huawei-card-text: var(--theme-text-strong);
+  --huawei-card-muted: var(--theme-text-muted);
+  background: var(--theme-surface-0);
+  color: var(--theme-text-strong);
 }
 
 .huawei-product-page .product-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 36px 22px;
 }
 
@@ -225,7 +318,7 @@
   overflow: visible;
   border: 0;
   border-radius: 0;
-  background: #ffffff;
+  background: var(--theme-surface-1);
   box-shadow: none;
   transform: none;
 }
@@ -258,7 +351,7 @@
 
 .huawei-product-page .product-card-body {
   padding: 15px 0 0;
-  background: #ffffff;
+  background: var(--theme-surface-1);
 }
 
 .huawei-product-page .huawei-product-model {
@@ -287,7 +380,7 @@
 }
 
 .huawei-product-page .huawei-product-actions button span {
-  color: #8b8b8b;
+  color: var(--theme-text-muted);
   font-size: 19px;
 }
 
@@ -306,5 +399,134 @@
 @media (max-width: 560px) {
   .huawei-product-page .product-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Restore the original compact Huawei category navigation style. */
+@media (min-width: 851px) {
+  .huawei-product-page .product-layout {
+    grid-template-columns: 194px minmax(0, 1fr);
+    gap: 19px;
+  }
+
+  .huawei-product-page .product-filter {
+    width: 194px;
+    padding-right: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--theme-border) transparent;
+  }
+
+  .huawei-product-page .product-filter::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .huawei-product-page .product-filter::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .huawei-product-page .product-filter::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: var(--theme-border);
+  }
+}
+
+@media (min-width: 651px) and (max-width: 850px) {
+  .huawei-product-page .product-layout {
+    grid-template-columns: 170px minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .huawei-product-page .product-filter {
+    width: 170px;
+  }
+}
+
+.huawei-product-page .product-filter > h3 {
+  margin: 0;
+  padding-bottom: 9px;
+  font-size: 14px;
+  letter-spacing: normal;
+}
+
+.huawei-product-page .filter-group {
+  padding: 17px 0 15px;
+}
+
+.huawei-product-page .filter-group h4 {
+  margin: 0 0 11px;
+  letter-spacing: 0.4px;
+}
+
+.huawei-product-page .huawei-category-parent {
+  min-height: 0;
+  padding: 11px 0;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.huawei-product-page .huawei-category-parent small {
+  color: var(--huawei-card-muted);
+  font-weight: 400;
+}
+
+.huawei-product-page .huawei-category-children {
+  gap: 3px;
+  padding: 0 0 10px 12px;
+  border-left: 1px solid color-mix(in srgb, var(--huawei-red) 20%, var(--theme-border));
+}
+
+.huawei-product-page .huawei-category-child {
+  min-height: 0;
+  padding: 5px 0;
+  color: var(--huawei-card-muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.huawei-product-page .huawei-category-child span {
+  display: inline;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.huawei-product-page .huawei-category-child:hover {
+  color: var(--huawei-card-text);
+  transform: none;
+}
+
+/* Classic flat checkbox filters used by the original Huawei catalogue. */
+.huawei-product-page .filter-group label {
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 0;
+  border-radius: 0;
+  font-size: 13px;
+  line-height: 1.3;
+  transition: none;
+}
+
+.huawei-product-page .filter-group label:hover {
+  background: transparent;
+  transform: none;
+}
+
+.huawei-product-page .filter-group input {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  margin-top: 0;
+  border-radius: 2px;
+}
+
+@media (max-width: 650px) {
+  .huawei-product-page .product-layout {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .huawei-product-page .product-filter {
+    width: 100%;
   }
 }

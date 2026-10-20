@@ -4,6 +4,8 @@ import SnttLogo from "../../../assets/SNTT.png";
 import { useTheme } from "../ThemeContext";
 import "./Navbar.css";
 
+const publicAsset = (fileName) => `${import.meta.env.BASE_URL}iconNavbar/${fileName}`;
+
 const productPath = (parameters) => {
   if (parameters.collection === "huawei") {
     const huaweiSolutionPaths = {
@@ -77,20 +79,20 @@ const productCollections = [
         id: "residential-solution",
         label: "Residential Solutions",
         products: [
-          { id: "smart-string-ess", label: "Smart String ESS", model: "LUNA2000-5/7/10/12/14...", icon: "/iconNavbar/luna2000-7_14_21-s1.png" },
-          { id: "smart-energy-controller", label: "Smart Energy Controller", model: "SUN2000-12/15/17/20/25...", icon: "/iconNavbar/sun2000-12_15_17_20_25k-mb0.png" },
-          { id: "smart-module-controller", label: "Smart Module Controller", model: "SUN2000-600W-PA0", icon: "/iconNavbar/merc-600w-pa0.png" },
-          { id: "smart-guard", label: "Smart Guard", model: "SmartGuard-63A-S0", icon: "/iconNavbar/smartguard-63a-s0-aus0.png" },
+          { id: "smart-string-ess", label: "Smart String ESS", model: "LUNA2000-5/7/10/12/14...", icon: publicAsset("luna2000-7_14_21-s1.png") },
+          { id: "smart-energy-controller", label: "Smart Energy Controller", model: "SUN2000-12/15/17/20/25...", icon: publicAsset("sun2000-12_15_17_20_25k-mb0.png") },
+          { id: "smart-module-controller", label: "Smart Module Controller", model: "SUN2000-600W-PA0", icon: publicAsset("merc-600w-pa0.png") },
+          { id: "smart-guard", label: "Smart Guard", model: "SmartGuard-63A-S0", icon: publicAsset("smartguard-63a-s0-aus0.png") },
         ],
       },
       {
         id: "commercial-industrial-solutions",
         label: "Commercial & Industrial Solutions",
         products: [
-          { id: "smart-pv-controller", label: "Smart PV Controller", model: "SUN2000-150K-MG0", icon: "/iconNavbar/sun2000-150k-mg0.png" },
-          { id: "smart-module-controller", label: "Smart Module Controller", model: "MERC-1100/1300W-P", icon: "/iconNavbar/merc-1100-1300w-p.png" },
-          { id: "hybrid-cooling-grid-forming-ess", label: "C&I Hybrid Cooling Grid Forming ESS", model: "LUNA2000-241 Series", icon: "/iconNavbar/luna2000-215-series.png" },
-          { id: "accessories", label: "Accessories", model: "Smart Dongle - 4G", icon: "/iconNavbar/ci-smartdongle-4g.png" },
+          { id: "smart-pv-controller", label: "Smart PV Controller", model: "SUN2000-150K-MG0", icon: publicAsset("sun2000-150k-mg0.png") },
+          { id: "smart-module-controller", label: "Smart Module Controller", model: "MERC-1100/1300W-P", icon: publicAsset("merc-1100-1300w-p.png") },
+          { id: "hybrid-cooling-grid-forming-ess", label: "C&I Hybrid Cooling Grid Forming ESS", model: "LUNA2000-241 Series", icon: publicAsset("luna2000-215-series.png") },
+          { id: "accessories", label: "Accessories", model: "Smart Dongle - 4G", icon: publicAsset("ci-smartdongle-4g.png") },
         ],
       },
       {
@@ -150,8 +152,6 @@ const locationLinks = [
 
 const referenceLinks = [
   { id: "chint", label: "Project Reference (CHINT)" },
-  { id: "power-transmission-factory", label: "Power Transmission (Factory)" },
-  { id: "distribution-factory", label: "Distribution (Factory)" },
 ];
 
 const Navbar = () => {

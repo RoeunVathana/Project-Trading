@@ -26,12 +26,73 @@ const formatDate = (value) => {
   return Number.isNaN(date.getTime()) ? "—" : date.toISOString().slice(0, 10);
 };
 
-const getCategoryName = (product, categories) => {
-  if (typeof product.category === "string" && product.category.trim()) return product.category;
-  if (product.category?.name) return product.category.name;
-  if (product.categoryName) return product.categoryName;
-  return categories.find((category) => Number(category.id) === Number(product.categoryId))?.name || "Uncategorized";
+const getCategoryIds = (product) => {
+  if (Array.isArray(product?.categoryIds) && product.categoryIds.length) return product.categoryIds;
+  if (typeof product?.categoryIds === "string" && product.categoryIds.trim()) {
+    return product.categoryIds.split(",").map((value) => value.trim()).filter(Boolean);
+  }
+  return product?.categoryId ? [product.categoryId] : [];
 };
+
+const sortHuaweiCategories = (left, right) =>
+  Number(left.displayOrder || 0) - Number(right.displayOrder || 0)
+  || Number(left.id) - Number(right.id);
+
+const buildHuaweiCategoryTree = (categories, products) => {
+  const activeCategories = categories.filter((category) => category.isActive !== false);
+  const categoryById = new Map(activeCategories.map((category) => [String(category.id), category]));
+  const childrenByParent = new Map();
+
+  activeCategories.forEach((category) => {
+    const parentKey = category.parentId === null || category.parentId === undefined || category.parentId === ""
+      ? null
+      : String(category.parentId);
+    const children = childrenByParent.get(parentKey) || [];
+    children.push(category);
+    childrenByParent.set(parentKey, children);
+  });
+  childrenByParent.forEach((children) => children.sort(sortHuaweiCategories));
+
+  const getDescendantIds = (categoryId, visited = new Set()) => {
+    const key = String(categoryId);
+    if (visited.has(key)) return [];
+    const nextVisited = new Set(visited);
+    nextVisited.add(key);
+    return [key, ...(childrenByParent.get(key) || []).flatMap((child) => getDescendantIds(child.id, nextVisited))];
+  };
+
+  const buildNode = (category) => {
+    const descendantIds = getDescendantIds(category.id);
+    return {
+      ...category,
+      children: (childrenByParent.get(String(category.id)) || []).map(buildNode),
+      descendantIds,
+      productCount: products.filter((product) => getCategoryIds(product)
+        .some((categoryId) => descendantIds.includes(String(categoryId)))).length,
+    };
+  };
+
+  return (childrenByParent.get(null) || activeCategories.filter((category) => !categoryById.has(String(category.parentId))))
+    .sort(sortHuaweiCategories)
+    .map(buildNode);
+};
+
+const getCategoryNames = (product, categories) => {
+  const names = [];
+  if (typeof product.category === "string" && product.category.trim()) names.push(product.category);
+  if (product.category?.name) names.push(product.category.name);
+  if (product.categoryName) names.push(product.categoryName);
+  if (Array.isArray(product.categories)) {
+    product.categories.forEach((category) => category?.name && names.push(category.name));
+  }
+  getCategoryIds(product).forEach((categoryId) => {
+    const category = categories.find((item) => Number(item.id) === Number(categoryId));
+    if (category?.name) names.push(category.name);
+  });
+  return [...new Set(names)].filter(Boolean);
+};
+
+const getCategoryName = (product, categories) => getCategoryNames(product, categories)[0] || "Uncategorized";
 
 const normalizeCategoryName = (category) => {
   const categoryName = typeof category === "object" ? category?.name || category?.slug : category;
@@ -55,6 +116,7 @@ const getLearnMorePath = (product) => {
 
   const categoryValues = [
     product.category,
+    ...(product.categoryNames || []),
     product.categoryName,
     product.categorySlug,
     product.category?.slug,
@@ -95,12 +157,14 @@ const normalizeHuaweiProduct = (product, categories = [], imageRows = [], pdfRow
     : pdfRows.filter((pdf) => Number(pdf.productId) === Number(product.id)))
     .filter((pdf) => pdf.isPublished !== false)
     .map((pdf) => ({ ...pdf, filePath: toMediaUrl(pdf.filePath) }));
-  const categoryName = getCategoryName(product, categories);
+  const categoryNames = getCategoryNames(product, categories);
+  const categoryName = categoryNames[0] || getCategoryName(product, categories);
   const productName = product.productName || product.name || product.modelCode;
   const productModel = product.modelCode || product.model || "";
   const categoryRecord = product.category && typeof product.category === "object"
     ? product.category
-    : categories.find((category) => Number(category.id) === Number(product.categoryId));
+    : categories.find((category) => Number(category.id) === Number(getCategoryIds(product)[0]));
+  const baseImage = product.baseImageUrl || product.base_image_url || primaryImage?.imageUrl;
 
   return {
     ...product,
@@ -108,14 +172,16 @@ const normalizeHuaweiProduct = (product, categories = [], imageRows = [], pdfRow
     name: productName,
     model: productModel,
     category: categoryName,
+    categoryIds: getCategoryIds(product),
+    categoryNames,
     categorySlug: categoryRecord?.slug || "",
-    displayCategory: categoryName,
+    displayCategory: categoryNames.join(" · ") || categoryName,
     imageAltText,
-    image: toMediaUrl(primaryImage?.imageUrl),
+    image: toMediaUrl(baseImage),
     gallery,
     pdfs: productPdfs,
     description: product.description || product.shortDescription || "",
-    searchText: [productName, productModel, categoryName, product.description, product.shortDescription]
+    searchText: [productName, productModel, ...categoryNames, product.description, product.shortDescription]
       .filter(Boolean)
       .join(" ")
       .toLowerCase(),
@@ -174,17 +240,49 @@ const HuaweiCatalog = () => {
     };
   }, []);
 
+  const categoryTree = useMemo(
+    () => buildHuaweiCategoryTree(categories, products),
+    [categories, products],
+  );
+
+  const categoryScopes = useMemo(() => {
+    const scopes = new Map();
+    const equivalentCategoryIds = new Map();
+    categories.forEach((category) => {
+      const nameKey = normalizeCategoryName(category);
+      const ids = equivalentCategoryIds.get(nameKey) || [];
+      ids.push(String(category.id));
+      equivalentCategoryIds.set(nameKey, ids);
+    });
+    const addNode = (node) => {
+      const sameNameIds = equivalentCategoryIds.get(normalizeCategoryName(node)) || [];
+      scopes.set(String(node.id), [...new Set([...node.descendantIds, ...sameNameIds])]);
+      node.children.forEach(addNode);
+    };
+    categoryTree.forEach(addNode);
+    return scopes;
+  }, [categories, categoryTree]);
+
   const categoriesWithProducts = useMemo(() => {
+    const seenNames = new Set();
     return categories
       .filter((category) => category.isActive !== false && category.parentId !== null && category.parentId !== undefined)
-      .sort((left, right) => Number(left.displayOrder || 0) - Number(right.displayOrder || 0) || Number(left.id) - Number(right.id));
+      .sort(sortHuaweiCategories)
+      .filter((category) => {
+        const nameKey = normalizeCategoryName(category);
+        if (seenNames.has(nameKey)) return false;
+        seenNames.add(nameKey);
+        return true;
+      });
   }, [categories]);
 
   const popularCategories = useMemo(() => {
     const productCounts = new Map();
     products.forEach((product) => {
-      const key = String(product.categoryId);
-      productCounts.set(key, (productCounts.get(key) || 0) + 1);
+      getCategoryIds(product).forEach((categoryId) => {
+        const key = String(categoryId);
+        productCounts.set(key, (productCounts.get(key) || 0) + 1);
+      });
     });
 
     return categoriesWithProducts
@@ -192,6 +290,7 @@ const HuaweiCatalog = () => {
       ...category,
       productCount: productCounts.get(String(category.id)) || 0,
     }))
+    .filter((category) => category.productCount > 0)
     .sort((left, right) => right.productCount - left.productCount || Number(left.displayOrder) - Number(right.displayOrder));
   }, [categoriesWithProducts, products]);
 
@@ -200,14 +299,18 @@ const HuaweiCatalog = () => {
     const activeCategoryIds = Object.keys(selectedCategories).filter((id) => selectedCategories[id]);
     return products.filter((product) => {
       const searchMatch = !normalizedSearch || product.searchText.includes(normalizedSearch);
-      const categoryMatch = !activeCategoryIds.length || activeCategoryIds.includes(String(product.categoryId));
+      const productCategoryIds = getCategoryIds(product).map((categoryId) => String(categoryId));
+      const categoryMatch = !activeCategoryIds.length || activeCategoryIds.some((categoryId) => {
+        const scope = categoryScopes.get(categoryId) || [categoryId];
+        return scope.some((scopeId) => productCategoryIds.includes(scopeId));
+      });
       return searchMatch && categoryMatch;
     });
-  }, [appliedSearch, products, selectedCategories]);
+  }, [appliedSearch, categoryScopes, products, selectedCategories]);
 
-  const toggleCategory = (categoryId) => {
+  const selectCategory = (categoryId) => {
     const key = String(categoryId);
-    setSelectedCategories((current) => ({ ...current, [key]: !current[key] }));
+    setSelectedCategories((current) => (current[key] ? {} : { [key]: true }));
   };
 
   const resetFilters = () => {
@@ -238,7 +341,7 @@ const HuaweiCatalog = () => {
                   <input
                     type="checkbox"
                     checked={Boolean(selectedCategories[String(category.id)])}
-                    onChange={() => toggleCategory(category.id)}
+                    onChange={() => selectCategory(category.id)}
                   />
                   <span>{category.name}</span>
                 </label>
@@ -368,7 +471,9 @@ const HuaweiProductDetail = () => {
         const allProducts = (Array.isArray(productRows) ? productRows : [])
           .filter((item) => String(item.status || "PUBLISHED").toUpperCase() === "PUBLISHED")
           .map((item) => normalizeHuaweiProduct(item, safeCategories, imagesByProductId));
-        setSimilarProducts(allProducts.filter((item) => String(item.id) !== String(id) && Number(item.categoryId) === Number(normalized.categoryId)).slice(0, 4));
+        const normalizedCategoryIds = getCategoryIds(normalized).map((categoryId) => String(categoryId));
+        setSimilarProducts(allProducts.filter((item) => String(item.id) !== String(id)
+          && getCategoryIds(item).some((categoryId) => normalizedCategoryIds.includes(String(categoryId)))).slice(0, 4));
       } catch (loadError) {
         if (active) setError(loadError.message || "Unable to load this Huawei product.");
       } finally {
@@ -404,7 +509,7 @@ const HuaweiProductDetail = () => {
       <div className="product-detail-breadcrumb">
         <button type="button" onClick={() => navigate("/")}>Home</button><span>›</span>
         <button type="button" onClick={() => navigate("/product-huawei")}>Product Huawei</button><span>›</span>
-        <span>{product.category}</span><span>›</span><strong>{product.model}</strong>
+        <span>{product.displayCategory}</span><span>›</span><strong>{product.model}</strong>
       </div>
 
       <section className="product-detail-hero">
@@ -425,7 +530,7 @@ const HuaweiProductDetail = () => {
         <div className="product-detail-information">
           <div className="product-detail-label"><span /> HUAWEI SMART ENERGY SOLUTION</div>
           <h1>{product.name}</h1>
-          <div className="product-detail-tags"><span>{product.brandName || "Huawei"}</span><span>{product.model}</span><span>{product.category}</span><span>{product.status || "PUBLISHED"}</span></div>
+          <div className="product-detail-tags"><span>{product.brandName || "Huawei"}</span><span>{product.model}</span><span>{product.displayCategory}</span><span>{product.status || "PUBLISHED"}</span></div>
           <p className="product-detail-description">{product.description || `Explore the ${product.name} Huawei smart-energy solution.`}</p>
           <div className="product-detail-features">
             <div className="detail-feature"><strong>{product.brandName || "Huawei"}</strong><span>Brand</span></div>
@@ -446,7 +551,7 @@ const HuaweiProductDetail = () => {
             <div className="product-info-overview" role="tabpanel">
               <h3>Product summary</h3>
               <div className="product-info-overview-grid">
-                <section className="product-info-group"><h4>CATALOG INFORMATION</h4><ul><li><span className="product-info-item-label">Category</span>: {product.category}</li><li><span className="product-info-item-label">Model code</span>: {product.model}</li><li><span className="product-info-item-label">Brand</span>: {product.brandName || "Huawei"}</li><li><span className="product-info-item-label">Status</span>: {product.status || "PUBLISHED"}</li></ul></section>
+                <section className="product-info-group"><h4>CATALOG INFORMATION</h4><ul><li><span className="product-info-item-label">Categories</span>: {product.displayCategory}</li><li><span className="product-info-item-label">Model code</span>: {product.model}</li><li><span className="product-info-item-label">Brand</span>: {product.brandName || "Huawei"}</li><li><span className="product-info-item-label">Status</span>: {product.status || "PUBLISHED"}</li></ul></section>
                 <section className="product-info-group"><h4>DESCRIPTION</h4><ul><li>{product.description || "No additional description is available for this product."}</li></ul></section>
               </div>
             </div>
@@ -460,10 +565,10 @@ const HuaweiProductDetail = () => {
 
       <section className="technical-specifications">
         <div className="technical-heading"><h2>Catalog Details</h2><p>Key information for the {product.model} Huawei product.</p></div>
-        <div className="specification-table-wrapper has-specifications"><table className="specification-table"><thead><tr><th>FIELD</th><th>VALUE</th></tr></thead><tbody><tr><td>Product</td><td className="cyan-value">{product.name}</td></tr><tr><td>Model code</td><td className="cyan-value">{product.model}</td></tr><tr><td>Category</td><td className="cyan-value">{product.category}</td></tr><tr><td>PDF documents</td><td className="cyan-value">{product.pdfs?.length || 0}</td></tr></tbody></table></div>
+        <div className="specification-table-wrapper has-specifications"><table className="specification-table"><thead><tr><th>FIELD</th><th>VALUE</th></tr></thead><tbody><tr><td>Product</td><td className="cyan-value">{product.name}</td></tr><tr><td>Model code</td><td className="cyan-value">{product.model}</td></tr><tr><td>Categories</td><td className="cyan-value">{product.displayCategory}</td></tr><tr><td>PDF documents</td><td className="cyan-value">{product.pdfs?.length || 0}</td></tr></tbody></table></div>
       </section>
 
-      {similarProducts.length > 0 && <section className="similar-products" aria-labelledby="huawei-similar-products-title"><div className="similar-products-heading"><h2 id="huawei-similar-products-title"><span aria-hidden="true" /> Similar Huawei Products</h2></div><div className="similar-products-grid">{similarProducts.map((similarProduct) => <article className="similar-product-card" key={similarProduct.id}><div className="similar-product-image">{similarProduct.image ? <img src={similarProduct.image} alt={similarProduct.name} loading="lazy" decoding="async" /> : <div className="huawei-product-image-placeholder"><span>HUAWEI</span></div>}</div><div className="similar-product-copy"><span className="similar-product-category">{similarProduct.category}</span><h3>{similarProduct.name}</h3><span className="similar-product-model">{similarProduct.model}</span></div><div className="similar-product-actions"><button type="button" className="similar-product-view" onClick={() => { const path = getLearnMorePath(similarProduct); navigate(path || `/product-huawei/${similarProduct.id}`, { state: { product: similarProduct } }); }}>View Details</button><button type="button" className="similar-product-documents" onClick={() => navigate(`/product-huawei/${similarProduct.id}/downloads`)}>PDF Library <span aria-hidden="true">↓</span></button></div></article>)}</div></section>}
+      {similarProducts.length > 0 && <section className="similar-products" aria-labelledby="huawei-similar-products-title"><div className="similar-products-heading"><h2 id="huawei-similar-products-title"><span aria-hidden="true" /> Similar Huawei Products</h2></div><div className="similar-products-grid">{similarProducts.map((similarProduct) => <article className="similar-product-card" key={similarProduct.id}><div className="similar-product-image">{similarProduct.image ? <img src={similarProduct.image} alt={similarProduct.name} loading="lazy" decoding="async" /> : <div className="huawei-product-image-placeholder"><span>HUAWEI</span></div>}</div><div className="similar-product-copy"><span className="similar-product-category">{similarProduct.displayCategory}</span><h3>{similarProduct.name}</h3><span className="similar-product-model">{similarProduct.model}</span></div><div className="similar-product-actions"><button type="button" className="similar-product-view" onClick={() => { const path = getLearnMorePath(similarProduct); navigate(path || `/product-huawei/${similarProduct.id}`, { state: { product: similarProduct } }); }}>View Details</button><button type="button" className="similar-product-documents" onClick={() => navigate(`/product-huawei/${similarProduct.id}/downloads`)}>PDF Library <span aria-hidden="true">↓</span></button></div></article>)}</div></section>}
     </div>
   );
 };
