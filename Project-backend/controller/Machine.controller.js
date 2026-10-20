@@ -17,6 +17,7 @@ const { logError } = require("../middlewares/LogError");
 const MACHINE_FIELDS = [
   "name",
   "model",
+  "division",
   "description",
   "categoryId",
   "image",
@@ -30,12 +31,13 @@ const MACHINE_FIELDS = [
 
 const REQUIRED_FIELDS = ["name", "model", "categoryId"];
 const REQUIRED_STRING_FIELDS = ["name", "model"];
+const CATALOG_DIVISIONS = new Set(["chint", "factory"]);
 const MACHINE_PAGE_SIZE = 10;
 
 const categoryAssociation = () => ({
   model: Category,
   as: "category",
-  attributes: ["id", "name", "description", "status"],
+  attributes: ["id", "name", "division", "description", "status"],
 });
 
 const machineIncludes = () => [
@@ -92,6 +94,13 @@ const parseMachinePayload = (body, requireRequiredFields = false) => {
     if (!Object.prototype.hasOwnProperty.call(body, field)) continue;
 
     const value = body[field];
+    if (field === "division") {
+      if (typeof value !== "string" || !CATALOG_DIVISIONS.has(value.trim().toLowerCase())) {
+        return { error: "division must be either chint or factory." };
+      }
+      values.division = value.trim().toLowerCase();
+      continue;
+    }
     if (field === "categoryId") {
       const categoryId = parseMachineId(value);
       if (!categoryId) {
@@ -152,6 +161,20 @@ const getMachines = async (req, res) => {
 
     const filters = [];
     const queryFields = ["name", "model", "description", "machineType"];
+
+    const requestedDivision = req.query.division;
+    if (requestedDivision !== undefined && requestedDivision !== "") {
+      if (
+        typeof requestedDivision !== "string" ||
+        !CATALOG_DIVISIONS.has(requestedDivision.trim().toLowerCase())
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "division must be either chint or factory.",
+        });
+      }
+      filters.push({ division: requestedDivision.trim().toLowerCase() });
+    }
 
     for (const field of queryFields) {
       const queryValue = req.query[field];

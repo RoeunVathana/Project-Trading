@@ -204,3 +204,107 @@
   cursor: not-allowed;
   opacity: 0.4;
 }
+
+/* Compact Huawei catalogue cards inspired by the reference product grid. */
+.huawei-product-page {
+  --huawei-red: #c8102e;
+  --huawei-card-surface: #f7f7f7;
+  --huawei-card-border: #e9e9e9;
+  --huawei-card-text: #1d1d1f;
+  --huawei-card-muted: #777777;
+  background: #ffffff;
+  color: var(--huawei-card-text);
+}
+
+.huawei-product-page .product-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 36px 22px;
+}
+
+.huawei-product-page .product-card {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+  transform: none;
+}
+
+.huawei-product-page .product-card:hover {
+  border-color: transparent;
+  box-shadow: none;
+  transform: translateY(-2px);
+}
+
+.huawei-product-page .product-image {
+  aspect-ratio: 1.12 / 1;
+  border: 1px solid var(--huawei-card-border);
+  background: var(--huawei-card-surface);
+}
+
+.huawei-product-page .product-image img {
+  padding: 9%;
+  object-fit: contain;
+  transition: transform 240ms ease;
+}
+
+.huawei-product-page .product-card:hover .product-image img {
+  transform: scale(1.025);
+}
+
+.huawei-product-page .product-badge {
+  display: none;
+}
+
+.huawei-product-page .product-card-body {
+  padding: 15px 0 0;
+  background: #ffffff;
+}
+
+.huawei-product-page .huawei-product-model {
+  margin-bottom: 5px;
+  color: var(--huawei-card-text);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.huawei-product-page .huawei-product-category {
+  color: var(--huawei-card-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.huawei-product-page .huawei-product-actions {
+  gap: 26px;
+  margin-top: 14px;
+}
+
+.huawei-product-page .huawei-product-actions button {
+  color: var(--huawei-card-text);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.huawei-product-page .huawei-product-actions button span {
+  color: #8b8b8b;
+  font-size: 19px;
+}
+
+.huawei-product-page .huawei-product-actions button:hover,
+.huawei-product-page .huawei-product-actions button:hover span {
+  color: var(--huawei-red);
+}
+
+@media (max-width: 1000px) {
+  .huawei-product-page .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px 18px;
+  }
+}
+
+@media (max-width: 560px) {
+  .huawei-product-page .product-grid {
+    grid-template-columns: 1fr;
+  }
+}

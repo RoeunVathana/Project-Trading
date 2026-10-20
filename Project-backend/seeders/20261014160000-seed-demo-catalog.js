@@ -6,16 +6,19 @@ const bcrypt = require("bcryptjs");
 const categoriesToSeed = [
   {
     name: "Milling Centers",
+    division: "factory",
     description: "High-precision CNC milling machines for industrial production.",
     status: "active",
   },
   {
     name: "Turning Centers",
+    division: "factory",
     description: "Reliable CNC turning solutions for demanding applications.",
     status: "active",
   },
   {
     name: "Power Distribution",
+    division: "chint",
     description: "Low-voltage equipment for safe and efficient power distribution.",
     status: "active",
   },
@@ -25,6 +28,7 @@ const machinesToSeed = [
   {
     name: "Precision Pro 5K",
     model: "EFS-CNC-5000",
+    division: "factory",
     category: "Milling Centers",
     description: "A high-speed five-axis milling center for precision production.",
     machineType: "Milling center",
@@ -37,6 +41,7 @@ const machinesToSeed = [
   {
     name: "TurnMaster 2K",
     model: "TM-CNC-2000",
+    division: "factory",
     category: "Turning Centers",
     description: "A compact CNC turning center for repeatable production work.",
     machineType: "Turning center",
@@ -49,6 +54,7 @@ const machinesToSeed = [
   {
     name: "Smart Power Breaker",
     model: "EFS-LV-6300",
+    division: "chint",
     category: "Power Distribution",
     description: "A configurable low-voltage breaker for industrial distribution systems.",
     machineType: "Low-voltage breaker",
@@ -148,6 +154,7 @@ module.exports = {
       const machineRows = machinesToSeed.map((machine) => ({
         name: machine.name,
         model: machine.model,
+        division: machine.division,
         description: machine.description,
         categoryId: categoryIds.get(machine.category.toLowerCase()),
         image: media.image,

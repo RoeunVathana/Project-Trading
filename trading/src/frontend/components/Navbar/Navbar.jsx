@@ -75,22 +75,22 @@ const productCollections = [
     solutions: [
       {
         id: "residential-solution",
-        label: "Residential Solution",
+        label: "Residential Solutions",
         products: [
-          { id: "smart-string-ess", label: "Smart String ESS" },
-          { id: "smart-energy-controller", label: "Smart Energy Controller" },
-          { id: "smart-module-controller", label: "Smart Module Controller" },
-          { id: "smart-guard", label: "Smart Guard" },
+          { id: "smart-string-ess", label: "Smart String ESS", model: "LUNA2000-5/7/10/12/14...", icon: "/iconNavbar/luna2000-7_14_21-s1.png" },
+          { id: "smart-energy-controller", label: "Smart Energy Controller", model: "SUN2000-12/15/17/20/25...", icon: "/iconNavbar/sun2000-12_15_17_20_25k-mb0.png" },
+          { id: "smart-module-controller", label: "Smart Module Controller", model: "SUN2000-600W-PA0", icon: "/iconNavbar/merc-600w-pa0.png" },
+          { id: "smart-guard", label: "Smart Guard", model: "SmartGuard-63A-S0", icon: "/iconNavbar/smartguard-63a-s0-aus0.png" },
         ],
       },
       {
         id: "commercial-industrial-solutions",
         label: "Commercial & Industrial Solutions",
         products: [
-          { id: "smart-pv-controller", label: "Smart PV Controller" },
-          { id: "smart-module-controller", label: "Smart Module Controller" },
-          { id: "hybrid-cooling-grid-forming-ess", label: "Hybrid Cooling Grid Forming ESS" },
-          { id: "accessories", label: "Accessories" },
+          { id: "smart-pv-controller", label: "Smart PV Controller", model: "SUN2000-150K-MG0", icon: "/iconNavbar/sun2000-150k-mg0.png" },
+          { id: "smart-module-controller", label: "Smart Module Controller", model: "MERC-1100/1300W-P", icon: "/iconNavbar/merc-1100-1300w-p.png" },
+          { id: "hybrid-cooling-grid-forming-ess", label: "C&I Hybrid Cooling Grid Forming ESS", model: "LUNA2000-241 Series", icon: "/iconNavbar/luna2000-215-series.png" },
+          { id: "accessories", label: "Accessories", model: "Smart Dongle - 4G", icon: "/iconNavbar/ci-smartdongle-4g.png" },
         ],
       },
       {
@@ -167,6 +167,12 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const nextTheme = theme === "dark" ? "light" : "dark";
+
+  useEffect(() => {
+    if (!location.pathname.startsWith("/product-huawei")) return;
+    setActiveCollection("huawei");
+    setActiveSolution("residential-solution");
+  }, [location.pathname]);
 
   const selectedCollection = productCollections.find(
     (collection) => collection.id === activeCollection,
@@ -450,12 +456,23 @@ const Navbar = () => {
                 </Link>
                 {selectedSolution.products.map((product) => (
                   <Link
-                    className="product-mega-product-link"
+                    className={"product-mega-product-link" + (product.icon ? " has-image" : "")}
                     to={selectedProductPath(product)}
                     onClick={closeMenu}
                     key={product.id}
                   >
-                    {product.label}
+                    {product.icon && (
+                      <img
+                        className="product-mega-product-image"
+                        src={product.icon}
+                        alt=""
+                        loading="lazy"
+                      />
+                    )}
+                    <span>
+                      <strong>{product.label}</strong>
+                      {product.model && <small>Model: {product.model}</small>}
+                    </span>
                   </Link>
                 ))}
               </div>
@@ -577,3 +594,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+

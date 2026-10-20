@@ -20,6 +20,12 @@ module.exports = (sequelize, DataTypes) => {
         unique: true,
       },
 
+      division: {
+        type: DataTypes.STRING(32),
+        allowNull: false,
+        defaultValue: "chint",
+      },
+
       description: {
         type: DataTypes.TEXT,
         allowNull: true,

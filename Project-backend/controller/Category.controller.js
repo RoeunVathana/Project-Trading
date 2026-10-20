@@ -2,7 +2,8 @@ const { Category, Machine } = require("../models");
 const { fn, col } = require("sequelize");
 const { logError } = require("../middlewares/LogError");
 
-const CATEGORY_FIELDS = ["name", "description", "status"];
+const CATEGORY_FIELDS = ["name", "division", "description", "status"];
+const CATALOG_DIVISIONS = new Set(["chint", "factory"]);
 
 const parseCategoryId = (value) => {
   if (typeof value !== "string" || !/^\d+$/.test(value)) return null;
@@ -19,6 +20,14 @@ const parseCategoryPayload = (body, requireName = false) => {
   for (const field of CATEGORY_FIELDS) {
     if (!Object.prototype.hasOwnProperty.call(body, field)) continue;
     const value = body[field];
+
+    if (field === "division") {
+      if (typeof value !== "string" || !CATALOG_DIVISIONS.has(value.trim().toLowerCase())) {
+        return { error: "division must be either chint or factory." };
+      }
+      values.division = value.trim().toLowerCase();
+      continue;
+    }
 
     if (field === "name") {
       if (typeof value !== "string" || !value.trim()) {
@@ -55,9 +64,20 @@ const parseCategoryPayload = (body, requireName = false) => {
   return { values };
 };
 
-const getCategories = async (_req, res) => {
+const getCategories = async (req, res) => {
   try {
-    const categories = await Category.findAll({ order: [["id", "DESC"]] });
+    const where = {};
+    if (req.query.division !== undefined && req.query.division !== "") {
+      const division = String(req.query.division).trim().toLowerCase();
+      if (!CATALOG_DIVISIONS.has(division)) {
+        return res.status(400).json({
+          success: false,
+          message: "division must be either chint or factory.",
+        });
+      }
+      where.division = division;
+    }
+    const categories = await Category.findAll({ where, order: [["id", "DESC"]] });
     return res.status(200).json({ success: true, data: categories });
   } catch (error) {
     return logError("Category", error, res, "Unable to retrieve categories.");
@@ -76,11 +96,23 @@ const getTopCategories = async (req, res) => {
     }
 
     const limit = Math.min(requestedLimit, 10);
+    const where = { status: "active" };
+    if (req.query.division !== undefined && req.query.division !== "") {
+      const division = String(req.query.division).trim().toLowerCase();
+      if (!CATALOG_DIVISIONS.has(division)) {
+        return res.status(400).json({
+          success: false,
+          message: "division must be either chint or factory.",
+        });
+      }
+      where.division = division;
+    }
     const categories = await Category.findAll({
-      where: { status: "active" },
+      where,
       attributes: [
         "id",
         "name",
+        "division",
         [fn("COUNT", col("machines.id")), "machineCount"],
         [fn("SUM", col("machines.viewCount")), "viewCount"],
       ],
@@ -92,7 +124,7 @@ const getTopCategories = async (req, res) => {
           required: true,
         },
       ],
-      group: ["Category.id", "Category.name"],
+      group: ["Category.id", "Category.name", "Category.division"],
       order: [
         [fn("SUM", col("machines.viewCount")), "DESC"],
         [fn("COUNT", col("machines.id")), "DESC"],

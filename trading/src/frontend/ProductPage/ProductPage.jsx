@@ -4,7 +4,11 @@ import { fetchCachedJson } from "../apiCache";
 
 import fallbackProducts from "./DataProduct";
 import EngineeringSection from "./EngineeringSection";
-import { toSpecificationEntries } from "./specificationUtils";
+import {
+  formatSpecificationSection,
+  splitSpecificationValue,
+  toSpecificationEntries,
+} from "./specificationUtils";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const API_BASE_URL = (
@@ -36,6 +40,18 @@ const MACHINE_TYPE_OPTIONS = [
   { slug: "electricity-meter", label: "Electricity Meter" },
 ];
 
+const toCardSpecificationRows = (entries) => (entries || [])
+  .flatMap((entry) => splitSpecificationValue(entry.value).map((value) => {
+    const inlineLabel = !entry.label
+      ? value.match(/^([^:]{1,80}):\s*(.+)$/)
+      : null;
+    const label = inlineLabel?.[1] || entry.label || formatSpecificationSection(entry.section);
+    const displayValue = inlineLabel?.[2] || value;
+
+    return [String(label).replace(/:\s*$/, ""), displayValue];
+  }))
+  .filter(([, value]) => value);
+
 const toProduct = (machine) => {
   const categoryName = machine.category?.name || "Uncategorized";
   const rawMachineType = String(machine.machineType || "").trim();
@@ -46,9 +62,7 @@ const toProduct = (machine) => {
   const precisionNumber = Number.parseFloat(precisionValue);
   const availabilityValue = String(machine.availability || "").toLowerCase();
   const specificationEntries = toSpecificationEntries(machine.specs);
-  const specs = specificationEntries
-    .map((entry) => [entry.label || entry.section, entry.value])
-    .filter(([, value]) => value);
+  const specs = toCardSpecificationRows(specificationEntries);
 
   if (specs.length === 0) {
     [
@@ -64,7 +78,9 @@ const toProduct = (machine) => {
   return {
     ...machine,
     image: toMediaUrl(machine.image) || fallbackProducts[0]?.image || "",
-    gallery: (machine.gallery || []).map((image) => toMediaUrl(image.imageUrl)),
+    gallery: (machine.gallery || [])
+      .map((image) => toMediaUrl(typeof image === "string" ? image : image?.imageUrl))
+      .filter(Boolean),
     category: categoryName.toUpperCase(),
     searchText: [machine.name, machine.model, categoryName, rawMachineType, machine.description]
       .filter(Boolean)
@@ -135,6 +151,7 @@ const ProductPage = () => {
     (option) => option.slug === productSlug,
   );
   const selectedMachineType = selectedMachineTypeOption?.label || "";
+  const selectedDivision = collection === "factory" ? "factory" : "chint";
   const productContext = productContexts[collection] || productContexts.chint;
   const [products, setProducts] = useState([]);
   const [nextPage, setNextPage] = useState(1);
@@ -157,6 +174,7 @@ const ProductPage = () => {
 
       try {
         const query = new URLSearchParams({ page: String(pageToLoad) });
+        query.set("division", selectedDivision);
         if (selectedMachineType) query.set("machineType", selectedMachineType);
 
         const result = await fetchCachedJson(
@@ -198,13 +216,13 @@ const ProductPage = () => {
         if (requestId === loadRequestRef.current) setLoading(false);
       }
     },
-    [selectedMachineType],
+    [selectedDivision, selectedMachineType],
   );
 
   const loadTopCategories = useCallback(async () => {
     try {
       const result = await fetchCachedJson(
-        `${API_BASE_URL}/api/categories/top?limit=5`,
+        `${API_BASE_URL}/api/categories/top?limit=5&division=${selectedDivision}`,
       );
 
       setTopCategories(
@@ -221,11 +239,11 @@ const ProductPage = () => {
       // Category ranking is optional; the local fallback still works with loaded products.
       setTopCategories([]);
     }
-  }, []);
+  }, [selectedDivision]);
 
   const loadCategories = useCallback(async () => {
     try {
-      const result = await fetchCachedJson(`${API_BASE_URL}/api/categories`);
+      const result = await fetchCachedJson(`${API_BASE_URL}/api/categories?division=${selectedDivision}`);
 
       setCategoryOptions(
         (Array.isArray(result.data) ? result.data : [])
@@ -239,7 +257,7 @@ const ProductPage = () => {
     } catch {
       setCategoryOptions([]);
     }
-  }, []);
+  }, [selectedDivision]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {

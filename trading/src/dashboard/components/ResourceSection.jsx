@@ -1,6 +1,22 @@
 import { useState } from "react";
 import { TABLE_COLUMNS } from "../dashboardConfig";
 
+const getPaginationItems = (pageCount, currentPage) => {
+  if (pageCount <= 7) {
+    return Array.from({ length: pageCount }, (_, index) => index + 1);
+  }
+
+  if (currentPage <= 4) {
+    return [1, 2, 3, 4, 5, "ellipsis-end", pageCount];
+  }
+
+  if (currentPage >= pageCount - 3) {
+    return [1, "ellipsis-start", pageCount - 4, pageCount - 3, pageCount - 2, pageCount - 1, pageCount];
+  }
+
+  return [1, "ellipsis-start", currentPage - 1, currentPage, currentPage + 1, "ellipsis-end", pageCount];
+};
+
 const ResourceSection = ({
   activeSection,
   activeConfig,
@@ -22,6 +38,7 @@ const ResourceSection = ({
   const pageSize = 10;
   const pageCount = Math.max(1, Math.ceil(filteredRecords.length / pageSize));
   const currentPage = Math.min(pageState.key === filterKey ? pageState.page : 1, pageCount);
+  const paginationItems = getPaginationItems(pageCount, currentPage);
   const visibleRecords = shouldPaginate
     ? filteredRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     : filteredRecords;
@@ -42,7 +59,7 @@ const ResourceSection = ({
         <p>{activeConfig.description}</p>
       </div>
       <button type="button" className="dashboard-primary-button" onClick={onCreate}>
-        <span>＋</span> Add {activeConfig.singular}
+        <span>{"\uFF0B"}</span> Add {activeConfig.singular}
       </button>
     </section>
 
@@ -50,7 +67,7 @@ const ResourceSection = ({
       <div className="resource-toolbar">
         <div className="resource-record-count"><strong>{filteredRecords.length}</strong><span>records</span></div>
         <div className="resource-toolbar-actions">
-          <button type="button" className="dashboard-refresh-button" onClick={loadData} disabled={loading} aria-label="Refresh data" title="Refresh data">↻</button>
+          <button type="button" className="dashboard-refresh-button" onClick={loadData} disabled={loading} aria-label="Refresh data" title="Refresh data">{"\u21BB"}</button>
         </div>
       </div>
 
@@ -120,18 +137,28 @@ const ResourceSection = ({
                 Previous
               </button>
               <div className="dashboard-pagination-pages">
-                {Array.from({ length: pageCount }, (_, index) => index + 1).map((pageNumber) => (
-                  <button
-                    type="button"
-                    key={pageNumber}
-                    className={`dashboard-pagination-button ${pageNumber === currentPage ? "is-active" : ""}`}
-                    onClick={() => goToPage(pageNumber)}
-                    aria-label={`Go to ${activeConfig.title.toLowerCase()} page ${pageNumber}`}
-                    aria-current={pageNumber === currentPage ? "page" : undefined}
-                  >
-                    {pageNumber}
-                  </button>
-                ))}
+                {paginationItems.map((item) => {
+                  if (typeof item !== "number") {
+                    return (
+                      <span className="dashboard-pagination-ellipsis" key={item} aria-hidden="true">
+                        …
+                      </span>
+                    );
+                  }
+
+                  return (
+                    <button
+                      type="button"
+                      key={item}
+                      className={`dashboard-pagination-button ${item === currentPage ? "is-active" : ""}`}
+                      onClick={() => goToPage(item)}
+                      aria-label={`Go to ${activeConfig.title.toLowerCase()} page ${item}`}
+                      aria-current={item === currentPage ? "page" : undefined}
+                    >
+                      {item}
+                    </button>
+                  );
+                })}
               </div>
               <button
                 type="button"
@@ -150,7 +177,7 @@ const ResourceSection = ({
           <span className="empty-state-mark">{activeConfig.icon}</span>
           <strong>{search ? "No matching records" : `No ${activeConfig.title.toLowerCase()} yet`}</strong>
           <p>{search ? "Try another search term." : `Create your first ${activeConfig.singular} to get started.`}</p>
-          {!search && <button type="button" className="dashboard-primary-button" onClick={onCreate}>＋ Add {activeConfig.singular}</button>}
+          {!search && <button type="button" className="dashboard-primary-button" onClick={onCreate}>{"\uFF0B"} Add {activeConfig.singular}</button>}
         </div>
       )}
     </section>

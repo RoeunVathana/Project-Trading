@@ -3,7 +3,9 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import DataProduct from "./DataProduct";
 import { fetchCachedJson } from "../apiCache";
 import {
+  formatSpecificationSection,
   groupSpecificationEntries,
+  splitSpecificationValue,
   toSpecificationEntries,
 } from "./specificationUtils";
 import "./style/ProductDetail.css";
@@ -53,10 +55,18 @@ const normalizeApiProduct = (machine) => {
     : [];
   const specificationEntries = toSpecificationEntries(machine.specs);
   const pdfs = Array.isArray(machine.pdfs)
-    ? machine.pdfs.map((pdf) => ({
-        ...pdf,
-        filePath: toMediaUrl(pdf.filePath),
-      }))
+    ? machine.pdfs
+        .map((pdf) => {
+          if (typeof pdf === "string") {
+            return { filePath: toMediaUrl(pdf) };
+          }
+
+          return {
+            ...pdf,
+            filePath: toMediaUrl(pdf?.filePath),
+          };
+        })
+        .filter((pdf) => pdf.filePath)
     : [];
   const specs = specificationEntries
     .map((entry) => [entry.label || entry.section, entry.value])
@@ -401,14 +411,18 @@ const ProductDetail = () => {
   const overviewSections = groupedSpecificationEntries.map((section) => ({
     title: section.title,
     items: section.items.flatMap((entry) => {
-      const values = String(entry.value || "")
-        .split(/\r?\n/)
-        .map((value) => value.trim())
-        .filter(Boolean);
-
-      return values.map((value) => ({ label: entry.label, value }));
+      return splitSpecificationValue(entry.value)
+        .map((value) => ({ label: entry.label, value }));
     }),
   }));
+  const tableSpecificationEntries = displaySpecificationEntries.flatMap((entry, entryIndex) =>
+    splitSpecificationValue(entry.value).map((value, valueIndex) => ({
+      ...entry,
+      id: `${entry.id || entryIndex}-${valueIndex}`,
+      section: formatSpecificationSection(entry.section),
+      value,
+    })),
+  );
   const productDocuments = Array.isArray(product.pdfs) ? product.pdfs : [];
   const visibleDocuments =
     activeInfoTab === "catalog"
@@ -698,7 +712,7 @@ const ProductDetail = () => {
                       role="row"
                       key={document.id || document.filePath}
                     >
-                      <strong>{document.fileName || "Product document"}</strong>
+                      <strong>{document.fileName || document.originalFileName || "Product document"}</strong>
                       <span>{formatFileSize(document.fileSize)}</span>
                       <span>{formatReleaseTime(document.createdAt)}</span>
                       <a
@@ -753,7 +767,7 @@ const ProductDetail = () => {
 
         <div
           className={`specification-table-wrapper ${
-            displaySpecificationEntries.length
+            tableSpecificationEntries.length
               ? "has-specifications"
               : "is-empty"
           }`}
@@ -768,8 +782,8 @@ const ProductDetail = () => {
             </thead>
 
             <tbody>
-              {displaySpecificationEntries.length ? (
-                displaySpecificationEntries.map((entry, index) => (
+              {tableSpecificationEntries.length ? (
+                tableSpecificationEntries.map((entry, index) => (
                   <tr
                     key={`${entry.id || entry.label || "specification"}-${index}`}
                   >

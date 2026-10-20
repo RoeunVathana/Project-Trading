@@ -28,6 +28,10 @@ import {
   publicFileUrl,
   recordTitle,
 } from "./dashboardUtils";
+import {
+  formatSpecificationSection,
+  splitSpecificationValue,
+} from "../frontend/ProductPage/specificationUtils";
 
 const toCategorySlug = (value) => String(value || "")
   .trim()
@@ -245,6 +249,23 @@ const DashboardPage = () => {
     () => new Map(records.huaweiCategories.map((category) => [category.id, category])),
     [records.huaweiCategories],
   );
+  const huaweiImagesByProductId = useMemo(() => {
+    const images = new Map();
+    records.huaweiImages.forEach((image) => {
+      const productId = Number(image.productId);
+      const productImages = images.get(productId) || [];
+      productImages.push(image);
+      images.set(productId, productImages);
+    });
+    images.forEach((productImages) => {
+      productImages.sort(
+        (left, right) => Number(right.isPrimary) - Number(left.isPrimary)
+          || Number(left.displayOrder || 0) - Number(right.displayOrder || 0)
+          || Number(left.id || 0) - Number(right.id || 0),
+      );
+    });
+    return images;
+  }, [records.huaweiImages]);
   const searchIndex = useMemo(() => {
     const index = {};
 
@@ -357,7 +378,8 @@ const DashboardPage = () => {
     config.fields.forEach((field) => {
       const value = form[field.name];
       if (field.type === "file") {
-        if (value) fileUploads.push([field.apiField, value]);
+        const selectedFiles = Array.isArray(value) ? value : value ? [value] : [];
+        selectedFiles.forEach((file) => fileUploads.push({ key: field.apiField, file, field }));
         if (field.clearField && form[field.clearField]) payload[field.clearField] = "true";
       } else if (value !== "" && value !== undefined && value !== null) {
         const normalizedValue = field.normalize === "lowercase" && typeof value === "string"
@@ -395,31 +417,57 @@ const DashboardPage = () => {
       }
     }
 
-    let body = payload;
-    if (fileUploads.length) {
-      body = new FormData();
-      Object.entries(payload).forEach(([key, value]) =>
-        body.append(key, value),
-      );
-      fileUploads.forEach(([key, file]) => body.append(key, file));
-    }
-
     setBusy(true);
     try {
-      const savedResult = await requestApi(
-        record
-          ? `${config.endpoint}/${config.recordPath ? config.recordPath(record) : record.id}`
-          : config.createEndpoint || config.endpoint,
-        { method: record ? "PUT" : "POST", body, token },
-      );
-      if (resource === "users" && record?.id === account?.id && savedResult.data) {
+      const endpoint = record
+        ? `${config.endpoint}/${config.recordPath ? config.recordPath(record) : record.id}`
+        : config.createEndpoint || config.endpoint;
+      const method = record ? "PUT" : "POST";
+      const isBatchCreate = !record && fileUploads.length > 1 && fileUploads.every(({ field }) => field.multiple);
+      const requests = isBatchCreate
+        ? fileUploads.map(({ key, file }, index) => {
+            const batchPayload = { ...payload };
+            if (resource === "gallery" && batchPayload.sortOrder !== undefined) {
+              batchPayload.sortOrder = Number(batchPayload.sortOrder || 0) + index;
+            }
+            if (resource === "huaweiImages") {
+              if (batchPayload.displayOrder !== undefined) {
+                batchPayload.displayOrder = Number(batchPayload.displayOrder || 0) + index;
+              }
+              if (index > 0 && batchPayload.isPrimary === "true") {
+                batchPayload.isPrimary = "false";
+              }
+            }
+            if (resource === "huaweiPdfs" && typeof batchPayload.title === "string") {
+              const fileTitle = file.name.replace(/\.pdf$/i, "").trim();
+              batchPayload.title = `${batchPayload.title.trim()} · ${fileTitle}`;
+            }
+            const batchBody = new FormData();
+            Object.entries(batchPayload).forEach(([keyName, value]) => batchBody.append(keyName, value));
+            batchBody.append(key, file);
+            return requestApi(endpoint, { method, body: batchBody, token });
+          })
+        : [
+            (() => {
+              let body = payload;
+              if (fileUploads.length) {
+                body = new FormData();
+                Object.entries(payload).forEach(([key, value]) => body.append(key, value));
+                fileUploads.forEach(({ key, file }) => body.append(key, file));
+              }
+              return requestApi(endpoint, { method, body, token });
+            })(),
+          ];
+      const savedResults = await Promise.all(requests);
+      const savedResult = savedResults[savedResults.length - 1];
+      if (resource === "users" && record?.id === account?.id && savedResult?.data) {
         setAccount(savedResult.data);
       }
       clearCachedJson();
       setDialog(null);
       setNotice({
         type: "success",
-        message: `${config.singular} ${record ? "updated" : "created"}.`,
+        message: `${savedResults.length > 1 ? `${savedResults.length} ` : ""}${config.singular}${savedResults.length > 1 ? "s" : ""} ${record ? "updated" : "created"}.`,
       });
       await loadData();
     } catch (error) {
@@ -561,13 +609,24 @@ const DashboardPage = () => {
     if (key === "parent") return record.parent?.name || (record.parentId ? huaweiCategoryName(record.parentId) : "-");
     if (key === "product") return record.product?.productName ? `${record.product.productName} - ${record.product.modelCode}` : huaweiProductName(record.productId);
     if (resource === "specs" && key === "section") {
-      return record.section || "General";
+      return formatSpecificationSection(record.section);
     }
     if (resource === "specs" && key === "label") {
       return record.label || record.specName || "—";
     }
     if (resource === "specs" && key === "value") {
-      return record.value || record.specValue || "—";
+      const values = splitSpecificationValue(record.value || record.specValue);
+      if (!values.length) return "—";
+
+      return (
+        <span className="dashboard-spec-values">
+          {values.map((value, index) => (
+            <span className="dashboard-spec-value" key={`${value}-${index}`}>
+              {value}
+            </span>
+          ))}
+        </span>
+      );
     }
     if (resource === "specs" && key === "sortOrder") {
       return record.sortOrder ?? 0;
@@ -590,6 +649,8 @@ const DashboardPage = () => {
     if (key === "image") {
       const path = resource === "machines"
         ? record.image
+        : resource === "huawei"
+          ? huaweiImagesByProductId.get(Number(record.id))?.[0]?.imageUrl
         : resource === "users"
           ? record.profileImage
           : record.imageUrl;
@@ -597,7 +658,7 @@ const DashboardPage = () => {
         <img
           className={`dashboard-thumb ${resource === "users" ? "dashboard-user-thumb" : ""}`}
           src={publicFileUrl(path)}
-          alt={resource === "users" ? `${record.name || record.email || "User"} profile` : ""}
+          alt={resource === "huawei" ? `${record.productName || "Huawei product"} image` : resource === "users" ? `${record.name || record.email || "User"} profile` : ""}
         />
       ) : (
         resource === "users" ? (
@@ -609,7 +670,10 @@ const DashboardPage = () => {
         )
       );
     }
-    if (key === "galleryCount") return record.gallery?.length ?? 0;
+    if (key === "galleryCount") {
+      if (resource === "huawei") return huaweiImagesByProductId.get(Number(record.id))?.length ?? 0;
+      return record.gallery?.length ?? 0;
+    }
     if (key === "specCount") return record.specs?.length ?? 0;
     if (key === "document") {
       return record.filePath ? (

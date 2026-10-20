@@ -4,10 +4,12 @@ import { publicFileUrl, recordTitle } from "../dashboardUtils";
 
 const handleFileChange = (event, field, setForm) => {
   const input = event.target;
-  const file = input.files?.[0] || null;
+  const files = Array.from(input.files || []);
+  const file = input.multiple ? files : files[0] || null;
+  const filesToValidate = input.multiple ? files : file ? [file] : [];
 
-  if (file && field.maxSize && file.size > field.maxSize) {
-    input.setCustomValidity(`${field.label} must be ${field.maxSizeLabel} or smaller.`);
+  if (filesToValidate.some((selectedFile) => field.maxSize && selectedFile.size > field.maxSize)) {
+    input.setCustomValidity(`Each ${field.label.toLowerCase()} must be ${field.maxSizeLabel} or smaller.`);
     input.value = "";
     setForm((current) => ({ ...current, [field.name]: null }));
     return;
@@ -145,7 +147,10 @@ const RecordDialogs = ({
                 <label className={`dashboard-field ${field.type === "textarea" ? "field-wide" : ""} ${field.type === "boolean" ? "field-boolean" : ""}`} key={field.name}>
                   <span>{field.label}{(field.required || field.requiredOnCreate) && !dialog.record ? <b> *</b> : null}</span>
                   {field.type === "textarea" ? (
-                    <textarea value={form[field.name] || ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: field.normalize === "lowercase" ? event.target.value.toLowerCase() : event.target.value }))} placeholder={field.placeholder} rows="3" />
+                    <>
+                      <textarea value={form[field.name] || ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: field.normalize === "lowercase" ? event.target.value.toLowerCase() : event.target.value }))} placeholder={field.placeholder} rows={field.rows || 3} />
+                      {field.helpText && <small className="dashboard-field-hint">{field.helpText}</small>}
+                    </>
                   ) : field.type === "select" ? (
                     <select value={form[field.name] || ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} required={field.required}>
                       <option value="">Select {field.label.toLowerCase()}</option>
@@ -169,10 +174,26 @@ const RecordDialogs = ({
                       <input
                         type="file"
                         accept={field.accept}
+                        multiple={field.multiple && !dialog.record}
                         required={!dialog.record && field.requiredOnCreate}
                         onChange={(event) => handleFileChange(event, field, setForm)}
                       />
-                      <small>{form[field.name]?.name || (dialog.record ? "Choose a replacement file (optional)" : "Choose a file")}</small>
+                      <small>
+                        {(() => {
+                          const selectedFiles = Array.isArray(form[field.name])
+                            ? form[field.name]
+                            : form[field.name]
+                              ? [form[field.name]]
+                              : [];
+                          if (!selectedFiles.length) {
+                            if (dialog.record) return "Choose a replacement file (optional)";
+                            return field.multiple ? "Select files to upload" : "Choose a file";
+                          }
+                          if (selectedFiles.length === 1) return selectedFiles[0].name;
+                          return `${selectedFiles.length} files selected`;
+                        })()}
+                      </small>
+                      {field.helpText && <small className="dashboard-field-hint">{field.helpText}</small>}
                       {field.currentKey && dialog.record?.[field.currentKey] && (
                         <small className="file-current-note">
                           Current file: <a href={publicFileUrl(dialog.record[field.currentKey])} target="_blank" rel="noreferrer">{field.currentLabel || "Open file"}</a>

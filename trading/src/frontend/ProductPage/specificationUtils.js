@@ -20,6 +20,23 @@ const LEGACY_SPEC_FIELDS = [
   { key: "mounting", section: "Mounting", label: "Installation method" },
 ];
 
+export const splitSpecificationValue = (value) => String(value || "")
+  .split(/\r?\n/)
+  .map((line) => line.trim())
+  .filter(Boolean);
+
+const SMALL_SECTION_WORDS = new Set(["a", "an", "and", "for", "in", "of", "on", "or", "the", "to", "with"]);
+
+export const formatSpecificationSection = (section) => {
+  const value = String(section || "General").trim() || "General";
+  if (value !== value.toLocaleLowerCase()) return value;
+
+  return value.split(/\s+/).map((word, index) => {
+    if (index > 0 && SMALL_SECTION_WORDS.has(word)) return word;
+    return word.charAt(0).toLocaleUpperCase() + word.slice(1);
+  }).join(" ");
+};
+
 export const toSpecificationEntries = (specifications) => (specifications || [])
   .flatMap((specification, specificationIndex) => {
     const structuredValue = specification.value || specification.specValue || "";
@@ -69,7 +86,7 @@ export const groupSpecificationEntries = (entries) => {
     const sectionKey = section.toLocaleLowerCase();
     let group = groupMap.get(sectionKey);
     if (!group) {
-      group = { title: section, items: [] };
+      group = { title: formatSpecificationSection(section), items: [] };
       groupMap.set(sectionKey, group);
       groups.push(group);
     }

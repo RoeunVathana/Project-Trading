@@ -517,7 +517,6 @@
     color: var(--theme-text-strong);
     font-size: 18px;
     font-weight: 700;
-    text-transform: capitalize;
 }
 
 .product-info-item-label {

@@ -42,6 +42,12 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
 
+      division: {
+        type: DataTypes.STRING(32),
+        allowNull: false,
+        defaultValue: "chint",
+      },
+
       description: {
         type: DataTypes.TEXT,
         allowNull: true,
