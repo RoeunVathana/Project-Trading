@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getHuaweiNavbarImage } from "../productAssets";
 import "./SmartEnergyController.css";
 
 const API_BASE_URL = (
@@ -7,6 +8,7 @@ const API_BASE_URL = (
 ).replace(/\/$/, "");
 
 const HERO_BACKGROUND_IMAGE = "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=2400&q=88";
+const NAVBAR_PRODUCT_IMAGE = getHuaweiNavbarImage("smart-energy-controller");
 
 const toMediaUrl = (path) => {
   if (!path) return "";
@@ -38,7 +40,7 @@ const fallbackProduct = {
   category: "Smart Energy Controller",
   modelCode: "SUN5000 Series",
   description: "Smart energy control for dependable residential solar installations.",
-  image: "",
+  image: NAVBAR_PRODUCT_IMAGE,
   images: [],
 };
 
@@ -70,7 +72,7 @@ const SmartEnergyController = () => {
         setProduct({
           ...productRow,
           category: getCategoryName(productRow, Array.isArray(categoryRows) ? categoryRows : []),
-          image: toMediaUrl(primaryImage?.imageUrl),
+          image: toMediaUrl(productRow.baseImageUrl || productRow.base_image_url || primaryImage?.imageUrl) || NAVBAR_PRODUCT_IMAGE,
           images: images.map((image) => ({ ...image, imageUrl: toMediaUrl(image.imageUrl) })),
         });
       } catch (loadError) {

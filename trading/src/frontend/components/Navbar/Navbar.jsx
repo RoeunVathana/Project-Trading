@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import SnttLogo from "../../../assets/SNTT.png";
+import { getHuaweiNavbarImage } from "../../ProductHuawei/productAssets";
 import { useTheme } from "../ThemeContext";
 import "./Navbar.css";
-
-const publicAsset = (fileName) => `${import.meta.env.BASE_URL}iconNavbar/${fileName}`;
 
 const productPath = (parameters) => {
   if (parameters.collection === "huawei") {
@@ -17,15 +16,25 @@ const productPath = (parameters) => {
     };
 
     // Product links must take precedence over their parent solution page.
-    if (huaweiSolutionPaths[parameters.product]) {
-      return huaweiSolutionPaths[parameters.product];
+    // Category-specific slugs let the Huawei API resolve the first published
+    // product from the exact residential or commercial category.
+    if (huaweiSolutionPaths[parameters.product] && !parameters.categorySlug) {
+      const path = huaweiSolutionPaths[parameters.product];
+      return parameters.solution
+        ? `${path}?solution=${encodeURIComponent(parameters.solution)}`
+        : path;
     }
 
     if (parameters.solution === "residential-solution") {
       return "/product-huawei/residential-solution";
     }
 
-    if (parameters.product) return `/product-huawei/${parameters.product}`;
+    if (parameters.product || parameters.categorySlug) {
+      const path = `/product-huawei/${parameters.categorySlug || parameters.product}`;
+      return parameters.solution
+        ? `${path}?solution=${encodeURIComponent(parameters.solution)}`
+        : path;
+    }
     return "/product-huawei";
   }
 
@@ -79,20 +88,20 @@ const productCollections = [
         id: "residential-solution",
         label: "Residential Solutions",
         products: [
-          { id: "smart-string-ess", label: "Smart String ESS", model: "LUNA2000-5/7/10/12/14...", icon: publicAsset("luna2000-7_14_21-s1.png") },
-          { id: "smart-energy-controller", label: "Smart Energy Controller", model: "SUN2000-12/15/17/20/25...", icon: publicAsset("sun2000-12_15_17_20_25k-mb0.png") },
-          { id: "smart-module-controller", label: "Smart Module Controller", model: "SUN2000-600W-PA0", icon: publicAsset("merc-600w-pa0.png") },
-          { id: "smart-guard", label: "Smart Guard", model: "SmartGuard-63A-S0", icon: publicAsset("smartguard-63a-s0-aus0.png") },
+          { id: "smart-string-ess", label: "Smart String ESS", model: "LUNA2000-5/7/10/12/14...", icon: getHuaweiNavbarImage("smart-string-ess") },
+          { id: "smart-energy-controller", label: "Smart Energy Controller", model: "SUN2000-12/15/17/20/25...", icon: getHuaweiNavbarImage("smart-energy-controller") },
+          { id: "smart-module-controller", label: "Smart Module Controller", model: "SUN2000-600W-PA0", icon: getHuaweiNavbarImage("smart-module-controller", "residential-solution") },
+          { id: "smart-guard", label: "Smart Guard", model: "SmartGuard-63A-S0", icon: getHuaweiNavbarImage("smart-guard") },
         ],
       },
       {
         id: "commercial-industrial-solutions",
         label: "Commercial & Industrial Solutions",
         products: [
-          { id: "smart-pv-controller", label: "Smart PV Controller", model: "SUN2000-150K-MG0", icon: publicAsset("sun2000-150k-mg0.png") },
-          { id: "smart-module-controller", label: "Smart Module Controller", model: "MERC-1100/1300W-P", icon: publicAsset("merc-1100-1300w-p.png") },
-          { id: "hybrid-cooling-grid-forming-ess", label: "C&I Hybrid Cooling Grid Forming ESS", model: "LUNA2000-241 Series", icon: publicAsset("luna2000-215-series.png") },
-          { id: "accessories", label: "Accessories", model: "Smart Dongle - 4G", icon: publicAsset("ci-smartdongle-4g.png") },
+          { id: "smart-pv-controller", categorySlug: "commercial-industrial-smart-pv-controller", label: "Smart PV Controller", model: "SUN2000-150K-MG0", icon: getHuaweiNavbarImage("smart-pv-controller") },
+          { id: "smart-module-controller", categorySlug: "commercial-industrial-smart-module-controller", label: "Smart Module Controller", model: "MERC-1100/1300W-P", icon: getHuaweiNavbarImage("smart-module-controller", "commercial-industrial-solutions") },
+          { id: "hybrid-cooling-grid-forming-ess", categorySlug: "commercial-industrial-c-and-i-hybrid-cooling-grid-forming-ess", label: "C&I Hybrid Cooling Grid Forming ESS", model: "LUNA2000-241 Series", icon: getHuaweiNavbarImage("hybrid-cooling-grid-forming-ess") },
+          { id: "accessories", categorySlug: "commercial-industrial-accessories", label: "Accessories", model: "Smart Dongle - 4G", icon: getHuaweiNavbarImage("accessories") },
         ],
       },
       {
@@ -265,7 +274,7 @@ const Navbar = () => {
     clearTimeout(dropdownCloseTimer.current);
     dropdownCloseTimer.current = setTimeout(() => {
       setOpenDropdown(null);
-    }, 240);
+    }, 360);
   };
 
   const handleDropdownBlur = (event) => {
@@ -322,6 +331,7 @@ const Navbar = () => {
     collection: selectedCollection.id,
     solution: selectedSolution.id,
     product: product.id,
+    categorySlug: product.categorySlug,
   });
 
   return (

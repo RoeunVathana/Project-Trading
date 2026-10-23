@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchCachedJson } from "../../apiCache";
+import { getHuaweiNavbarImage, HUAWEI_NAVBAR_PRODUCT_IMAGES } from "../productAssets";
 import "./HuaweiShowcase.css";
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_URL || "http://localhost:3000"
 ).replace(/\/$/, "");
-
-const publicAsset = (fileName) => `${import.meta.env.BASE_URL}iconNavbar/${fileName}`;
 
 const fallbackImages = [
   "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=2400&q=88",
@@ -20,14 +19,43 @@ const fallbackImages = [
   "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=2400&q=88",
 ];
 
-const staticProductImages = {
-  "smart-string-ess": publicAsset("luna2000-7_14_21-s1.png"),
-  "smart-energy-controller": publicAsset("sun2000-12_15_17_20_25k-mb0.png"),
-  "smart-module-controller": publicAsset("merc-600w-pa0.png"),
-  "smart-guard": publicAsset("smartguard-63a-s0-aus0.png"),
-  "smart-pv-controller": publicAsset("sun2000-150k-mg0.png"),
-  "hybrid-cooling-grid-forming-ess": publicAsset("luna2000-215-series.png"),
-  "accessories": publicAsset("ci-smartdongle-4g.png"),
+const staticProductImages = HUAWEI_NAVBAR_PRODUCT_IMAGES;
+
+const categoryProductMeta = {
+  "commercial-industrial-smart-module-controller": {
+    productId: "smart-module-controller",
+    label: "Smart Module Controller",
+    model: "MERC-1100/1300W-P",
+  },
+  "commercial-industrial-smart-pv-controller": {
+    productId: "smart-pv-controller",
+    label: "Smart PV Controller",
+    model: "SUN2000-150K-MG0",
+  },
+  "commercial-industrial-c-and-i-hybrid-grid-forming-ess": {
+    productId: "hybrid-cooling-grid-forming-ess",
+    label: "C&I Hybrid Cooling Grid Forming ESS",
+    model: "LUNA2000-241 Series",
+  },
+  "commercial-industrial-c-and-i-hybrid-cooling-grid-forming-ess": {
+    productId: "hybrid-cooling-grid-forming-ess",
+    label: "C&I Hybrid Cooling Grid Forming ESS",
+    model: "LUNA2000-241 Series",
+  },
+  "commercial-industrial-accessories": {
+    productId: "accessories",
+    label: "Accessories",
+    model: "Smart Dongle - 4G",
+  },
+};
+
+const getCategoryProductImage = (categorySlug) => {
+  const productId = categoryProductMeta[categorySlug]?.productId || categorySlug;
+  const solutionId = categorySlug.startsWith("commercial-industrial-")
+    ? "commercial-industrial-solutions"
+    : "";
+
+  return getHuaweiNavbarImage(productId, solutionId);
 };
 
 const categoryConfigs = {
@@ -188,13 +216,14 @@ const getConfig = (categorySlug) => {
   if (genericCategoryConfigCache.has(categorySlug)) return genericCategoryConfigCache.get(categorySlug);
 
   const baseConfig = categoryConfigs["smart-module-controller"];
-  const label = toCategoryLabel(categorySlug);
-  const staticImage = staticProductImages[categorySlug];
+  const categoryMeta = categoryProductMeta[categorySlug];
+  const label = categoryMeta?.label || toCategoryLabel(categorySlug);
+  const staticImage = getCategoryProductImage(categorySlug);
   const config = {
     ...baseConfig,
     label,
     heroImage: staticImage || baseConfig.heroImage,
-    fallbackModel: "Huawei product",
+    fallbackModel: categoryMeta?.model || "Huawei product",
     allocationTitle: `${label} for a More Connected Home`,
     allocationCopy: `Explore the ${label} solution and its role in a dependable Huawei smart-energy system.`,
     finalTitle: `${label}, Designed for Tomorrow`,
@@ -267,7 +296,7 @@ const HuaweiShowcase = ({ categorySlug = "smart-string-ess" }) => {
         setProduct({
           ...productRow,
           category: getCategoryName(productRow, categoryRows, config.label),
-          image: toMediaUrl(primaryImage?.imageUrl),
+          image: toMediaUrl(productRow.baseImageUrl || productRow.base_image_url || primaryImage?.imageUrl),
           images,
         });
       } catch (loadError) {
@@ -375,7 +404,7 @@ const HuaweiShowcase = ({ categorySlug = "smart-string-ess" }) => {
   const model = product.modelCode || config.fallbackModel;
   const productImages = product.images || [];
   const getProductImage = (fallback, index = 0) => productImages[index]?.imageUrl || fallback;
-  const heroImage = staticProductImages[categorySlug] || product.image || config.heroImage;
+  const heroImage = product.image || getCategoryProductImage(categorySlug) || config.heroImage;
 
   return (
     <main className={`huawei-showcase huawei-showcase--${categorySlug}`} style={{ "--showcase-hero-image": `url("${config.heroImage}")` }}>

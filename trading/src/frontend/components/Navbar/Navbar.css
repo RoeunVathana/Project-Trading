@@ -7,6 +7,10 @@
 
 .navbar {
   --nav-height: 76px;
+  /* Keep navbar interactions calm and easy to follow without slowing the page itself. */
+  --motion-fast: 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-standard: 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-slow: 520ms cubic-bezier(0.22, 1, 0.36, 1);
   --nav-bg: var(--theme-surface-1);
   --nav-panel: var(--theme-surface-1);
   --nav-panel-raised: var(--theme-surface-1);
@@ -37,7 +41,7 @@
   box-shadow: 0 9px 28px rgba(0, 0, 0, 0.15);
   -webkit-backdrop-filter: blur(20px) saturate(135%);
   backdrop-filter: blur(20px) saturate(135%);
-  transition: background-color 180ms ease, border-color 180ms ease;
+  transition: background-color var(--motion-standard), border-color var(--motion-standard), box-shadow var(--motion-standard);
 }
 
 .navbar::after {
@@ -164,7 +168,13 @@
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  transition:
+    color var(--motion-standard),
+    background-color var(--motion-standard),
+    border-color var(--motion-standard),
+    box-shadow var(--motion-standard),
+    transform var(--motion-standard);
+  will-change: color, background-color, border-color, box-shadow, transform;
 }
 
 .navbar-menu > a.active,
@@ -219,7 +229,12 @@
   pointer-events: none;
   transform: translateY(8px) scale(0.985);
   transform-origin: top left;
-  transition: opacity 180ms ease, visibility 180ms ease, transform 180ms ease;
+  filter: blur(4px);
+  transition:
+    opacity 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .navbar-dropdown.is-open .navbar-submenu {
@@ -227,6 +242,7 @@
   visibility: visible;
   pointer-events: auto;
   transform: translateY(0) scale(1);
+  filter: blur(0);
 }
 
 .navbar-dropdown--reference .navbar-submenu,
@@ -281,14 +297,14 @@
   line-height: 1;
   text-align: left;
   cursor: pointer;
-  transition: color 160ms ease, background-color 160ms ease;
+  transition: color var(--motion-standard), background-color var(--motion-standard);
 }
 
 .home-nav-tree__branch-title span {
   color: var(--nav-accent);
   font-size: 16px;
   letter-spacing: 0;
-  transition: transform 160ms ease;
+  transition: transform var(--motion-standard);
 }
 
 .home-nav-tree__branch:hover .home-nav-tree__branch-title span,
@@ -305,7 +321,7 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: max-height 180ms ease, margin-top 180ms ease, opacity 180ms ease, visibility 180ms ease;
+  transition: max-height var(--motion-standard), margin-top var(--motion-standard), opacity var(--motion-standard), visibility var(--motion-standard);
 }
 
 .home-nav-tree__branch:hover .home-nav-tree__links,
@@ -447,7 +463,7 @@
   line-height: 1.32;
   text-align: left;
   cursor: pointer;
-  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+  transition: color var(--motion-standard), background-color var(--motion-standard), border-color var(--motion-standard), transform var(--motion-standard);
 }
 
 .navbar-menu button.product-mega-collection::before,
@@ -461,7 +477,7 @@
   background: transparent;
   content: "";
   transform: translateY(-50%);
-  transition: background-color 160ms ease, height 160ms ease;
+  transition: background-color var(--motion-standard), height var(--motion-standard);
 }
 
 .navbar-menu button.product-mega-collection.active,
@@ -487,7 +503,7 @@
   color: var(--nav-text-muted);
   font-size: 18px;
   line-height: 1;
-  transition: color 160ms ease, transform 160ms ease;
+  transition: color var(--motion-standard), transform var(--motion-standard);
 }
 
 .product-mega-heading {
@@ -506,7 +522,7 @@
   letter-spacing: -0.01em;
   line-height: 1.25;
   text-decoration: none;
-  transition: color 160ms ease, background-color 160ms ease;
+  transition: color var(--motion-standard), background-color var(--motion-standard);
 }
 
 .product-mega-heading::before {
@@ -550,7 +566,7 @@
   line-height: 1.35;
   text-decoration: none;
   white-space: normal;
-  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+  transition: color var(--motion-standard), background-color var(--motion-standard), border-color var(--motion-standard), transform var(--motion-standard);
 }
 
 .navbar-menu .product-mega-product-link::before {
@@ -560,7 +576,7 @@
   border: 1px solid var(--nav-status);
   border-radius: 50%;
   content: "";
-  transition: background-color 160ms ease, box-shadow 160ms ease;
+  transition: background-color var(--motion-standard), box-shadow var(--motion-standard);
 }
 
 .nav-tree-menu {
@@ -591,7 +607,7 @@
   font-weight: 750;
   line-height: 1.25;
   text-decoration: none;
-  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease;
+  transition: color var(--motion-standard), background-color var(--motion-standard), border-color var(--motion-standard);
 }
 
 .navbar-menu .nav-tree-menu__heading span {
@@ -626,7 +642,7 @@
   line-height: 1.35;
   text-decoration: none;
   white-space: normal;
-  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+  transition: color var(--motion-standard), background-color var(--motion-standard), border-color var(--motion-standard), transform var(--motion-standard);
 }
 
 .navbar-menu .nav-tree-menu__links a::before {
@@ -659,7 +675,7 @@
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: max-height 180ms ease, margin-top 180ms ease, opacity 180ms ease, visibility 180ms ease;
+    transition: max-height var(--motion-standard), margin-top var(--motion-standard), opacity var(--motion-standard), visibility var(--motion-standard);
   }
 
   .nav-tree-menu--progressive:hover .nav-tree-menu__links,
@@ -714,7 +730,7 @@
   line-height: 1;
   text-decoration: none;
   white-space: nowrap;
-  transition: filter 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  transition: filter var(--motion-standard), transform var(--motion-standard), box-shadow var(--motion-standard);
 }
 
 .navbar-menu > a.mobile-get-started {
@@ -732,7 +748,7 @@
   background: rgba(255, 255, 255, 0.035);
   color: var(--nav-text-strong);
   cursor: pointer;
-  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+  transition: color var(--motion-standard), background-color var(--motion-standard), border-color var(--motion-standard), transform var(--motion-standard);
 }
 
 .theme-toggle {
@@ -784,7 +800,7 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.8;
-  transition: transform 180ms ease;
+  transition: transform var(--motion-standard);
 }
 
 .menu-toggle.open {
@@ -932,7 +948,7 @@
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 180ms ease, visibility 180ms ease;
+    transition: opacity var(--motion-standard), visibility var(--motion-standard);
   }
 
   :root[data-theme="light"] .navbar-backdrop {
@@ -986,7 +1002,7 @@
     visibility: hidden;
     pointer-events: none;
     transform: translateY(-100%);
-    transition: opacity 180ms ease, visibility 180ms ease, transform 180ms ease;
+    transition: opacity var(--motion-standard), visibility var(--motion-standard), transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
     -webkit-overflow-scrolling: touch;
   }
 
@@ -1063,6 +1079,7 @@
     visibility: visible;
     pointer-events: auto;
     transform: none;
+    filter: none;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -1185,7 +1202,7 @@
 
   .get-started {
     display: inline-flex;
-    transition: opacity 180ms ease, visibility 180ms ease, transform 180ms ease, filter 160ms ease, box-shadow 160ms ease;
+    transition: opacity var(--motion-standard), visibility var(--motion-standard), transform var(--motion-standard), filter var(--motion-standard), box-shadow var(--motion-standard);
   }
 
   .navbar.is-menu-open .get-started {
@@ -1515,11 +1532,11 @@
 .navbar-menu > a,
 .navbar-dropdown-trigger {
   transition:
-    color var(--motion-fast),
-    background-color var(--motion-fast),
-    border-color var(--motion-fast),
-    box-shadow var(--motion-fast),
-    transform var(--motion-fast);
+    color var(--motion-standard),
+    background-color var(--motion-standard),
+    border-color var(--motion-standard),
+    box-shadow var(--motion-standard),
+    transform var(--motion-standard);
 }
 
 .navbar-submenu > * {
@@ -1539,7 +1556,7 @@
     content: "";
     opacity: 0;
     transform: scaleX(0.35);
-    transition: opacity var(--motion-fast), transform var(--motion-fast);
+    transition: opacity var(--motion-standard), transform var(--motion-standard);
   }
 
   .navbar-menu > a:not(.mobile-get-started):hover,
@@ -1558,7 +1575,7 @@
 }
 
 .navbar-dropdown.is-open .navbar-submenu > * {
-  animation: navbar-panel-item-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: navbar-panel-item-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .navbar-dropdown.is-open .navbar-submenu > *:nth-child(2) {
@@ -1567,6 +1584,26 @@
 
 .navbar-dropdown.is-open .navbar-submenu > *:nth-child(3) {
   animation-delay: 90ms;
+}
+
+.navbar-dropdown.is-open .product-mega-menu > *,
+.navbar-dropdown.is-open .nav-tree-menu__links > * {
+  animation: navbar-panel-item-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.navbar-dropdown.is-open .product-mega-menu > *:nth-child(2),
+.navbar-dropdown.is-open .nav-tree-menu__links > *:nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.navbar-dropdown.is-open .product-mega-menu > *:nth-child(3),
+.navbar-dropdown.is-open .nav-tree-menu__links > *:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+.navbar-dropdown.is-open .product-mega-menu > *:nth-child(4),
+.navbar-dropdown.is-open .nav-tree-menu__links > *:nth-child(4) {
+  animation-delay: 210ms;
 }
 
 @keyframes navbar-panel-item-in {
@@ -1592,7 +1629,7 @@
 .navbar-menu .product-mega-product-link.has-image {
   gap: 10px;
   padding-left: 6px;
-  min-height: 56px;
+  min-height: 72px;
 }
 
 .navbar-menu .product-mega-product-link.has-image::before {
@@ -1601,14 +1638,25 @@
 
 .product-mega-product-image {
   display: block;
-  width: 48px;
-  height: 36px;
-  flex: 0 0 48px;
+  width: 70px;
+  height: 56px;
+  flex: 0 0 70px;
+  box-sizing: border-box;
+  padding: 4px;
   border: 1px solid var(--nav-border);
-  border-radius: 5px;
-  background: var(--nav-panel-muted);
+  border-radius: 8px;
+  background: linear-gradient(145deg, var(--nav-panel-raised), var(--nav-panel-muted));
   object-fit: contain;
   object-position: center;
+  overflow: hidden;
+  transition: transform var(--motion-standard), border-color var(--motion-standard), box-shadow var(--motion-standard);
+}
+
+.navbar-menu .product-mega-product-link.has-image:hover .product-mega-product-image,
+.navbar-menu .product-mega-product-link.has-image:focus-visible .product-mega-product-image {
+  border-color: color-mix(in srgb, var(--nav-accent) 58%, var(--nav-border));
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--nav-accent) 18%, transparent);
+  transform: scale(1.04);
 }
 
 .navbar-menu .product-mega-product-link.has-image > span {
@@ -1635,5 +1683,17 @@
   color: var(--nav-text-muted);
   font-size: 12px;
   line-height: 1.3;
+}
+
+@media (max-width: 1199px) {
+  .navbar-menu .product-mega-product-link.has-image {
+    min-height: 70px;
+  }
+
+  .product-mega-product-image {
+    width: 66px;
+    height: 54px;
+    flex-basis: 66px;
+  }
 }
 

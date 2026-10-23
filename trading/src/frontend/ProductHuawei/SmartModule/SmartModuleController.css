@@ -318,7 +318,7 @@
   color: #fff;
   cursor: default;
   isolation: isolate;
-  transition: transform 220ms ease, box-shadow 220ms ease;
+  transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .smart-module-benefit-card::after {
@@ -328,7 +328,7 @@
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.96), rgba(0, 0, 0, 0.12) 72%);
   content: "";
   opacity: 0;
-  transition: opacity 220ms ease;
+  transition: opacity 360ms ease;
 }
 
 .smart-module-benefit-card:hover,
@@ -354,7 +354,7 @@
 }
 
 .smart-module-benefit-copy h2 {
-  transition: transform 220ms ease;
+  transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .smart-module-benefit-copy p {
@@ -364,8 +364,12 @@
   font-size: 16px;
   line-height: 1.4;
   opacity: 0;
+  visibility: hidden;
   transform: translateY(14px);
-  transition: opacity 220ms ease, transform 220ms ease;
+  transition:
+    opacity 360ms ease,
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 360ms;
 }
 
 .smart-module-benefit-card:hover .smart-module-benefit-copy h2,
@@ -376,7 +380,9 @@
 .smart-module-benefit-card:hover .smart-module-benefit-copy p,
 .smart-module-benefit-card:focus-visible .smart-module-benefit-copy p {
   opacity: 1;
+  visibility: visible;
   transform: translateY(0);
+  transition-delay: 0s;
 }
 
 .smart-module-benefit-card:nth-child(2),
@@ -917,7 +923,9 @@
 @media (hover: none) {
   .smart-module-benefit-copy p {
     opacity: 1;
+    visibility: visible;
     transform: none;
+    transition: none;
   }
 
   .smart-module-benefit-copy h2 {

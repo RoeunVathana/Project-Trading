@@ -129,6 +129,28 @@ textarea {
   transform: translate3d(0, 0, 0);
 }
 
+.text-reveal {
+  opacity: 0;
+  filter: blur(7px);
+  transform: translate3d(0, var(--text-reveal-distance, 18px), 0) scale(0.985);
+  transition:
+    opacity var(--text-reveal-duration, 640ms) cubic-bezier(0.22, 1, 0.36, 1),
+    filter var(--text-reveal-duration, 640ms) cubic-bezier(0.22, 1, 0.36, 1),
+    transform var(--text-reveal-duration, 640ms) cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--reveal-delay, 0ms) + var(--text-reveal-delay, 0ms));
+  will-change: opacity, filter, transform;
+}
+
+.text-reveal.is-visible {
+  opacity: 1;
+  filter: blur(0);
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.text-reveal:is(h1, h2, h3, h4, h5, h6) {
+  transform-origin: 0 100%;
+}
+
 /* Shared interaction timing for surfaces that appear across multiple pages. */
 .hardware-card,
 .spec-tag,
@@ -197,6 +219,18 @@ textarea {
 
   .table-row:hover {
     background: color-mix(in srgb, var(--theme-accent-text) 6%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition,
+  .scroll-reveal,
+  .text-reveal {
+    animation: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 }
 
@@ -325,7 +359,9 @@ button {
   }
 
   .scroll-reveal,
-  .scroll-reveal.is-visible {
+  .scroll-reveal.is-visible,
+  .text-reveal,
+  .text-reveal.is-visible {
     opacity: 1;
     transform: none;
     transition: none !important;

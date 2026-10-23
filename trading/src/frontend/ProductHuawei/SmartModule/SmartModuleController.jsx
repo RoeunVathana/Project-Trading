@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { getHuaweiNavbarImage } from "../productAssets";
 import "./SmartModuleController.css";
 
 const API_BASE_URL = (
@@ -51,7 +52,13 @@ const featureCards = [
 
 const SmartModuleController = () => {
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
+  const solutionId = new URLSearchParams(location.search).get("solution") || "residential-solution";
+  const navbarProductImage = getHuaweiNavbarImage("smart-module-controller", solutionId);
+  const navbarModel = solutionId === "commercial-industrial-solutions"
+    ? "MERC-1100/1300W-P"
+    : "SUN2000-600W-PA0";
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -81,8 +88,9 @@ const SmartModuleController = () => {
         setProduct({
           ...productRow,
           category,
+          modelCode: productRow.modelCode || navbarModel,
           imageAltText,
-          image: toMediaUrl(primaryImage?.imageUrl),
+          image: toMediaUrl(productRow.baseImageUrl || productRow.base_image_url || primaryImage?.imageUrl) || navbarProductImage,
           images: images.map((image) => ({
             ...image,
             imageUrl: toMediaUrl(image.imageUrl),
@@ -91,7 +99,7 @@ const SmartModuleController = () => {
       } catch (loadError) {
         if (loadError.name !== "AbortError") {
           if (id === "smart-module-controller") {
-            setProduct(fallbackProduct);
+            setProduct({ ...fallbackProduct, modelCode: navbarModel, image: navbarProductImage });
           } else {
             setError(loadError.message || "Unable to load this Huawei product.");
           }
@@ -103,7 +111,7 @@ const SmartModuleController = () => {
 
     loadProduct();
     return () => controller.abort();
-  }, [id]);
+  }, [id, navbarModel, navbarProductImage]);
 
   useEffect(() => {
     const elements = document.querySelectorAll(".smart-module-page [data-scroll-reveal]");

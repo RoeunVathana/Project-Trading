@@ -133,7 +133,9 @@ export const RESOURCE_CONFIG = {
       { name: "brandName", label: "Brand", defaultValue: "Huawei" },
       { name: "modelCode", label: "Model code", required: true, placeholder: "SUN2000-600W-PA0" },
       { name: "productName", label: "Product name", required: true, placeholder: "SUN2000-600W-PA0" },
-      { name: "baseImageFile", label: "Base image", type: "file", apiField: "baseImageUrl", accept: "image/*", maxSize: UPLOAD_LIMITS.image.bytes, maxSizeLabel: UPLOAD_LIMITS.image.label, currentKey: "baseImageUrl", currentLabel: "Open base image", helpText: "Used as the main image on Huawei product cards." },
+      // The backend upload middleware accepts the multipart file field "image"
+      // and maps it to the Huawei baseImageUrl column.
+      { name: "baseImageFile", label: "Base image", type: "file", apiField: "image", accept: "image/*", maxSize: UPLOAD_LIMITS.image.bytes, maxSizeLabel: UPLOAD_LIMITS.image.label, currentKey: "baseImageUrl", currentLabel: "Open base image", helpText: "Used as the main image on Huawei product cards." },
       { name: "displayOrder", label: "Display order", type: "number", min: 0, defaultValue: 0 },
     ],
   },

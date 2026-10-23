@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getHuaweiNavbarImage } from "../productAssets";
 import "./SmartStringESS.css";
 
 const API_BASE_URL = (
@@ -22,7 +23,7 @@ const fallbackProduct = {
   productName: "Smart String ESS",
   category: "Smart String ESS",
   modelCode: "LUNA S1",
-  image: "",
+  image: getHuaweiNavbarImage("smart-string-ess"),
   images: [],
 };
 
@@ -137,7 +138,7 @@ const SmartStringESS = () => {
         setProduct({
           ...productRow,
           category: getCategoryName(productRow, Array.isArray(categoryRows) ? categoryRows : []),
-          image: toMediaUrl(primaryImage?.imageUrl),
+          image: toMediaUrl(productRow.baseImageUrl || productRow.base_image_url || primaryImage?.imageUrl) || getHuaweiNavbarImage("smart-string-ess"),
           images,
         });
       } catch (loadError) {

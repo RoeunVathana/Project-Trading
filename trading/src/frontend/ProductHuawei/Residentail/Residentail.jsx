@@ -118,7 +118,8 @@ const Residentail = () => {
               id: product.id,
               title: product.productName || product.name || product.modelCode || category,
               description: product.shortDescription || product.description || category,
-              image: toMediaUrl(primaryImage?.imageUrl) || fallbackProducts[index % fallbackProducts.length].image,
+              image: toMediaUrl(product.baseImageUrl || product.base_image_url || primaryImage?.imageUrl)
+                || fallbackProducts[index % fallbackProducts.length].image,
               category,
               model: product.modelCode || product.model || "",
             };
