@@ -2,6 +2,25 @@ import "./HomePage.css";
 import CompliancePage from "./CompliancePage";
 
 import ImageCover from "../../assets/Homepage/Background.png"
+
+const AnimatedHeroText = ({ text, delay = 0, className = "" }) => (
+  <span className={`hero-count-text ${className}`} aria-label={text}>
+    <span aria-hidden="true">
+      {Array.from(text).map((character, index) => (
+        character === " " ? " " : (
+          <span
+            className="hero-count-char"
+            key={`${text}-${index}`}
+            style={{ "--char-delay": `${delay + index * 9}ms` }}
+          >
+            {character}
+          </span>
+        )
+      ))}
+    </span>
+  </span>
+);
+
 const HomePage = () => {
   return (
     <main className="home">
@@ -13,22 +32,34 @@ const HomePage = () => {
           {/* Left */}
           <div className="hero-content">
             <div className="hero-label">
-              <span></span>
-              SYSTEM ARCHITECTURE // COMPLETE RANGE
+              <span className="hero-label-marker"></span>
+              <AnimatedHeroText
+                className="hero-label-text"
+                delay={150}
+                text="SYSTEM ARCHITECTURE // COMPLETE RANGE"
+              />
             </div>
 
             <h1>
-              INDUSTRIAL
-              <span>MACHINERY</span>
-              CATALOG
+              <span className="hero-title-line" aria-label="INDUSTRIAL">
+                <AnimatedHeroText delay={300} text="INDUSTRIAL" />
+              </span>
+              <span
+                className="hero-title-line hero-title-line--accent"
+                aria-label="MACHINERY"
+              >
+                <AnimatedHeroText delay={470} text="MACHINERY" />
+              </span>
+              <span className="hero-title-line" aria-label="CATALOG">
+                <AnimatedHeroText delay={640} text="CATALOG" />
+              </span>
             </h1>
 
-            <p>
-              Deploying raw structural mass and extreme micro-precision
-              components. Our catalog features high-yield forging presses,
-              automated multi-axis bending units, and high-power fiber laser
-              profiling systems optimized for uninterrupted heavy-industry
-              deployment.
+            <p className="hero-description">
+              <AnimatedHeroText
+                delay={820}
+                text="Deploying raw structural mass and extreme micro-precision components. Our catalog features high-yield forging presses, automated multi-axis bending units, and high-power fiber laser profiling systems optimized for uninterrupted heavy-industry deployment."
+              />
             </p>
           </div>
 

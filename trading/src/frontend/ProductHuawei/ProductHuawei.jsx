@@ -111,6 +111,18 @@ const isSmartStringESSCategory = (categoryName) => ["smartstringess", "smartstri
 const isSmartGuardCategory = (categoryName) => normalizeCategoryName(categoryName)
   === "smartguard";
 
+const isSmartPVControllerCategory = (categoryName) => normalizeCategoryName(categoryName)
+  === "smartpvcontroller";
+
+const isHybridCoolingESSCategory = (categoryName) => [
+  "cihybridcoolinggridformingess",
+  "cihybridgridformingess",
+  "hybridcoolinggridformingess",
+].includes(normalizeCategoryName(categoryName));
+
+const isAccessoriesCategory = (categoryName) => normalizeCategoryName(categoryName)
+  === "accessories";
+
 const getLearnMorePath = (product) => {
   if (!product?.id) return "";
 
@@ -121,6 +133,21 @@ const getLearnMorePath = (product) => {
     product.categorySlug,
     product.category?.slug,
   ];
+  const categorySlug = String(product.categorySlug || "").toLowerCase();
+
+  if (categorySlug === "commercial-industrial-smart-pv-controller"
+    || categoryValues.some(isSmartPVControllerCategory)) {
+    return "/product-huawei/commercial-industrial-smart-pv-controller";
+  }
+  if (categorySlug === "commercial-industrial-c-and-i-hybrid-grid-forming-ess"
+    || categorySlug === "commercial-industrial-c-and-i-hybrid-cooling-grid-forming-ess"
+    || categoryValues.some(isHybridCoolingESSCategory)) {
+    return "/product-huawei/commercial-industrial-c-and-i-hybrid-cooling-grid-forming-ess";
+  }
+  if (categorySlug === "commercial-industrial-accessories"
+    || categoryValues.some(isAccessoriesCategory)) {
+    return "/product-huawei/commercial-industrial-accessories";
+  }
   if (categoryValues.some(isSmartGuardCategory)) return `/product-huawei/${product.id}/learn-more-smart-guard`;
   if (categoryValues.some(isSmartModuleCategory)) return `/product-huawei/${product.id}/learn-more`;
   if (categoryValues.some(isSmartEnergyCategory)) return `/product-huawei/${product.id}/learn-more-energy`;

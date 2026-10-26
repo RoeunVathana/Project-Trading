@@ -38,6 +38,10 @@ const productPath = (parameters) => {
     return "/product-huawei";
   }
 
+  if (parameters.collection === "chint" && parameters.solution === "low-voltage" && !parameters.product) {
+    return "/low-voltage";
+  }
+
   const search = new URLSearchParams(
     Object.entries(parameters).filter(([, value]) => value),
   ).toString();
@@ -177,17 +181,22 @@ const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const nextTheme = theme === "dark" ? "light" : "dark";
 
-  useEffect(() => {
-    if (!location.pathname.startsWith("/product-huawei")) return;
-    setActiveCollection("huawei");
-    setActiveSolution("residential-solution");
-  }, [location.pathname]);
+  const routeCollection = location.pathname === "/low-voltage"
+    ? "chint"
+    : location.pathname.startsWith("/product-huawei")
+      ? "huawei"
+      : null;
+  const routeSolution = location.pathname === "/low-voltage"
+    ? "low-voltage"
+    : location.pathname.startsWith("/product-huawei")
+      ? "residential-solution"
+      : null;
 
   const selectedCollection = productCollections.find(
-    (collection) => collection.id === activeCollection,
+    (collection) => collection.id === (routeCollection || activeCollection),
   ) || productCollections[0];
   const selectedSolution = selectedCollection.solutions.find(
-    (solution) => solution.id === activeSolution,
+    (solution) => solution.id === (routeSolution || activeSolution),
   ) || selectedCollection.solutions[0];
 
   const activateCollection = (collectionId) => {
@@ -287,7 +296,13 @@ const Navbar = () => {
     const { pathname } = location;
 
     if (name === "home") return pathname === "/";
-    if (name === "product") return pathname === "/product" || pathname.startsWith("/product/") || pathname === "/product-huawei" || pathname.startsWith("/product-huawei/");
+    if (name === "product") {
+      return pathname === "/low-voltage"
+        || pathname === "/product"
+        || pathname.startsWith("/product/")
+        || pathname === "/product-huawei"
+        || pathname.startsWith("/product-huawei/");
+    }
 
     return pathname === "/" + name;
   };

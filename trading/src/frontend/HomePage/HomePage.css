@@ -74,6 +74,46 @@
     max-width: 580px;
 }
 
+@keyframes heroTextLoad {
+    from {
+        opacity: 0;
+        filter: blur(8px);
+        transform: translate3d(0, 28px, 0);
+    }
+
+    to {
+        opacity: 1;
+        filter: blur(0);
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes heroTitleLineLoad {
+    from {
+        opacity: 0;
+        filter: blur(10px);
+        transform: translate3d(0, 42px, 0);
+    }
+
+    to {
+        opacity: 1;
+        filter: blur(0);
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes heroCharLoad {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 12px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
 .hero-label {
     display: inline-flex;
     align-items: center;
@@ -91,10 +131,24 @@
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 1.2px;
+
+    animation: heroTextLoad 1100ms cubic-bezier(0.22, 1, 0.36, 1) 100ms both;
+    will-change: opacity, filter, transform;
 }
 
-.hero-label span {
+.hero-label-marker {
     display: none;
+}
+
+.hero-label-text {
+    display: inline-block;
+}
+
+.hero-count-char {
+    display: inline-block;
+
+    animation: heroCharLoad 560ms cubic-bezier(0.22, 1, 0.36, 1) var(--char-delay) both;
+    will-change: opacity, transform;
 }
 
 .hero-content h1 {
@@ -107,12 +161,30 @@
     letter-spacing: -2px;
 }
 
-.hero-content h1 span {
+.hero-title-line {
     display: block;
+
+    animation: heroTitleLineLoad 1200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    will-change: opacity, filter, transform;
+}
+
+.hero-title-line:nth-child(1) {
+    animation-delay: 260ms;
+}
+
+.hero-title-line:nth-child(2) {
+    animation-delay: 430ms;
+}
+
+.hero-title-line:nth-child(3) {
+    animation-delay: 600ms;
+}
+
+.hero-title-line--accent {
     color: var(--theme-accent-text);
 }
 
-.hero-content p {
+.hero-description {
     max-width: 540px;
 
     margin-top: 30px;
@@ -121,6 +193,9 @@
 
     font-size: 16px;
     line-height: 1.7;
+
+    animation: heroTextLoad 1200ms cubic-bezier(0.22, 1, 0.36, 1) 780ms both;
+    will-change: opacity, filter, transform;
 }
 
 
@@ -173,6 +248,9 @@
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.5px;
+
+    animation: heroTextLoad 1000ms cubic-bezier(0.22, 1, 0.36, 1) 1120ms both;
+    will-change: opacity, filter, transform;
 }
 
 .status-dot {
@@ -792,5 +870,24 @@
 
     .spec-content>p {
         font-size: 14px;
+    }
+}
+
+
+/* =========================================
+   REDUCED MOTION
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .hero-label,
+    .hero-title-line,
+    .hero-count-char,
+    .hero-description,
+    .machine-info {
+        animation: none;
+        filter: none;
+        opacity: 1;
+        transform: none;
     }
 }

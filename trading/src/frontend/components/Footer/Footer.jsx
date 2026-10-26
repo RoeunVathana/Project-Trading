@@ -3,7 +3,7 @@ import SnttLogo from "../../../assets/SNTT.png";
 import "./Footer.css";
 
 const productLinks = [
-  ["Low-voltage", "/product?division=trd&collection=chint&solution=low-voltage"],
+  ["Low-voltage", "/low-voltage"],
   ["Power Transmission and Distribution", "/product?division=trd&collection=chint&solution=power-transmission-distribution"],
   ["Low-voltage Switchgear and Software", "/product?division=trd&collection=chint"],
   ["Instruments and Meters", "/product?division=trd&collection=chint&solution=instruments-meters"],
@@ -68,23 +68,25 @@ const Footer = () => (
       <FooterColumn title="About Us" links={aboutLinks} />
       <FooterColumn title="Services" links={serviceLinks} />
 
-      <aside className="footer-contact-panel" aria-label="CHINT contact information">
+      <aside className="footer-contact-panel" aria-label="SchneiTec Trading contact information">
         <div className="footer-brand-mark">
-          <img src={SnttLogo} alt="SNTT Power Systems" />
+          <img src={SnttLogo} alt="SchneiTec Trading" />
         </div>
 
         <div className="footer-contact-grid">
           <div className="footer-contact-item">
             <span>Phone</span>
-            <a href="tel:+6563293110">+65 6329 3110</a>
+            <a href="tel:+85593305040">093 305 040</a>
           </div>
           <div className="footer-contact-item">
             <span>Mailbox</span>
-            <a href="mailto:sales.apac@chint.com">sales.apac@chint.com</a>
+            <a href="mailto:trading@schneitec.com.kh">trading@schneitec.com.kh</a>
           </div>
           <div className="footer-contact-item">
-            <span>Technical Support</span>
-            <a href="mailto:sg.service@chint.com">sg.service@chint.com</a>
+            <span>Website</span>
+            <a href="https://trading.schneitec.com.kh/" target="_blank" rel="noreferrer">
+              trading.schneitec.com.kh
+            </a>
           </div>
         </div>
 
@@ -92,7 +94,7 @@ const Footer = () => (
           <h3>Follow us</h3>
           <div className="footer-social-links">
             <a href="https://www.linkedin.com" target="_blank" rel="noreferrer" aria-label="LinkedIn">in</a>
-            <a href="https://www.facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook">f</a>
+            <a href="https://www.facebook.com/schneitecbrandshop" target="_blank" rel="noreferrer" aria-label="Facebook">f</a>
             <a href="https://www.youtube.com" target="_blank" rel="noreferrer" aria-label="YouTube">▶</a>
           </div>
         </div>
@@ -100,8 +102,8 @@ const Footer = () => (
     </div>
 
     <div className="footer-bottom">
-      <p>© 2026 CHINT POWER SYSTEMS. ALL RIGHTS RESERVED.</p>
-      <p>SchneiTec Trading / Manufacturing / POWER SYSTEMS</p>
+      <p>© 2026 SCHNEITEC TRADING. ALL RIGHTS RESERVED.</p>
+      <p>SchneiTec Trading / Power Systems</p>
     </div>
   </footer>
 );

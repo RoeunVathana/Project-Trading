@@ -18,10 +18,14 @@ const ProductHuawei = lazy(() => import("./frontend/ProductHuawei/ProductHuawei"
 const ProductHuaweiDetail = lazy(() => import("./frontend/ProductHuawei/ProductHuaweiDetail"));
 const SmartModuleController = lazy(() => import("./frontend/ProductHuawei/SmartModule/SmartModuleController"));
 const SmartEnergyController = lazy(() => import("./frontend/ProductHuawei/SmartEnergy/SmartEnergyController"));
+const SmartPVController = lazy(() => import("./frontend/ProductHuawei/SmartPVController/SmartPVController"));
+const IHybridCoolingGridFormingESS = lazy(() => import("./frontend/ProductHuawei/IHybridCoolingGridFormingESS/IHybridCoolingGridFormingESS"));
+const Accessories = lazy(() => import("./frontend/ProductHuawei/Accessories/Accessories"));
 const SmartStringESS = lazy(() => import("./frontend/ProductHuawei/SmartStringESS/SmartStringESS"));
 const SmartGuard = lazy(() => import("./frontend/ProductHuawei/SmartGuard/SmartGuard"));
 const Residentail = lazy(() => import("./frontend/ProductHuawei/Residentail/Residentail"));
 const HuaweiShowcase = lazy(() => import("./frontend/ProductHuawei/HuaweiShowcase/HuaweiShowcase"));
+const LowVoltage = lazy(() => import("./frontend/Low-voltage/Low-voltage"));
 import DashboardLayout from "./dashboard/components/Layout";
 const DashboardPage = lazy(() => import("./dashboard/DashboardPage"));
 
@@ -45,6 +49,17 @@ const HuaweiProductRoute = () => {
   if (id === "smart-string-ess") return <SmartStringESS />;
   if (id === "smart-energy-controller") return <SmartEnergyController />;
   if (id === "smart-module-controller") return <SmartModuleController />;
+  if (id === "smart-pv-controller" || id === "commercial-industrial-smart-pv-controller") {
+    return <SmartPVController />;
+  }
+  if (id === "hybrid-cooling-grid-forming-ess"
+    || id === "commercial-industrial-c-and-i-hybrid-grid-forming-ess"
+    || id === "commercial-industrial-c-and-i-hybrid-cooling-grid-forming-ess") {
+    return <IHybridCoolingGridFormingESS />;
+  }
+  if (id === "accessories" || id === "commercial-industrial-accessories") {
+    return <Accessories />;
+  }
   if (id === "smart-guard") return <SmartGuard />;
   if (id && !/^\d+$/.test(id)) return <HuaweiShowcase categorySlug={id} />;
 
@@ -77,6 +92,8 @@ const App = () => {
           <Route path="/product-huawei/:id" element={<HuaweiProductRoute />} />
 
           <Route path="/distribution" element={<DistributionPage />} />
+
+          <Route path="/low-voltage" element={<LowVoltage />} />
 
           <Route path="/reference" element={<NewPreference />} />
 
