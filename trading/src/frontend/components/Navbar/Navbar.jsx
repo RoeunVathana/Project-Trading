@@ -29,6 +29,10 @@ const productPath = (parameters) => {
       return "/product-huawei/residential-solution";
     }
 
+    if (parameters.solution === "commercial-industrial-solutions") {
+      return "/commercial-industrial-solutions";
+    }
+
     if (parameters.product || parameters.categorySlug) {
       const path = `/product-huawei/${parameters.categorySlug || parameters.product}`;
       return parameters.solution
@@ -170,33 +174,58 @@ const referenceLinks = [
 const Navbar = () => {
   const navbarRef = useRef(null);
   const dropdownCloseTimer = useRef(null);
+  const dropdownLockedByClick = useRef(null);
   const dropdownTriggerRefs = useRef({});
   const menuToggleRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [activeCollection, setActiveCollection] = useState(productCollections[0].id);
   const [activeSolution, setActiveSolution] = useState(productCollections[0].solutions[0].id);
+  const [manualSelectionRoute, setManualSelectionRoute] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const nextTheme = theme === "dark" ? "light" : "dark";
 
-  const routeCollection = location.pathname === "/low-voltage"
+  const searchParams = new URLSearchParams(location.search);
+  const routeCollectionId = location.pathname === "/low-voltage"
     ? "chint"
+    : location.pathname === "/commercial-industrial-solutions"
+      ? "huawei"
     : location.pathname.startsWith("/product-huawei")
       ? "huawei"
-      : null;
-  const routeSolution = location.pathname === "/low-voltage"
+      : searchParams.get("collection");
+  const routeCollection = productCollections.find(
+    (collection) => collection.id === routeCollectionId,
+  );
+  const routeSolutionId = location.pathname === "/low-voltage"
     ? "low-voltage"
+    : location.pathname === "/commercial-industrial-solutions"
+      ? "commercial-industrial-solutions"
     : location.pathname.startsWith("/product-huawei")
       ? "residential-solution"
-      : null;
+      : searchParams.get("solution");
+  const routeSolution = routeCollection?.solutions.find(
+    (solution) => solution.id === routeSolutionId,
+  );
+  const currentRouteKey = (location.key || "")
+    + location.pathname
+    + location.search
+    + location.hash;
+
+  const selectionIsManual = manualSelectionRoute === currentRouteKey;
+  const selectedCollectionId = selectionIsManual
+    ? activeCollection
+    : routeCollection?.id || activeCollection;
+  const selectedSolutionId = selectionIsManual
+    ? activeSolution
+    : routeSolution?.id || activeSolution;
 
   const selectedCollection = productCollections.find(
-    (collection) => collection.id === (routeCollection || activeCollection),
+    (collection) => collection.id === selectedCollectionId,
   ) || productCollections[0];
   const selectedSolution = selectedCollection.solutions.find(
-    (solution) => solution.id === (routeSolution || activeSolution),
+    (solution) => solution.id === selectedSolutionId,
   ) || selectedCollection.solutions[0];
 
   const activateCollection = (collectionId) => {
@@ -205,6 +234,12 @@ const Navbar = () => {
 
     setActiveCollection(collection.id);
     setActiveSolution(collection.solutions[0].id);
+    setManualSelectionRoute(currentRouteKey);
+  };
+
+  const activateSolution = (solutionId) => {
+    setActiveSolution(solutionId);
+    setManualSelectionRoute(currentRouteKey);
   };
 
   const closeMenu = (restoreFocus = false) => {
@@ -212,6 +247,7 @@ const Navbar = () => {
     const focusTarget = activeTrigger || (restoreFocus ? menuToggleRef.current : null);
 
     clearTimeout(dropdownCloseTimer.current);
+    dropdownLockedByClick.current = null;
     setOpen(false);
     setOpenDropdown(null);
 
@@ -224,6 +260,7 @@ const Navbar = () => {
     const closeWhenClickingOutside = (event) => {
       if (!navbarRef.current?.contains(event.target)) {
         clearTimeout(dropdownCloseTimer.current);
+        dropdownLockedByClick.current = null;
         setOpen(false);
         setOpenDropdown(null);
       }
@@ -258,6 +295,7 @@ const Navbar = () => {
     const compactNavigation = window.matchMedia("(max-width: 1199px)");
     const resetNavigation = () => {
       clearTimeout(dropdownCloseTimer.current);
+      dropdownLockedByClick.current = null;
       setOpen(false);
       setOpenDropdown(null);
     };
@@ -273,12 +311,16 @@ const Navbar = () => {
   const handleDropdownEnter = (name) => {
     clearTimeout(dropdownCloseTimer.current);
     if (isDesktopNavigation()) {
+      if (dropdownLockedByClick.current && dropdownLockedByClick.current !== name) {
+        dropdownLockedByClick.current = null;
+      }
       setOpenDropdown(name);
     }
   };
 
   const handleDropdownLeave = () => {
     if (!isDesktopNavigation()) return;
+    if (dropdownLockedByClick.current) return;
 
     clearTimeout(dropdownCloseTimer.current);
     dropdownCloseTimer.current = setTimeout(() => {
@@ -288,8 +330,26 @@ const Navbar = () => {
 
   const handleDropdownBlur = (event) => {
     if (!event.currentTarget.contains(event.relatedTarget)) {
+      dropdownLockedByClick.current = null;
       setOpenDropdown(null);
     }
+  };
+
+  const handleDropdownTriggerClick = (name) => {
+    clearTimeout(dropdownCloseTimer.current);
+
+    if (isDesktopNavigation()) {
+      if (dropdownLockedByClick.current === name) {
+        dropdownLockedByClick.current = null;
+        setOpenDropdown(null);
+      } else {
+        dropdownLockedByClick.current = name;
+        setOpenDropdown(name);
+      }
+      return;
+    }
+
+    setOpenDropdown((current) => (current === name ? null : name));
   };
 
   const isCurrentSection = (name) => {
@@ -298,6 +358,7 @@ const Navbar = () => {
     if (name === "home") return pathname === "/";
     if (name === "product") {
       return pathname === "/low-voltage"
+        || pathname === "/commercial-industrial-solutions"
         || pathname === "/product"
         || pathname.startsWith("/product/")
         || pathname === "/product-huawei"
@@ -326,12 +387,7 @@ const Navbar = () => {
         aria-haspopup="true"
         aria-controls={"navbar-" + name + "-panel"}
         aria-expanded={openDropdown === name}
-        onClick={() => {
-          if (isDesktopNavigation()) return;
-
-          const closing = openDropdown === name;
-          setOpenDropdown(closing ? null : name);
-        }}
+        onClick={() => handleDropdownTriggerClick(name)}
       >
         {label}
       </button>
@@ -449,14 +505,18 @@ const Navbar = () => {
                     className={"product-mega-solution" + (selectedSolution.id === solution.id ? " active" : "")}
                     aria-pressed={selectedSolution.id === solution.id}
                     key={solution.id}
-                    onMouseEnter={() => setActiveSolution(solution.id)}
-                    onFocus={() => setActiveSolution(solution.id)}
+                    onMouseEnter={() => activateSolution(solution.id)}
+                    onFocus={() => activateSolution(solution.id)}
                     onClick={() => {
-                      setActiveSolution(solution.id);
+                      activateSolution(solution.id);
 
                       if (selectedCollection.id === "huawei" && solution.id === "residential-solution") {
                         closeMenu();
                         navigate("/product-huawei/residential-solution");
+                      }
+                      if (selectedCollection.id === "huawei" && solution.id === "commercial-industrial-solutions") {
+                        closeMenu();
+                        navigate("/commercial-industrial-solutions");
                       }
                     }}
                   >

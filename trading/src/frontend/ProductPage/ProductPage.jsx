@@ -29,6 +29,25 @@ const toMachineTypeSlug = (value) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
+const toCategoryKey = (value) => String(value || "")
+  .trim()
+  .toLowerCase()
+  .replace(/\s+/g, " ");
+
+const shuffleProducts = (items) => {
+  const shuffled = [...items];
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [
+      shuffled[randomIndex],
+      shuffled[index],
+    ];
+  }
+
+  return shuffled;
+};
+
 const MACHINE_TYPE_OPTIONS = [
   { slug: "main-power-distribution", label: "Main Power Distribution" },
   { slug: "sub-power-distribution", label: "Sub Power Distribution" },
@@ -53,7 +72,13 @@ const toCardSpecificationRows = (entries) => (entries || [])
   .filter(([, value]) => value);
 
 const toProduct = (machine) => {
-  const categoryName = machine.category?.name || "Uncategorized";
+  const categoryValue = machine.category;
+  const categoryName = typeof categoryValue === "string"
+    ? categoryValue.trim()
+    : categoryValue?.name || machine.categoryName || "Uncategorized";
+  const categoryId = machine.categoryId ?? (
+    typeof categoryValue === "object" ? categoryValue?.id : ""
+  );
   const rawMachineType = String(machine.machineType || "").trim();
   const machineTypeValue = `${rawMachineType} ${categoryName}`.toLowerCase();
   const powerValue = String(machine.power || "").toLowerCase();
@@ -77,11 +102,13 @@ const toProduct = (machine) => {
 
   return {
     ...machine,
+    categoryId,
     image: toMediaUrl(machine.image) || fallbackProducts[0]?.image || "",
     gallery: (machine.gallery || [])
       .map((image) => toMediaUrl(typeof image === "string" ? image : image?.imageUrl))
       .filter(Boolean),
     category: categoryName.toUpperCase(),
+    categoryKey: toCategoryKey(categoryName),
     searchText: [machine.name, machine.model, categoryName, rawMachineType, machine.description]
       .filter(Boolean)
       .join(" ")
@@ -173,38 +200,57 @@ const ProductPage = () => {
       setLoadError("");
 
       try {
-        const query = new URLSearchParams({ page: String(pageToLoad) });
-        query.set("division", selectedDivision);
-        if (selectedMachineType) query.set("machineType", selectedMachineType);
+        const loadPage = (page) => {
+          const query = new URLSearchParams({
+            page: String(page),
+            division: selectedDivision,
+          });
+          if (selectedMachineType) query.set("machineType", selectedMachineType);
 
-        const result = await fetchCachedJson(
-          `${API_BASE_URL}/api/machines?${query.toString()}`,
-        );
+          return fetchCachedJson(
+            `${API_BASE_URL}/api/machines?${query.toString()}`,
+          );
+        };
+
+        const firstResult = await loadPage(pageToLoad);
         if (requestId !== loadRequestRef.current) return;
 
-        const newMachines = Array.isArray(result.data)
-          ? result.data.map(toProduct)
+        const totalPages = Number(firstResult.pagination?.totalPages);
+        const pageNumbers = pageToLoad === 1 && Number.isFinite(totalPages)
+          ? Array.from(
+              { length: Math.max(0, totalPages - 1) },
+              (_, index) => index + 2,
+            )
           : [];
-        const totalPages = Number(result.pagination?.totalPages);
-        const totalItems = Number(result.pagination?.totalItems);
+        const remainingResults = await Promise.all(pageNumbers.map(loadPage));
+        if (requestId !== loadRequestRef.current) return;
+
+        const pageResults = [firstResult, ...remainingResults];
+        const newMachines = pageResults.flatMap((result) => (
+          Array.isArray(result.data) ? result.data.map(toProduct) : []
+        ));
+        const uniqueMachines = [...new Map(
+          newMachines.map((machine) => [String(machine.id), machine]),
+        ).values()];
+        const totalItems = Number(firstResult.pagination?.totalItems);
 
         setProducts((current) => {
-          if (pageToLoad === 1) return newMachines;
+          if (pageToLoad === 1) return uniqueMachines;
 
           const loadedIds = new Set(current.map((machine) => machine.id));
           return [
             ...current,
-            ...newMachines.filter((machine) => !loadedIds.has(machine.id)),
+            ...uniqueMachines.filter((machine) => !loadedIds.has(machine.id)),
           ];
         });
         setTotalMachines(
-          Number.isFinite(totalItems) ? totalItems : newMachines.length,
+          Number.isFinite(totalItems) ? totalItems : uniqueMachines.length,
         );
-        setNextPage(pageToLoad + 1);
+        setNextPage(pageToLoad + (pageNumbers.length + 1));
         setHasMore(
-          Number.isFinite(totalPages)
+          pageToLoad !== 1 && Number.isFinite(totalPages)
             ? pageToLoad < totalPages
-            : newMachines.length > 0,
+            : false,
         );
       } catch (error) {
         if (requestId === loadRequestRef.current) {
@@ -251,6 +297,7 @@ const ProductPage = () => {
           .map((category) => ({
             id: category.id,
             name: String(category.name || "").trim(),
+            categoryKey: toCategoryKey(category.name),
           }))
           .filter((category) => category.id && category.name),
       );
@@ -426,6 +473,13 @@ const ProductPage = () => {
     );
   }, [categoryOptions, products, selectedMachineTypeOption]);
 
+  const categoryKeysById = useMemo(
+    () => new Map(
+      categoryOptions.map((category) => [String(category.id), category.categoryKey]),
+    ),
+    [categoryOptions],
+  );
+
   /* =================================================
        CHECK ACTIVE FILTER GROUP
     ================================================= */
@@ -439,11 +493,9 @@ const ProductPage = () => {
 
   const hasAvailabilityFilter = filters.inStock || filters.customOrder;
   const normalizedSearch = appliedSearch.toLowerCase();
-  const orderedProducts = useMemo(
-    () => [...products].sort((left, right) => {
-      const viewDifference = Number(right.viewCount || 0) - Number(left.viewCount || 0);
-      return viewDifference || Number(right.id || 0) - Number(left.id || 0);
-    }),
+  const selectedCategoryKey = toCategoryKey(selectedCategory);
+  const randomizedProducts = useMemo(
+    () => shuffleProducts(products),
     [products],
   );
 
@@ -452,18 +504,21 @@ const ProductPage = () => {
     ================================================= */
 
   const filteredProducts = useMemo(() => {
-    return orderedProducts
+    return randomizedProducts
       .filter((product) => {
         const searchMatch =
           !normalizedSearch || product.searchText.includes(normalizedSearch);
         const categoryMatch =
-          !selectedCategory || product.category === selectedCategory;
+          !selectedCategoryKey || product.categoryKey === selectedCategoryKey;
+        const productCategoryId = String(product.categoryId || "");
+        const productCategoryKey = product.categoryKey || toCategoryKey(product.category);
         const apiCategoryMatch =
           !hasCategoryFilter ||
-          Boolean(
-            filters.categories[
-              String(product.categoryId || product.category?.id)
-            ],
+          Object.entries(filters.categories).some(
+            ([categoryId, isSelected]) => isSelected && (
+              categoryId === productCategoryId
+              || categoryKeysById.get(categoryId) === productCategoryKey
+            ),
           );
         const machineTypeMatch =
           !selectedMachineTypeOption ||
@@ -504,14 +559,15 @@ const ProductPage = () => {
         );
       });
   }, [
-    orderedProducts,
+    randomizedProducts,
     filters,
     hasCategoryFilter,
     hasPowerFilter,
     hasPrecisionFilter,
     hasAvailabilityFilter,
     normalizedSearch,
-    selectedCategory,
+    selectedCategoryKey,
+    categoryKeysById,
     selectedMachineTypeOption,
   ]);
 

@@ -26,6 +26,7 @@ const SmartGuard = lazy(() => import("./frontend/ProductHuawei/SmartGuard/SmartG
 const Residentail = lazy(() => import("./frontend/ProductHuawei/Residentail/Residentail"));
 const HuaweiShowcase = lazy(() => import("./frontend/ProductHuawei/HuaweiShowcase/HuaweiShowcase"));
 const LowVoltage = lazy(() => import("./frontend/Low-voltage/Low-voltage"));
+const CommercialIndustrialSolutions = lazy(() => import("./frontend/Commercial&IndustrialSolutions/CommercialIndustrialSolutions"));
 import DashboardLayout from "./dashboard/components/Layout";
 const DashboardPage = lazy(() => import("./dashboard/DashboardPage"));
 
@@ -94,6 +95,7 @@ const App = () => {
           <Route path="/distribution" element={<DistributionPage />} />
 
           <Route path="/low-voltage" element={<LowVoltage />} />
+          <Route path="/commercial-industrial-solutions" element={<CommercialIndustrialSolutions />} />
 
           <Route path="/reference" element={<NewPreference />} />
 

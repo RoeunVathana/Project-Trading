@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { RESOURCE_CONFIG, TABLE_COLUMNS } from "../dashboardConfig";
 import { publicFileUrl, recordTitle } from "../dashboardUtils";
@@ -29,6 +30,98 @@ const relationLabel = (item, resource) => {
   return item.name || item.model || item.title || `Record #${item.id}`;
 };
 
+const relationOptionLabel = (item, resource) => {
+  const label = relationLabel(item, resource);
+  return resource === "machines" && item.model ? `${label} · ${item.model}` : label;
+};
+
+const SearchableRelationField = ({ field, value, records, onChange }) => {
+  const wrapperRef = useRef(null);
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const options = useMemo(
+    () => (records[field.resource] || []).map((item) => ({
+      item,
+      label: relationOptionLabel(item, field.resource),
+      searchText: `${relationOptionLabel(item, field.resource)} ${item.name || ""} ${item.model || ""} ${item.productName || ""} ${item.modelCode || ""}`.toLowerCase(),
+    })),
+    [field.resource, records],
+  );
+  const selectedOption = options.find((option) => String(option.item.id) === String(value || ""));
+  const filteredOptions = options.filter((option) => option.searchText.includes(query.trim().toLowerCase()));
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const closeOnOutsideClick = (event) => {
+      if (!wrapperRef.current?.contains(event.target)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    return () => document.removeEventListener("pointerdown", closeOnOutsideClick);
+  }, [open]);
+
+  return (
+    <div className="dashboard-relation-select" ref={wrapperRef}>
+      <button
+        type="button"
+        className={`dashboard-relation-trigger ${open ? "is-open" : ""}`}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => {
+          setQuery("");
+          setOpen((current) => !current);
+        }}
+      >
+        <span>{selectedOption?.label || `Select ${field.label.toLowerCase()}`}</span>
+        <span className="dashboard-relation-chevron" aria-hidden="true">⌄</span>
+      </button>
+      {open && (
+        <div className="dashboard-relation-menu" role="listbox" aria-label={`Search ${field.label.toLowerCase()}`}>
+          <input
+            type="search"
+            value={query}
+            autoFocus
+            placeholder={`Search ${field.label.toLowerCase()}...`}
+            aria-label={`Search ${field.label.toLowerCase()}`}
+            onChange={(event) => setQuery(event.target.value)}
+            onClick={(event) => event.stopPropagation()}
+          />
+          <div className="dashboard-relation-options">
+            <button
+              type="button"
+              className={`dashboard-relation-option ${!value ? "is-selected" : ""}`}
+              role="option"
+              aria-selected={!value}
+              onClick={() => {
+                onChange("");
+                setOpen(false);
+              }}
+            >
+              Select {field.label.toLowerCase()}
+            </button>
+            {filteredOptions.map((option) => (
+              <button
+                type="button"
+                className={`dashboard-relation-option ${String(option.item.id) === String(value || "") ? "is-selected" : ""}`}
+                role="option"
+                aria-selected={String(option.item.id) === String(value || "")}
+                key={option.item.id}
+                onClick={() => {
+                  onChange(String(option.item.id));
+                  setOpen(false);
+                }}
+              >
+                <strong>{option.label}</strong>
+                {field.resource === "machines" && option.item.model && <small>{option.item.model}</small>}
+              </button>
+            ))}
+            {!filteredOptions.length && <p className="dashboard-relation-empty">No matching names found.</p>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const ImagePreviewDialog = ({ imageTarget, onCloseImage }) => (
   <div className="dashboard-modal-backdrop dashboard-image-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onCloseImage()}>
     <section className="dashboard-image-modal" role="dialog" aria-modal="true" aria-labelledby="image-preview-title">
@@ -39,12 +132,8 @@ const ImagePreviewDialog = ({ imageTarget, onCloseImage }) => (
         </div>
         <button type="button" className="modal-close" aria-label="Close image preview" onClick={onCloseImage}>×</button>
       </div>
-      <div className="dashboard-image-stage">
-        <img src={imageTarget.src} alt={imageTarget.alt} />
-      </div>
-      <div className="dashboard-image-footer">
-        <button type="button" className="dashboard-secondary-button" onClick={onCloseImage}>Close image</button>
-      </div>
+      <div className="dashboard-image-stage"><img src={imageTarget.src} alt={imageTarget.alt} /></div>
+      <div className="dashboard-image-footer"><button type="button" className="dashboard-secondary-button" onClick={onCloseImage}>Close image</button></div>
     </section>
   </div>
 );
@@ -65,41 +154,20 @@ const RecordViewDialog = ({ viewTarget, onCloseView, onImageView, renderCell }) 
             onClick={(event) => {
               const image = event.target.closest?.("img");
               if (!image) return;
-              onImageView({
-                src: image.currentSrc || image.src,
-                alt: image.alt || recordTitle(resource, record),
-              });
+              onImageView({ src: image.currentSrc || image.src, alt: image.alt || recordTitle(resource, record) });
             }}
           >
-            {imageColumn ? (
-              renderCell(resource, imageColumn.key, record)
-            ) : (
-              <span className="dashboard-view-hero-mark">{RESOURCE_CONFIG[resource].icon}</span>
-            )}
+            {imageColumn ? renderCell(resource, imageColumn.key, record) : <span className="dashboard-view-hero-mark">{RESOURCE_CONFIG[resource].icon}</span>}
           </div>
           <div className="dashboard-view-hero-copy">
-            <div className="dashboard-view-heading-line">
-              <span className="dashboard-eyebrow">{RESOURCE_CONFIG[resource].title} · DETAILS</span>
-              <span className="dashboard-view-id">#{record.id}</span>
-            </div>
+            <div className="dashboard-view-heading-line"><span className="dashboard-eyebrow">{RESOURCE_CONFIG[resource].title} · DETAILS</span><span className="dashboard-view-id">#{record.id}</span></div>
             <h2 id="view-dialog-title">{recordTitle(resource, record)}</h2>
             <p>{secondaryLabel}</p>
           </div>
           <button type="button" className="modal-close dashboard-view-close" aria-label="Close details" onClick={onCloseView}>×</button>
         </div>
-
-        <div className="dashboard-record-grid">
-          {detailColumns.map((column) => (
-            <div className="dashboard-record-field" key={column.key}>
-              <span>{column.label}</span>
-              <div className="dashboard-record-value">{renderCell(resource, column.key, record)}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="dashboard-modal-footer">
-          <button type="button" className="dashboard-secondary-button" onClick={onCloseView}>Close details</button>
-        </div>
+        <div className="dashboard-record-grid">{detailColumns.map((column) => <div className="dashboard-record-field" key={column.key}><span>{column.label}</span><div className="dashboard-record-value">{renderCell(resource, column.key, record)}</div></div>)}</div>
+        <div className="dashboard-modal-footer"><button type="button" className="dashboard-secondary-button" onClick={onCloseView}>Close details</button></div>
       </section>
     </div>
   );
@@ -125,136 +193,82 @@ const RecordDialogs = ({
 }) => {
   const dialogLayer = (
     <>
-    {imageTarget && <ImagePreviewDialog imageTarget={imageTarget} onCloseImage={onCloseImage} />}
-    {viewTarget && (
-      <RecordViewDialog viewTarget={viewTarget} onCloseView={onCloseView} onImageView={onImageView} renderCell={renderCell} />
-    )}
+      {imageTarget && <ImagePreviewDialog imageTarget={imageTarget} onCloseImage={onCloseImage} />}
+      {viewTarget && <RecordViewDialog viewTarget={viewTarget} onCloseView={onCloseView} onImageView={onImageView} renderCell={renderCell} />}
 
-    {dialog && (
-      <div className="dashboard-modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-        <section className={`dashboard-modal dashboard-form-modal dashboard-form-${dialog.resource}`} role="dialog" aria-modal="true" aria-labelledby="record-dialog-title">
-          <div className="dashboard-modal-heading">
-            <div>
-              <span className="dashboard-eyebrow">{dialog.record ? "EDIT RECORD" : "NEW RECORD"}</span>
-              <h2 id="record-dialog-title">{dialog.record ? "Update" : "Create"} {RESOURCE_CONFIG[dialog.resource].singular}</h2>
+      {dialog && (
+        <div className="dashboard-modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+          <section className={`dashboard-modal dashboard-form-modal dashboard-form-${dialog.resource}`} role="dialog" aria-modal="true" aria-labelledby="record-dialog-title">
+            <div className="dashboard-modal-heading">
+              <div><span className="dashboard-eyebrow">{dialog.record ? "EDIT RECORD" : "NEW RECORD"}</span><h2 id="record-dialog-title">{dialog.record ? "Update" : "Create"} {RESOURCE_CONFIG[dialog.resource].singular}</h2></div>
+              <button type="button" className="modal-close" aria-label="Close dialog" onClick={onClose}>×</button>
             </div>
-            <button type="button" className="modal-close" aria-label="Close dialog" onClick={onClose}>×</button>
-          </div>
 
-          <form className="dashboard-form" onSubmit={onSave}>
-            <div className="dashboard-form-grid">
-              {RESOURCE_CONFIG[dialog.resource].fields.map((field) => (
-                <label className={`dashboard-field ${field.type === "textarea" ? "field-wide" : ""} ${field.type === "boolean" ? "field-boolean" : ""}`} key={field.name}>
-                  <span>{field.label}{(field.required || field.requiredOnCreate) && !dialog.record ? <b> *</b> : null}</span>
-                  {field.type === "textarea" ? (
-                    <>
-                      <textarea value={form[field.name] || ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: field.normalize === "lowercase" ? event.target.value.toLowerCase() : event.target.value }))} placeholder={field.placeholder} rows={field.rows || 3} />
-                      {field.helpText && <small className="dashboard-field-hint">{field.helpText}</small>}
-                    </>
-                  ) : field.type === "select" ? (
-                    <select value={form[field.name] || ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} required={field.required}>
-                      <option value="">Select {field.label.toLowerCase()}</option>
-                      {field.options.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
-                    </select>
-                  ) : field.type === "boolean" ? (
-                    <input
-                      type="checkbox"
-                      checked={form[field.name] === true || form[field.name] === "true"}
-                      onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.checked }))}
-                    />
-                  ) : field.type === "relation" ? (
-                    <select value={form[field.name] || ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} required={field.required}>
-                      <option value="">Select {field.label.toLowerCase()}</option>
-                      {(records[field.resource] || []).map((item) => ({ ...item, name: relationLabel(item, field.resource) })).map((item) => (
-                        <option value={item.id} key={item.id}>{item.name || item.model || `Machine #${item.id}`}{field.resource === "machines" && item.name ? ` · ${item.model}` : ""}</option>
-                      ))}
-                    </select>
-                  ) : field.type === "file" ? (
-                    <span className="file-input-wrap">
-                      <input
-                        type="file"
-                        accept={field.accept}
-                        multiple={field.multiple && !dialog.record}
-                        required={!dialog.record && field.requiredOnCreate}
-                        onChange={(event) => handleFileChange(event, field, setForm)}
-                      />
-                      <small>
-                        {(() => {
-                          const selectedFiles = Array.isArray(form[field.name])
-                            ? form[field.name]
-                            : form[field.name]
-                              ? [form[field.name]]
-                              : [];
-                          if (!selectedFiles.length) {
-                            if (dialog.record) return "Choose a replacement file (optional)";
-                            return field.multiple ? "Select files to upload" : "Choose a file";
-                          }
-                          if (selectedFiles.length === 1) return selectedFiles[0].name;
-                          return `${selectedFiles.length} files selected`;
-                        })()}
-                      </small>
-                      {field.helpText && <small className="dashboard-field-hint">{field.helpText}</small>}
-                      {field.currentKey && dialog.record?.[field.currentKey] && (
-                        <small className="file-current-note">
-                          Current file: <a href={publicFileUrl(dialog.record[field.currentKey])} target="_blank" rel="noreferrer">{field.currentLabel || "Open file"}</a>
+            <form className="dashboard-form" onSubmit={onSave}>
+              <div className="dashboard-form-grid">
+                {RESOURCE_CONFIG[dialog.resource].fields.map((field) => (
+                  <label className={`dashboard-field ${field.type === "textarea" ? "field-wide" : ""} ${field.type === "boolean" ? "field-boolean" : ""}`} key={field.name}>
+                    <span>{field.label}{(field.required || field.requiredOnCreate) && !dialog.record ? <b> *</b> : null}</span>
+                    {field.type === "textarea" ? (
+                      <>
+                        <textarea value={form[field.name] || ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: field.normalize === "lowercase" ? event.target.value.toLowerCase() : event.target.value }))} placeholder={field.placeholder} rows={field.rows || 3} />
+                        {field.helpText && <small className="dashboard-field-hint">{field.helpText}</small>}
+                      </>
+                    ) : field.type === "select" ? (
+                      <select value={form[field.name] || ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} required={field.required}>
+                        <option value="">Select {field.label.toLowerCase()}</option>
+                        {field.options.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
+                      </select>
+                    ) : field.type === "boolean" ? (
+                      <input type="checkbox" checked={form[field.name] === true || form[field.name] === "true"} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.checked }))} />
+                    ) : field.type === "relation" ? (
+                      <SearchableRelationField field={field} value={form[field.name] || ""} records={records} onChange={(nextValue) => setForm((current) => ({ ...current, [field.name]: nextValue }))} />
+                    ) : field.type === "file" ? (
+                      <span className="file-input-wrap">
+                        <input type="file" accept={field.accept} multiple={field.multiple && !dialog.record} required={!dialog.record && field.requiredOnCreate} onChange={(event) => handleFileChange(event, field, setForm)} />
+                        <small>
+                          {(() => {
+                            const selectedFiles = Array.isArray(form[field.name]) ? form[field.name] : form[field.name] ? [form[field.name]] : [];
+                            if (!selectedFiles.length) {
+                              if (dialog.record) return "Choose a replacement file (optional)";
+                              return field.multiple ? "Select files to upload" : "Choose a file";
+                            }
+                            if (selectedFiles.length === 1) return selectedFiles[0].name;
+                            return `${selectedFiles.length} files selected`;
+                          })()}
                         </small>
-                      )}
-                      {field.maxSizeLabel && <small className="file-limit-note">Maximum {field.maxSizeLabel}</small>}
-                      {field.clearField && dialog.record?.[field.currentKey] && (
-                        <span className="file-clear-control">
-                          <input
-                            type="checkbox"
-                            checked={Boolean(form[field.clearField])}
-                            onChange={(event) => setForm((current) => ({ ...current, [field.clearField]: event.target.checked }))}
-                          />
-                          Remove current video
-                        </span>
-                      )}
-                    </span>
-                  ) : (
-                    <input
-                      type={field.type || "text"}
-                      min={field.min}
-                      value={form[field.name] ?? ""}
-                      onChange={(event) => setForm((current) => ({ ...current, [field.name]: field.normalize === "lowercase" ? event.target.value.toLowerCase() : event.target.value }))}
-                      placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
-                      required={field.required || (!dialog.record && field.requiredOnCreate)}
-                    />
-                  )}
-                </label>
-              ))}
-            </div>
-            <div className="dashboard-modal-footer">
-              <button type="button" className="dashboard-secondary-button" onClick={onClose} disabled={busy}>Cancel</button>
-              <button type="submit" className="dashboard-primary-button" disabled={busy}>
-                {busy ? "Saving..." : dialog.record ? "Save changes" : `Create ${RESOURCE_CONFIG[dialog.resource].singular}`}
-              </button>
-            </div>
-          </form>
-        </section>
-      </div>
-    )}
+                        {field.helpText && <small className="dashboard-field-hint">{field.helpText}</small>}
+                        {field.currentKey && dialog.record?.[field.currentKey] && <small className="file-current-note">Current file: <a href={publicFileUrl(dialog.record[field.currentKey])} target="_blank" rel="noreferrer">{field.currentLabel || "Open file"}</a></small>}
+                        {field.maxSizeLabel && <small className="file-limit-note">Maximum {field.maxSizeLabel}</small>}
+                        {field.clearField && dialog.record?.[field.currentKey] && <span className="file-clear-control"><input type="checkbox" checked={Boolean(form[field.clearField])} onChange={(event) => setForm((current) => ({ ...current, [field.clearField]: event.target.checked }))} />Remove current video</span>}
+                      </span>
+                    ) : (
+                      <input type={field.type || "text"} min={field.min} value={form[field.name] ?? ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: field.normalize === "lowercase" ? event.target.value.toLowerCase() : event.target.value }))} placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`} required={field.required || (!dialog.record && field.requiredOnCreate)} />
+                    )}
+                  </label>
+                ))}
+              </div>
+              <div className="dashboard-modal-footer"><button type="button" className="dashboard-secondary-button" onClick={onClose} disabled={busy}>Cancel</button><button type="submit" className="dashboard-primary-button" disabled={busy}>{busy ? "Saving..." : dialog.record ? "Save changes" : `Create ${RESOURCE_CONFIG[dialog.resource].singular}`}</button></div>
+            </form>
+          </section>
+        </div>
+      )}
 
-    {deleteTarget && (
-      <div className="dashboard-modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onCancelDelete()}>
-        <section className="dashboard-confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description">
-          <div className="confirm-warning-mark">!</div>
-          <span className="dashboard-eyebrow">CONFIRM DELETE</span>
-          <h2 id="delete-dialog-title">Delete this {RESOURCE_CONFIG[deleteTarget.resource].singular}?</h2>
-          <p id="delete-dialog-description">“{recordTitle(deleteTarget.resource, deleteTarget.record)}” will be permanently removed. This action cannot be undone.</p>
-          <div className="dashboard-modal-footer">
-            <button type="button" className="dashboard-secondary-button" onClick={onCancelDelete} disabled={busy}>Cancel</button>
-            <button type="button" className="dashboard-danger-button" onClick={onConfirmDelete} disabled={busy}>{busy ? "Deleting..." : "Delete permanently"}</button>
-          </div>
-        </section>
-      </div>
-    )}
+      {deleteTarget && (
+        <div className="dashboard-modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onCancelDelete()}>
+          <section className="dashboard-confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description">
+            <div className="confirm-warning-mark">!</div>
+            <span className="dashboard-eyebrow">CONFIRM DELETE</span>
+            <h2 id="delete-dialog-title">Delete this {RESOURCE_CONFIG[deleteTarget.resource].singular}?</h2>
+            <p id="delete-dialog-description">“{recordTitle(deleteTarget.resource, deleteTarget.record)}” will be permanently removed. This action cannot be undone.</p>
+            <div className="dashboard-modal-footer"><button type="button" className="dashboard-secondary-button" onClick={onCancelDelete} disabled={busy}>Cancel</button><button type="button" className="dashboard-danger-button" onClick={onConfirmDelete} disabled={busy}>{busy ? "Deleting..." : "Delete permanently"}</button></div>
+          </section>
+        </div>
+      )}
     </>
   );
 
-  return typeof document === "undefined"
-    ? dialogLayer
-    : createPortal(dialogLayer, document.body);
+  return typeof document === "undefined" ? dialogLayer : createPortal(dialogLayer, document.body);
 };
 
 export default RecordDialogs;
