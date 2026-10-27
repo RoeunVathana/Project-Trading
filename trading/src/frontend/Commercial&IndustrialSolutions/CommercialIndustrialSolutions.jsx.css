@@ -1,4 +1,24 @@
 .ci-page {
+  --ci-bg: #080e1d;
+  --ci-surface: #111a2a;
+  --ci-surface-soft: #151f30;
+  --ci-surface-dark: #121a2a;
+  --ci-text: #f7f9ff;
+  --ci-copy: #b8c1d0;
+  --ci-muted: #7f8ca2;
+  --ci-line: rgba(255, 255, 255, .12);
+  --ci-red: #f20d22;
+  --ci-blue: #2b78ff;
+  --ci-shadow: 0 18px 40px rgba(0, 0, 0, .23);
+  min-width: 0;
+  overflow: hidden;
+  background: radial-gradient(circle at 8% 0%, rgba(43, 120, 255, .13), transparent 31%), linear-gradient(180deg, #0b1426 0%, var(--ci-bg) 56%, #060b16 100%);
+  transition: background 320ms ease, color 320ms ease;
+  color: var(--ci-text);
+  font-family: var(--font-family);
+}
+
+:root[data-theme="light"] .ci-page {
   --ci-bg: #f5f7fb;
   --ci-surface: #fff;
   --ci-surface-soft: #f8f9fc;
@@ -7,25 +27,16 @@
   --ci-copy: #5c6a7d;
   --ci-muted: #8a95a6;
   --ci-line: rgba(11, 20, 37, .11);
-  --ci-red: #f20d22;
-  --ci-blue: #2b78ff;
   --ci-shadow: 0 18px 40px rgba(19, 35, 61, .11);
-  min-width: 0;
-  overflow: hidden;
-  background: var(--ci-bg);
-  color: var(--ci-text);
-  font-family: var(--font-family);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(43, 120, 255, .08), transparent 30%),
+    linear-gradient(180deg, #fbfcfe 0%, var(--ci-bg) 54%, #eef3f8 100%);
 }
 
 :root[data-theme="dark"] .ci-page {
-  --ci-bg: #080e1d;
-  --ci-surface: #111a2a;
-  --ci-surface-soft: #151f30;
-  --ci-text: #f7f9ff;
-  --ci-copy: #b8c1d0;
-  --ci-muted: #7f8ca2;
-  --ci-line: rgba(255, 255, 255, .12);
-  --ci-shadow: 0 18px 40px rgba(0, 0, 0, .23);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(43, 120, 255, .13), transparent 31%),
+    linear-gradient(180deg, #0b1426 0%, var(--ci-bg) 56%, #060b16 100%);
 }
 
 .ci-page *,
@@ -95,7 +106,8 @@
 .ci-button--red:hover { background: #d6081b; }
 .ci-button--outline { border-color: currentColor; color: var(--ci-text); background: transparent; }
 .ci-button--outline:hover { color: #fff; background: var(--ci-text); }
-.ci-button--white { background: #fff; color: #0b1425; }
+.ci-page .ci-button--white { border-color: rgba(255,255,255,.78); background: #fff; color: #0b1425; box-shadow: 0 9px 20px rgba(0,0,0,.2); }
+.ci-page .ci-button--white:hover { border-color: #fff; background: #e9eff8; color: #0b1425; box-shadow: 0 13px 25px rgba(0,0,0,.28); }
 .ci-button--dark { background: #0a1221; color: #fff; }
 .ci-button--transparent { border-color: #fff; color: #fff; background: transparent; }
 .ci-button--transparent:hover { color: #0a1221; background: #fff; }
@@ -157,8 +169,8 @@
 .ci-product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 .ci-product-card { padding: 22px; border-radius: 18px; background: var(--ci-surface-soft); transition: transform 220ms ease, box-shadow 220ms ease; }
 .ci-product-card:hover { transform: translateY(-7px); box-shadow: var(--ci-shadow); }
-.ci-product-image { display: grid; height: 192px; place-items: center; margin-bottom: 20px; overflow: hidden; border-radius: 10px; background: #e9edf3; }
-.ci-product-image img { width: 100%; height: 100%; object-fit: cover; }
+.ci-product-image { display: grid; height: 192px; place-items: center; margin-bottom: 20px; overflow: hidden; border-radius: 10px; background: linear-gradient(145deg, #f7f9fc, #e5ebf3); }
+.ci-product-image img { width: 100%; height: 100%; padding: 16px; object-fit: contain; }
 .ci-product-card h3 { margin: 0 0 7px; color: var(--ci-text); font-size: 17px; letter-spacing: -.02em; }
 .ci-product-card p { min-height: 38px; margin: 0; color: var(--ci-copy); font-size: 12px; line-height: 1.45; }
 .ci-product-card > strong { display: block; margin-top: 20px; color: var(--ci-muted); font-size: 10px; letter-spacing: .03em; }
@@ -174,7 +186,8 @@
 .ci-performance-intro > div:first-child > p:last-child { max-width: 500px; margin: 0; font-size: 14px; line-height: 1.6; }
 .ci-performance-icon { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 7px; background: var(--ci-red); color: #fff; }
 .ci-performance-icon .ci-icon { width: 20px; height: 20px; }
-.ci-performance-image { position: relative; min-height: 370px; border-radius: 18px; background-position: center; background-size: cover; box-shadow: 0 16px 38px rgba(0,0,0,.28); }
+.ci-performance-image { position: relative; min-height: 370px; border-radius: 18px; background-position: center; background-size: cover; background-repeat: no-repeat; box-shadow: 0 16px 38px rgba(0,0,0,.28); }
+.ci-performance-image--huawei { background-color: #1a263b; background-size: 72% auto; }
 .ci-failure-badge { position: absolute; right: -17px; bottom: -28px; display: flex; width: 153px; height: 99px; flex-direction: column; justify-content: center; padding-left: 29px; border-radius: 18px; background: var(--ci-red); box-shadow: 0 17px 28px rgba(242,13,34,.22); }
 .ci-failure-badge strong { font-size: 27px; letter-spacing: -.04em; }
 .ci-failure-badge small { margin-top: 2px; color: rgba(255,255,255,.85); font-size: 9px; }

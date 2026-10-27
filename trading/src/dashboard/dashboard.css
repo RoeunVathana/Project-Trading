@@ -1310,6 +1310,7 @@ img.account-avatar {
 
 .dashboard-modal-backdrop {
   --dash-accent: #00a866;
+  --dash-accent-strong: #008c58;
   --dash-accent-soft: rgba(0, 168, 102, 0.12);
   --dash-danger: #e35757;
   --dash-shadow: 0 20px 60px rgba(0, 0, 0, 0.24);
@@ -2944,6 +2945,9 @@ img.profile-avatar {
 }
 
 .dashboard-auth-screen {
+  --dash-accent: #258c9b;
+  --dash-accent-strong: #176f82;
+  --dash-accent-soft: rgba(37, 140, 155, 0.13);
   position: relative;
   display: grid;
   min-height: 100vh;
@@ -3172,6 +3176,9 @@ img.profile-avatar {
 }
 
 .dashboard-auth-screen[data-theme="light"] {
+  --dash-accent: #258c9b;
+  --dash-accent-strong: #176f82;
+  --dash-accent-soft: rgba(37, 140, 155, 0.13);
   background:
     radial-gradient(ellipse at 10% 12%, rgba(74, 158, 176, 0.16), transparent 34%),
     linear-gradient(145deg, #f3fafc 0%, #e6f1f5 100%);
@@ -3235,7 +3242,11 @@ img.profile-avatar {
   color: #176f82;
 }
 
+.dashboard-auth-screen[data-theme="dark"],
 :root[data-theme="dark"] .dashboard-auth-screen {
+  --dash-accent: #42bd94;
+  --dash-accent-strong: #238f6d;
+  --dash-accent-soft: rgba(66, 189, 148, 0.15);
   background:
     radial-gradient(ellipse at 12% 10%, rgba(255, 255, 255, 0.055), transparent 34%),
     #101010;
@@ -4683,6 +4694,7 @@ img.profile-avatar {
 
 :root[data-theme="dark"] .dashboard-modal-backdrop {
   --dash-accent: #4bcfa8;
+  --dash-accent-strong: #2d9f7d;
   --dash-accent-soft: rgba(75, 207, 168, 0.16);
   --dash-danger: #e07171;
   --dash-shadow: 0 20px 60px rgba(0, 0, 0, 0.48);
@@ -5679,5 +5691,492 @@ img.profile-avatar {
   padding: 11px 10px;
   color: var(--theme-text-muted);
   font-size: 12px;
+}
+
+/* Final dashboard system: one rhythm for navigation, content, tables and dialogs. */
+.dashboard-route {
+  background: color-mix(in srgb, var(--theme-surface-2) 56%, var(--theme-surface-0));
+}
+
+.dashboard-shell {
+  --dash-accent: #00a866;
+  --dash-accent-strong: #008c58;
+  --dash-accent-soft: color-mix(in srgb, var(--dash-accent) 12%, transparent);
+  --dash-panel-shadow: 0 16px 38px color-mix(in srgb, #071c2e 10%, transparent);
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--dash-accent) 6%, transparent), transparent 32%),
+    color-mix(in srgb, var(--theme-surface-2) 45%, var(--theme-surface-0));
+}
+
+.dashboard-sidebar {
+  width: 258px;
+  padding: 20px 15px 18px;
+  border-right-color: color-mix(in srgb, var(--dash-accent) 16%, var(--theme-border));
+  background: color-mix(in srgb, var(--theme-surface-1) 94%, var(--theme-surface-2));
+  box-shadow: 12px 0 34px color-mix(in srgb, #071c2e 8%, transparent);
+}
+
+.dashboard-brand {
+  min-height: 56px;
+  padding: 0 10px 17px;
+  border-bottom-color: color-mix(in srgb, var(--dash-accent) 18%, var(--theme-border));
+}
+
+.dashboard-brand-logo {
+  width: min(100%, 178px);
+  height: 43px;
+}
+
+.dashboard-profile {
+  border: 1px solid color-mix(in srgb, var(--dash-accent) 14%, var(--theme-border));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--dash-accent-soft) 58%, var(--theme-surface-2));
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--dash-accent) 7%, transparent);
+}
+
+.dashboard-nav-label {
+  margin: 30px 10px 12px;
+  color: var(--theme-text-muted);
+  font-size: 10px;
+  letter-spacing: 1.45px;
+}
+
+.dashboard-nav {
+  gap: 5px;
+}
+
+.dashboard-nav-item {
+  min-height: 45px;
+  border-radius: 11px;
+  font-weight: 650;
+}
+
+.dashboard-nav-item:hover {
+  border-color: color-mix(in srgb, var(--dash-accent) 18%, transparent);
+  background: color-mix(in srgb, var(--dash-accent-soft) 76%, var(--theme-surface-1));
+}
+
+.dashboard-nav-item.active {
+  border-color: color-mix(in srgb, var(--dash-accent) 28%, transparent);
+  background: linear-gradient(100deg, color-mix(in srgb, var(--dash-accent) 17%, var(--theme-surface-1)), transparent 88%);
+  box-shadow: inset 3px 0 0 var(--dash-accent), 0 8px 18px color-mix(in srgb, var(--dash-accent) 8%, transparent);
+}
+
+.dashboard-nav-submenu {
+  margin-left: 28px;
+  padding: 6px 0 6px 11px;
+  border-left-color: color-mix(in srgb, var(--dash-accent) 28%, var(--theme-border));
+}
+
+.dashboard-nav-subitem {
+  min-height: 37px;
+  border-radius: 9px;
+}
+
+.dashboard-nav-subitem.active {
+  background: color-mix(in srgb, var(--dash-accent-soft) 84%, var(--theme-surface-1));
+}
+
+.dashboard-sidebar-foot {
+  margin: 18px 4px 0;
+  padding: 12px 11px;
+  border: 1px solid color-mix(in srgb, var(--dash-accent) 16%, var(--theme-border));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--theme-surface-2) 64%, transparent);
+}
+
+.dashboard-main {
+  margin-left: 258px;
+}
+
+.dashboard-topbar {
+  min-height: 76px;
+  padding-right: clamp(18px, 3vw, 42px);
+  padding-left: clamp(18px, 3vw, 42px);
+  border-bottom-color: color-mix(in srgb, var(--dash-accent) 16%, var(--theme-border));
+  background: color-mix(in srgb, var(--theme-surface-1) 88%, transparent);
+  box-shadow: 0 8px 25px color-mix(in srgb, #071c2e 7%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.dashboard-welcome > span {
+  color: var(--theme-success-text);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 1.25px;
+  text-transform: uppercase;
+}
+
+.dashboard-welcome > strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--theme-text-strong);
+  font-size: 15px;
+  letter-spacing: -0.1px;
+}
+
+.dashboard-content {
+  width: min(100%, 1680px);
+  padding: clamp(26px, 3vw, 44px) clamp(20px, 3vw, 42px) 72px;
+}
+
+.dashboard-page-heading {
+  margin-bottom: 28px;
+}
+
+.dashboard-page-heading h1 {
+  margin-top: 8px;
+  font-size: clamp(32px, 3.3vw, 46px);
+  font-weight: 760;
+  letter-spacing: -1.35px;
+}
+
+.dashboard-page-heading p {
+  max-width: 720px;
+  font-size: 14px;
+}
+
+.dashboard-primary-button,
+.dashboard-secondary-button,
+.dashboard-danger-button {
+  min-height: 43px;
+  min-width: 112px;
+  border-radius: 10px;
+  padding: 0 18px;
+  font-weight: 760;
+  letter-spacing: -0.08px;
+  box-shadow: 0 1px 0 color-mix(in srgb, #fff 18%, transparent) inset;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease;
+}
+
+.dashboard-primary-button {
+  background: linear-gradient(135deg, var(--dash-accent, #00a866), var(--dash-accent-strong, #008c58));
+  box-shadow: 0 9px 20px color-mix(in srgb, var(--dash-accent, #00a866) 20%, transparent);
+}
+
+.dashboard-primary-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--dash-accent, #00a866) 86%, white), var(--dash-accent, #00a866));
+  box-shadow: 0 12px 25px color-mix(in srgb, var(--dash-accent, #00a866) 25%, transparent);
+  transform: translateY(-1px);
+}
+
+.dashboard-secondary-button {
+  border-color: color-mix(in srgb, var(--dash-accent) 18%, var(--theme-border));
+  background: color-mix(in srgb, var(--theme-surface-1) 80%, var(--theme-surface-2));
+}
+
+.dashboard-secondary-button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--dash-accent) 48%, var(--theme-border));
+  background: color-mix(in srgb, var(--dash-accent-soft) 55%, var(--theme-surface-1));
+  box-shadow: 0 7px 16px color-mix(in srgb, var(--dash-accent) 10%, transparent);
+  transform: translateY(-1px);
+}
+
+.dashboard-primary-button:disabled,
+.dashboard-secondary-button:disabled,
+.dashboard-danger-button:disabled {
+  border-color: color-mix(in srgb, var(--theme-border) 86%, var(--theme-surface-2));
+  background: color-mix(in srgb, var(--theme-surface-2) 76%, var(--theme-surface-1));
+  box-shadow: none;
+  color: var(--theme-text-muted);
+  cursor: wait;
+  opacity: 1;
+  transform: none;
+}
+
+.dashboard-metrics {
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.dashboard-metric-card,
+.dashboard-panel {
+  border-color: color-mix(in srgb, var(--dash-accent) 12%, var(--theme-border));
+  border-radius: 17px;
+  box-shadow: var(--dash-panel-shadow);
+}
+
+.dashboard-metric-card {
+  min-height: 140px;
+  padding: 20px;
+  background: linear-gradient(145deg, var(--theme-surface-1), color-mix(in srgb, var(--theme-surface-2) 42%, var(--theme-surface-1)));
+}
+
+.dashboard-metric-card > strong {
+  margin-top: 18px;
+  font-size: 35px;
+}
+
+.dashboard-panel-heading {
+  min-height: 76px;
+  padding: 17px 21px;
+  background: color-mix(in srgb, var(--theme-surface-2) 30%, var(--theme-surface-1));
+}
+
+.dashboard-panel-heading::after {
+  right: 21px;
+  left: 21px;
+  background: linear-gradient(90deg, var(--dash-accent), transparent 55%);
+}
+
+.resource-panel {
+  border-radius: 17px;
+}
+
+.resource-toolbar {
+  min-height: 72px;
+  padding: 14px 21px;
+  border-bottom-color: color-mix(in srgb, var(--dash-accent) 18%, var(--theme-border));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--dash-accent-soft) 62%, var(--theme-surface-1)), var(--theme-surface-1));
+}
+
+.dashboard-table-wrap {
+  background: var(--theme-surface-1);
+}
+
+.dashboard-table {
+  min-width: 760px;
+}
+
+.dashboard-table th {
+  padding: 14px 17px;
+  border-bottom-color: color-mix(in srgb, var(--dash-accent) 22%, var(--theme-border));
+  background: color-mix(in srgb, var(--dash-accent-soft) 58%, var(--theme-surface-2));
+  color: color-mix(in srgb, var(--theme-success-text) 74%, var(--theme-text-muted));
+  font-size: 10px;
+  letter-spacing: 0.85px;
+}
+
+.dashboard-table td {
+  padding: 15px 17px;
+  font-size: 13px;
+}
+
+.dashboard-table tbody tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--theme-surface-2) 20%, transparent);
+}
+
+.dashboard-table tbody tr:hover td {
+  background: color-mix(in srgb, var(--dash-accent-soft) 72%, var(--theme-surface-1));
+}
+
+.row-action {
+  min-height: 34px;
+  padding-inline: 11px;
+  border-radius: 9px;
+  font-weight: 700;
+}
+
+.dashboard-pagination {
+  padding: 16px 20px;
+  background: color-mix(in srgb, var(--theme-surface-2) 32%, var(--theme-surface-1));
+}
+
+/* Forms: every control stays inside its grid track, including long relation labels. */
+.dashboard-form-modal {
+  width: min(100%, 720px);
+}
+
+.dashboard-modal,
+.dashboard-confirm-modal,
+.dashboard-image-modal {
+  border-color: color-mix(in srgb, var(--dash-accent) 18%, var(--theme-border));
+  border-radius: 20px;
+  box-shadow: 0 30px 90px color-mix(in srgb, #000 42%, transparent), 0 0 0 1px color-mix(in srgb, var(--dash-accent) 6%, transparent);
+}
+
+.dashboard-modal-heading {
+  padding: 24px 27px 21px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--dash-accent-soft) 72%, var(--theme-surface-1)), var(--theme-surface-1) 72%);
+}
+
+.dashboard-modal-heading h2,
+.dashboard-confirm-modal h2 {
+  font-size: clamp(21px, 2.5vw, 26px);
+  font-weight: 760;
+  letter-spacing: -0.55px;
+}
+
+.modal-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--theme-surface-2) 35%, transparent);
+}
+
+.dashboard-form {
+  width: 100%;
+  min-width: 0;
+  padding: 25px 27px 0;
+}
+
+.dashboard-form-grid {
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 19px 17px;
+}
+
+.dashboard-form-grid > *,
+.dashboard-field,
+.dashboard-relation-select {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dashboard-field {
+  width: 100%;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.dashboard-form-specs .dashboard-form-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.dashboard-field > span:first-child {
+  min-height: 1.25em;
+  color: var(--theme-text-primary);
+  font-weight: 750;
+}
+
+.dashboard-field input:not([type="checkbox"]),
+.dashboard-field select,
+.dashboard-field textarea,
+.dashboard-relation-trigger {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--theme-surface-0) 66%, var(--theme-surface-1));
+}
+
+.dashboard-field input:not([type="checkbox"]),
+.dashboard-field select,
+.dashboard-relation-trigger {
+  min-height: 46px;
+}
+
+.dashboard-field input:not([type="checkbox"]),
+.dashboard-field select,
+.dashboard-field textarea {
+  padding: 12px 13px;
+}
+
+.dashboard-field textarea {
+  min-height: 112px;
+  line-height: 1.45;
+}
+
+.dashboard-relation-trigger {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18px;
+  gap: 9px;
+  overflow: hidden;
+  padding: 12px 13px;
+}
+
+.dashboard-relation-trigger > span:first-child {
+  display: block;
+  min-width: 0;
+  max-width: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-relation-trigger > .dashboard-relation-chevron {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.dashboard-relation-menu {
+  z-index: 80;
+  border-radius: 13px;
+  box-shadow: 0 20px 40px color-mix(in srgb, #000 28%, transparent);
+}
+
+.dashboard-modal-footer {
+  margin: 25px -27px 0;
+  padding: 17px 27px;
+  background: color-mix(in srgb, var(--theme-surface-2) 32%, var(--theme-surface-1));
+}
+
+.dashboard-toast {
+  border-radius: 13px;
+  box-shadow: 0 18px 38px color-mix(in srgb, #000 22%, transparent);
+}
+
+.dashboard-shell :is(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--dash-accent) 42%, transparent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1150px) {
+  .dashboard-sidebar { width: 230px; }
+  .dashboard-main { margin-left: 230px; }
+}
+
+@media (max-width: 850px) {
+  .dashboard-sidebar { width: min(280px, 84vw); }
+  .dashboard-main { margin-left: 0; }
+
+  .dashboard-content {
+    padding: 24px 16px 56px;
+  }
+
+  .dashboard-form-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .dashboard-modal-backdrop {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .dashboard-modal,
+  .dashboard-confirm-modal,
+  .dashboard-image-modal {
+    max-height: calc(100vh - 24px);
+    border-radius: 17px;
+  }
+
+  .dashboard-modal-heading,
+  .dashboard-form {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .dashboard-modal-footer {
+    margin-right: -18px;
+    margin-left: -18px;
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboard-page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .dashboard-page-heading .dashboard-primary-button {
+    width: 100%;
+  }
+
+  .dashboard-modal-footer {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .dashboard-modal-footer > button {
+    width: 100%;
+  }
 }
 

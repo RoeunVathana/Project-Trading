@@ -66,6 +66,7 @@ const SearchableRelationField = ({ field, value, records, onChange }) => {
         className={`dashboard-relation-trigger ${open ? "is-open" : ""}`}
         aria-haspopup="listbox"
         aria-expanded={open}
+        title={selectedOption?.label || `Select ${field.label.toLowerCase()}`}
         onClick={() => {
           setQuery("");
           setOpen((current) => !current);

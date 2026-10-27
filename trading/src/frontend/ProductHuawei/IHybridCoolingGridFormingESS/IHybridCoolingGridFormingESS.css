@@ -353,18 +353,22 @@
 }
 
 .hybrid-ess-highlight button::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 9px;
   height: 9px;
+  margin: 0;
   border-right: 2px solid currentColor;
   border-bottom: 2px solid currentColor;
   content: "";
-  transform: translateY(-2px) rotate(45deg);
+  transform: translate(-50%, -50%) rotate(45deg);
   transition: transform 220ms ease;
 }
 
 .hybrid-ess-highlight button:hover::before,
 .hybrid-ess-highlight button:focus-visible::before {
-  transform: translateY(1px) rotate(45deg);
+  transform: translate(-50%, calc(-50% + 2px)) rotate(45deg);
 }
 
 .hybrid-ess-intro,

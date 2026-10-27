@@ -46,6 +46,16 @@ const productPath = (parameters) => {
     return "/low-voltage";
   }
 
+  if (parameters.collection === "chint" && parameters.solution === "instruments-meters" && !parameters.product) {
+    return "/instruments-and-meters";
+  }
+
+  if ((parameters.collection === "chint" || parameters.collection === "factory")
+    && parameters.solution === "power-transmission-distribution"
+    && !parameters.product) {
+    return "/power-transmission-distribution";
+  }
+
   const search = new URLSearchParams(
     Object.entries(parameters).filter(([, value]) => value),
   ).toString();
@@ -190,6 +200,10 @@ const Navbar = () => {
   const searchParams = new URLSearchParams(location.search);
   const routeCollectionId = location.pathname === "/low-voltage"
     ? "chint"
+    : location.pathname === "/instruments-and-meters"
+      ? "chint"
+    : location.pathname === "/power-transmission-distribution"
+      ? "chint"
     : location.pathname === "/commercial-industrial-solutions"
       ? "huawei"
     : location.pathname.startsWith("/product-huawei")
@@ -200,6 +214,10 @@ const Navbar = () => {
   );
   const routeSolutionId = location.pathname === "/low-voltage"
     ? "low-voltage"
+    : location.pathname === "/instruments-and-meters"
+      ? "instruments-meters"
+    : location.pathname === "/power-transmission-distribution"
+      ? "power-transmission-distribution"
     : location.pathname === "/commercial-industrial-solutions"
       ? "commercial-industrial-solutions"
     : location.pathname.startsWith("/product-huawei")
@@ -358,6 +376,8 @@ const Navbar = () => {
     if (name === "home") return pathname === "/";
     if (name === "product") {
       return pathname === "/low-voltage"
+        || pathname === "/instruments-and-meters"
+        || pathname === "/power-transmission-distribution"
         || pathname === "/commercial-industrial-solutions"
         || pathname === "/product"
         || pathname.startsWith("/product/")
@@ -596,7 +616,9 @@ const Navbar = () => {
                     {reference.label}
                   </Link>
                 ))}
-                <Link to="/reference#project-matrix" onClick={closeMenu}>All Projects</Link>
+                <Link to="/reference?category=huawei#project-matrix" onClick={closeMenu}>
+                  Project Reference (HUAWEI)
+                </Link>
               </div>
             </div>
           ))}

@@ -6,7 +6,7 @@ const productLinks = [
   ["Low-voltage", "/low-voltage"],
   ["Power Transmission and Distribution", "/product?division=trd&collection=chint&solution=power-transmission-distribution"],
   ["Low-voltage Switchgear and Software", "/product?division=trd&collection=chint"],
-  ["Instruments and Meters", "/product?division=trd&collection=chint&solution=instruments-meters"],
+  ["Instruments and Meters", "/instruments-and-meters"],
   ["EV Charging", "/product?division=trd&collection=chint"],
 ];
 

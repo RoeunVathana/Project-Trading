@@ -59,7 +59,8 @@ body {
 }
 
 .route-loading {
-  min-height: 52vh;
+  min-height: 100dvh;
+  box-sizing: border-box;
   display: grid;
   place-items: center;
   align-content: center;

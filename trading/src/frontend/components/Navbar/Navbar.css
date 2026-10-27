@@ -823,8 +823,9 @@
   .navbar-menu > a:not(.active):hover,
   .navbar-dropdown-trigger:not(.active):hover {
     color: var(--nav-text-strong);
-    background: var(--nav-hover);
-    border-color: var(--nav-border);
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
   }
 
   .navbar-menu button.product-mega-collection:hover,
@@ -1626,10 +1627,51 @@
 }
 
 /* Product dropdown thumbnails for Huawei catalog items. */
+.navbar-dropdown--product > .navbar-dropdown-trigger.active,
+.navbar-dropdown--product.is-open > .navbar-dropdown-trigger {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: inset 0 -2px 0 var(--nav-accent);
+}
+
+:root[data-theme="light"] .navbar-dropdown--product > .navbar-dropdown-trigger.active,
+:root[data-theme="light"] .navbar-dropdown--product.is-open > .navbar-dropdown-trigger {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: inset 0 -2px 0 var(--nav-accent);
+}
+
+@media (min-width: 1200px) {
+  .navbar-dropdown--product > .navbar-dropdown-trigger.active,
+  .navbar-dropdown--product.is-open > .navbar-dropdown-trigger {
+    box-shadow: none;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :root:not([data-theme="light"]) .navbar-menu > a:not(.active):hover,
+  :root:not([data-theme="light"]) .navbar-dropdown-trigger:not(.active):hover {
+    background: rgba(74, 165, 255, .1);
+    border-color: transparent;
+    box-shadow: inset 0 -2px 0 var(--nav-accent);
+  }
+}
+
 .navbar-menu .product-mega-product-link.has-image {
   gap: 10px;
   padding-left: 6px;
   min-height: 72px;
+}
+
+/* Keep every desktop navigation item on the same active treatment as Product. */
+@media (min-width: 1200px) {
+  .navbar-menu > a.active:not(.mobile-get-started),
+  .navbar-dropdown > .navbar-dropdown-trigger.active,
+  .navbar-dropdown.is-open > .navbar-dropdown-trigger {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: inset 0 -2px 0 var(--nav-accent);
+  }
 }
 
 .navbar-menu .product-mega-product-link.has-image::before {
