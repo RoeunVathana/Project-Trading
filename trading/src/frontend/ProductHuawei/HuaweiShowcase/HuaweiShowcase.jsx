@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchCachedJson } from "../../apiCache";
 import { getHuaweiNavbarImage, HUAWEI_NAVBAR_PRODUCT_IMAGES } from "../productAssets";
@@ -262,17 +262,45 @@ const getConfig = (categorySlug) => {
   return config;
 };
 
-const HuaweiShowcase = ({ categorySlug = "smart-string-ess" }) => {
+const HuaweiShowcase = ({ categorySlug = "smart-string-ess", productOverride = null }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const config = getConfig(categorySlug);
   const isCategoryRoute = id === categorySlug;
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const normalizedProductOverride = useMemo(() => {
+    if (!productOverride) return null;
+
+    const overrideImages = Array.isArray(productOverride.images)
+      ? productOverride.images
+      : Array.isArray(productOverride.gallery)
+        ? productOverride.gallery
+        : [];
+
+    return {
+      ...productOverride,
+      productName: productOverride.productName || productOverride.name || config.label,
+      category: typeof productOverride.category === "string"
+        ? productOverride.category
+        : productOverride.displayCategory || config.label,
+      modelCode: productOverride.modelCode || productOverride.model || config.fallbackModel,
+      image: productOverride.image || toMediaUrl(productOverride.baseImageUrl || productOverride.base_image_url),
+      images: overrideImages,
+    };
+  }, [config, productOverride]);
+  const [fetchedProduct, setFetchedProduct] = useState(null);
+  const product = normalizedProductOverride || fetchedProduct;
+  const [loading, setLoading] = useState(!productOverride);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
+
+    if (productOverride) {
+      return () => {
+        active = false;
+      };
+    }
+
     const loadProduct = async () => {
       setLoading(true);
       setError("");
@@ -322,7 +350,7 @@ const HuaweiShowcase = ({ categorySlug = "smart-string-ess" }) => {
           .map((image) => ({ ...image, imageUrl: toMediaUrl(image.imageUrl) }));
         const primaryImage = images.find((image) => image.isPrimary) || images[0];
 
-        setProduct({
+        setFetchedProduct({
           ...productRow,
           category: getCategoryName(productRow, categoryRows, config.label),
           image: toMediaUrl(productRow.baseImageUrl || productRow.base_image_url || primaryImage?.imageUrl),
@@ -331,7 +359,7 @@ const HuaweiShowcase = ({ categorySlug = "smart-string-ess" }) => {
       } catch (loadError) {
         if (!active) return;
         if (isCategoryRoute) {
-          setProduct({
+          setFetchedProduct({
             productName: config.label,
             category: config.label,
             modelCode: config.fallbackModel,
@@ -351,7 +379,7 @@ const HuaweiShowcase = ({ categorySlug = "smart-string-ess" }) => {
     return () => {
       active = false;
     };
-  }, [categorySlug, config, id, isCategoryRoute]);
+  }, [categorySlug, config, id, isCategoryRoute, productOverride]);
 
   useEffect(() => {
     const showcase = document.querySelector(".huawei-showcase");
@@ -417,7 +445,7 @@ const HuaweiShowcase = ({ categorySlug = "smart-string-ess" }) => {
     };
   }, [product]);
 
-  if (loading) return <div className="huawei-showcase-state">Loading Huawei product...</div>;
+  if (loading && !product) return <div className="huawei-showcase-state">Loading Huawei product...</div>;
   if (!product) {
     return (
       <div className="huawei-showcase-state">
@@ -428,22 +456,32 @@ const HuaweiShowcase = ({ categorySlug = "smart-string-ess" }) => {
     );
   }
 
-  const title = product.productName || config.label;
+  const title = product.productName || product.name || config.label;
   const category = product.category || config.label;
-  const model = product.modelCode || config.fallbackModel;
-  const displayTitle = config.heroTitle || title;
-  const displayModel = config.heroModel || model;
+  const model = product.modelCode || product.model || config.fallbackModel;
+  const displayTitle = isCategoryRoute ? (config.heroTitle || title) : title;
+  const displayModel = isCategoryRoute ? (config.heroModel || model) : model;
+  const displayDescription = !isCategoryRoute && product.description
+    ? product.description
+    : !isCategoryRoute && product.shortDescription
+      ? product.shortDescription
+      : !isCategoryRoute
+        ? `${title} (${model}) delivers dependable Smart Guard power management for your home.`
+        : config.heroCopy;
   const productImages = product.images || [];
   const useLocalCategoryAssets = categorySlug === "smart-guard";
   const getProductImage = (fallback, index = 0) => useLocalCategoryAssets
     ? fallback
     : productImages[index]?.imageUrl || fallback;
+  const selectedProductImage = !isCategoryRoute
+    ? product.image || productImages[0]?.imageUrl
+    : "";
   const heroImage = useLocalCategoryAssets
-    ? config.heroImage
+    ? selectedProductImage || config.heroImage
     : product.image || getCategoryProductImage(categorySlug) || config.heroImage;
 
   return (
-    <main className={`huawei-showcase huawei-showcase--${categorySlug}`} style={{ "--showcase-hero-image": `url("${config.heroImage}")` }}>
+    <main className={`huawei-showcase huawei-showcase--${categorySlug}`} style={{ "--showcase-hero-image": `url("${heroImage}")` }}>
       <section className="showcase-hero" data-showcase-reveal>
         <div className="showcase-hero-media" data-showcase-reveal="left">
           <img src={heroImage} alt={displayTitle} />
@@ -452,7 +490,7 @@ const HuaweiShowcase = ({ categorySlug = "smart-string-ess" }) => {
           <div className="showcase-brand">FusionSolar</div>
           <p className="showcase-category">{category}</p>
           <h1>{displayTitle}</h1>
-          {config.heroCopy && <p className="showcase-hero-description">{config.heroCopy}</p>}
+          {displayDescription && <p className="showcase-hero-description">{displayDescription}</p>}
           <p className="showcase-model">Model: {displayModel} <span className="showcase-new-badge">NEW</span></p>
           <span className="showcase-accent-line" aria-hidden="true" />
         </div>
