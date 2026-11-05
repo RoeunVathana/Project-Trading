@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getHuaweiNavbarImage } from "../productAssets";
 import "./SmartStringESS.css";
 
@@ -7,23 +7,35 @@ const API_BASE_URL = (
   import.meta.env.VITE_API_URL || "http://localhost:3000"
 ).replace(/\/$/, "");
 
+const smartEssAsset = (fileName) => (
+  `${import.meta.env.BASE_URL}SmartESS/${encodeURIComponent(fileName)}`
+);
+
+const huaweiAsset = (fileName) => (
+  `${import.meta.env.BASE_URL}Huawei/${encodeURIComponent(fileName)}`
+);
+
+const HERO_BACKGROUND_IMAGE = huaweiAsset("DSC05119.jpg");
+
 const fallbackImages = [
-  "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1800&q=88",
-  "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=88",
-  "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=1600&q=88",
-  "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1600&q=88",
-  "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=1600&q=88",
-  "https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&w=1600&q=88",
-  "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1600&q=88",
-  "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?auto=format&fit=crop&w=1600&q=88",
-  "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=1600&q=88",
+  smartEssAsset("cells.png"),
+  smartEssAsset("energy.png"),
+  smartEssAsset("controller11-background.png"),
+  smartEssAsset("controller12-background.png"),
+  smartEssAsset("controller13-background.png"),
+  smartEssAsset("controller14-background.png"),
+  smartEssAsset("controller15-background.png"),
+  smartEssAsset("sec3.png"),
+  smartEssAsset("home.jpg"),
 ];
+
+const heroProductImage = getHuaweiNavbarImage("smart-string-ess") || fallbackImages[0];
 
 const fallbackProduct = {
   productName: "Smart String ESS",
   category: "Smart String ESS",
   modelCode: "LUNA S1",
-  image: getHuaweiNavbarImage("smart-string-ess"),
+  image: heroProductImage,
   images: [],
 };
 
@@ -111,6 +123,7 @@ const ESSIcon = ({ type }) => {
 
 const SmartStringESS = () => {
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -138,13 +151,23 @@ const SmartStringESS = () => {
         setProduct({
           ...productRow,
           category: getCategoryName(productRow, Array.isArray(categoryRows) ? categoryRows : []),
-          image: toMediaUrl(productRow.baseImageUrl || productRow.base_image_url || primaryImage?.imageUrl) || getHuaweiNavbarImage("smart-string-ess"),
+          image: toMediaUrl(productRow.baseImageUrl || productRow.base_image_url || primaryImage?.imageUrl) || heroProductImage,
           images,
         });
       } catch (loadError) {
         if (loadError.name !== "AbortError") {
           if (id === "smart-string-ess") {
             setProduct(fallbackProduct);
+          } else if (location.state?.product) {
+            const routeProduct = location.state.product;
+            setProduct({
+              ...fallbackProduct,
+              ...routeProduct,
+              productName: routeProduct.productName || routeProduct.name || fallbackProduct.productName,
+              modelCode: routeProduct.modelCode || routeProduct.model || fallbackProduct.modelCode,
+              image: routeProduct.image || fallbackProduct.image,
+              images: routeProduct.images || routeProduct.gallery || [],
+            });
           } else {
             setError(loadError.message || "Unable to load this Huawei product.");
           }
@@ -156,7 +179,7 @@ const SmartStringESS = () => {
 
     loadProduct();
     return () => controller.abort();
-  }, [id]);
+  }, [id, location.state]);
 
   useEffect(() => {
     const elements = document.querySelectorAll(".smart-string-page [data-ess-reveal]");
@@ -193,11 +216,16 @@ const SmartStringESS = () => {
   const category = product.category || "Smart String ESS";
   const model = product.modelCode || "-";
   const images = product.images || [];
-  const getImage = (index) => images[index]?.imageUrl || fallbackImages[index % fallbackImages.length];
+  const getImage = (index) => images[index]?.imageUrl
+    || (index === 0 ? product.image : "")
+    || fallbackImages[index % fallbackImages.length];
   const getAlt = (index, fallback) => images[index]?.altText || images[index]?.alt_text || fallback;
 
   return (
-    <main className="smart-string-page">
+    <main
+      className="smart-string-page"
+      style={{ "--smart-string-hero-image": `url("${HERO_BACKGROUND_IMAGE}")` }}
+    >
       <section className="smart-string-hero" data-ess-reveal>
         <div className="smart-string-hero-product" data-ess-reveal="left">
           {product.image ? <img src={product.image} alt={title} /> : <div className="smart-string-product-placeholder">HUAWEI</div>}

@@ -7,6 +7,20 @@ const API_BASE_URL = (
   import.meta.env.VITE_API_URL || "http://localhost:3000"
 ).replace(/\/$/, "");
 
+const smartModuleAsset = (fileName) => (
+  `${import.meta.env.BASE_URL}smartModule/${encodeURIComponent(fileName)}`
+);
+
+const HERO_BACKGROUND_IMAGE = smartModuleAsset("controller2.png");
+const HERO_PRODUCT_IMAGE = smartModuleAsset("product_info2.jpg");
+const STORY_ENERGY_IMAGE = smartModuleAsset("product_info_sec2_bg.jpg");
+const STORY_PANELS_IMAGE = smartModuleAsset("product_info1.jpg");
+const STORY_TEMPERATURE_IMAGE = smartModuleAsset("product_info5.jpg");
+const STORY_SAFETY_IMAGE = smartModuleAsset("product_info2.jpg");
+const STORY_MAINTENANCE_IMAGE = smartModuleAsset("product_info3.jpg");
+const STORY_QUALITY_IMAGE = smartModuleAsset("product_info4.jpg");
+const FINAL_STORY_IMAGE = smartModuleAsset("87372bb0ca3b4b8ca10cf1bbcbb591f8.jpg");
+
 const toMediaUrl = (path) => {
   if (!path) return "";
   if (/^https?:\/\//i.test(path)) return path;
@@ -25,17 +39,17 @@ const fallbackProduct = {
   productName: "Smart Module Controller",
   modelCode: "SUN2000 Series",
   description: "Smart module control for dependable Huawei solar-energy performance.",
-  image: "",
+  image: HERO_PRODUCT_IMAGE,
   images: [],
 };
 
 const benefitCards = [
-  { title: "Higher Yields", description: "Improve power generation and make better use of every solar panel.", image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&q=85" },
-  { title: "Active Safety", description: "Monitor the system and respond quickly to abnormal operating conditions.", image: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=1200&q=85" },
-  { title: "Flexible Design", description: "Support flexible solar panel layouts across available rooftop space.", image: "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?auto=format&fit=crop&w=1200&q=85" },
-  { title: "Terminal Over-temperature Detection", description: "Detect overheating early and help protect the installation.", image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1200&q=85" },
-  { title: "Smart O&M", description: "View product status and power generation through smart monitoring.", image: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=1200&q=85" },
-  { title: "High Quality", description: "Designed for dependable operation in challenging environments.", image: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=1200&q=85" },
+  { title: "Higher Yields", description: "Improve power generation and make better use of every solar panel.", image: smartModuleAsset("product_info1.jpg") },
+  { title: "Active Safety", description: "Monitor the system and respond quickly to abnormal operating conditions.", image: smartModuleAsset("product_info2.jpg") },
+  { title: "Flexible Design", description: "Support flexible solar panel layouts across available rooftop space.", image: smartModuleAsset("product_info3.jpg") },
+  { title: "Terminal Over-temperature Detection", description: "Detect overheating early and help protect the installation.", image: smartModuleAsset("product_info4.jpg") },
+  { title: "Smart O&M", description: "View product status and power generation through smart monitoring.", image: smartModuleAsset("product_info5.jpg") },
+  { title: "High Quality", description: "Designed for dependable operation in challenging environments.", image: smartModuleAsset("product_info5.jpg") },
 ];
 
 const featureCards = [
@@ -54,6 +68,7 @@ const SmartModuleController = () => {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const usesLocalAssets = id === "smart-module-controller";
   const solutionId = new URLSearchParams(location.search).get("solution") || "residential-solution";
   const navbarProductImage = getHuaweiNavbarImage("smart-module-controller", solutionId);
   const navbarModel = solutionId === "commercial-industrial-solutions"
@@ -90,8 +105,10 @@ const SmartModuleController = () => {
           category,
           modelCode: productRow.modelCode || navbarModel,
           imageAltText,
-          image: toMediaUrl(productRow.baseImageUrl || productRow.base_image_url || primaryImage?.imageUrl) || navbarProductImage,
-          images: images.map((image) => ({
+          image: usesLocalAssets
+            ? HERO_PRODUCT_IMAGE
+            : toMediaUrl(productRow.baseImageUrl || productRow.base_image_url || primaryImage?.imageUrl) || HERO_PRODUCT_IMAGE || navbarProductImage,
+          images: usesLocalAssets ? [] : images.map((image) => ({
             ...image,
             imageUrl: toMediaUrl(image.imageUrl),
           })),
@@ -99,7 +116,7 @@ const SmartModuleController = () => {
       } catch (loadError) {
         if (loadError.name !== "AbortError") {
           if (id === "smart-module-controller") {
-            setProduct({ ...fallbackProduct, modelCode: navbarModel, image: navbarProductImage });
+            setProduct({ ...fallbackProduct, modelCode: navbarModel, image: HERO_PRODUCT_IMAGE });
           } else {
             setError(loadError.message || "Unable to load this Huawei product.");
           }
@@ -111,7 +128,7 @@ const SmartModuleController = () => {
 
     loadProduct();
     return () => controller.abort();
-  }, [id, navbarModel, navbarProductImage]);
+  }, [id, navbarModel, navbarProductImage, usesLocalAssets]);
 
   useEffect(() => {
     const elements = document.querySelectorAll(".smart-module-page [data-scroll-reveal]");
@@ -148,7 +165,7 @@ const SmartModuleController = () => {
   const productName = product.productName || title;
   const model = product.modelCode || "—";
   const description = product.description || product.shortDescription || `The ${title} helps deliver dependable Huawei smart-energy performance for residential solar installations.`;
-  const imageCards = product.images?.length
+  const imageCards = !usesLocalAssets && product.images?.length
     ? product.images.map((image, index) => ({
       title: image.altText || image.alt_text || benefitCards[index]?.title || `${productName} image ${index + 1}`,
       description: image.description || benefitCards[index]?.description || "Product image description is not available.",
@@ -157,8 +174,22 @@ const SmartModuleController = () => {
     : benefitCards;
 
   return (
-    <main className="smart-module-page">
-      <section className="smart-module-hero">
+    <main
+      className="smart-module-page"
+      style={{
+        "--smart-module-energy-image": `url("${STORY_ENERGY_IMAGE}")`,
+        "--smart-module-panels-image": `url("${STORY_PANELS_IMAGE}")`,
+        "--smart-module-temperature-image": `url("${STORY_TEMPERATURE_IMAGE}")`,
+        "--smart-module-safety-image": `url("${STORY_SAFETY_IMAGE}")`,
+        "--smart-module-maintenance-image": `url("${STORY_MAINTENANCE_IMAGE}")`,
+        "--smart-module-quality-image": `url("${STORY_QUALITY_IMAGE}")`,
+        "--smart-module-final-image": `url("${FINAL_STORY_IMAGE}")`,
+      }}
+    >
+      <section
+        className="smart-module-hero"
+        style={{ "--smart-module-hero-image": `url("${HERO_BACKGROUND_IMAGE}")` }}
+      >
         <div className="smart-module-hero-image-wrap" data-scroll-reveal="left">
           {product.image ? <img src={product.image} alt={title} /> : <div className="smart-module-image-placeholder">HUAWEI</div>}
         </div>
@@ -203,7 +234,11 @@ const SmartModuleController = () => {
         </div>
       </section>
 
-      <section className="smart-module-story smart-module-story-panels" data-scroll-reveal="left">
+      <section
+        className="smart-module-story smart-module-story-panels"
+        data-scroll-reveal="left"
+        style={{ backgroundImage: `linear-gradient(90deg, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.7) 42%, rgba(0, 0, 0, 0.1) 100%), url("${STORY_PANELS_IMAGE}")` }}
+      >
         <div className="smart-module-story-copy smart-module-container">
           <h2>Solar Panels on<br />Every Side</h2>
           <p>Just make full use of your rooftop by installing solar panels in every available space and creating more green power. The {title} enables solar panels to operate independently without interfering with one another. This allows for flexible installation on the rooftop, fearless of shadows, and maximizes the utilization of the surface area.</p>
@@ -211,28 +246,44 @@ const SmartModuleController = () => {
         </div>
       </section>
 
-      <section className="smart-module-story smart-module-story-temperature" data-scroll-reveal="right">
+      <section
+        className="smart-module-story smart-module-story-temperature"
+        data-scroll-reveal="right"
+        style={{ backgroundImage: `linear-gradient(90deg, rgba(5, 9, 20, 0.25), rgba(0, 0, 0, 0.91)), url("${STORY_TEMPERATURE_IMAGE}")` }}
+      >
         <div className="smart-module-story-copy smart-module-container">
           <h2>Temperature Protection<br />with Precision</h2>
           <p>The leading-edge terminal over-temperature detection technology ensures safety by accurately identifying overheating. It instantly triggers alarms or system shutdown to prevent fault escalation and eliminate risks of property damage.</p>
         </div>
       </section>
 
-      <section className="smart-module-story smart-module-story-safety" data-scroll-reveal="left">
+      <section
+        className="smart-module-story smart-module-story-safety"
+        data-scroll-reveal="left"
+        style={{ backgroundImage: `linear-gradient(90deg, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.18)), url("${STORY_SAFETY_IMAGE}")` }}
+      >
         <div className="smart-module-story-copy smart-module-container">
           <h2>Personnel &amp;<br />Property Safety,<br />First Priority</h2>
           <p>The Huawei {title} brings you a reassuringly ultimate safeguard. In any emergency, the inverter will be switched off instantly, or for any power outage, the rapid shutdown (RSD) of the module voltage will be activated to clear potential risks on a high-voltage rooftop for personnel and firefighting safety.</p>
         </div>
       </section>
 
-      <section className="smart-module-story smart-module-story-maintenance" data-scroll-reveal="right">
+      <section
+        className="smart-module-story smart-module-story-maintenance"
+        data-scroll-reveal="right"
+        style={{ backgroundImage: `linear-gradient(90deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.9)), url("${STORY_MAINTENANCE_IMAGE}")` }}
+      >
         <div className="smart-module-story-copy smart-module-container">
           <h2>High Maintenance?<br />Never</h2>
           <p>The FusionSolar app allows you to instantly view the location and power generation status of the solar panels. In case of any malfunction, precise repairs can be carried out, reducing operational and installation costs, and improving overall efficiency.</p>
         </div>
       </section>
 
-      <section className="smart-module-story smart-module-story-quality" data-scroll-reveal="left">
+      <section
+        className="smart-module-story smart-module-story-quality"
+        data-scroll-reveal="left"
+        style={{ backgroundImage: `linear-gradient(90deg, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.2)), url("${STORY_QUALITY_IMAGE}")` }}
+      >
         <div className="smart-module-story-copy smart-module-container">
           <h2>High Quality<br />Stay Powerful in<br />All Weathers</h2>
           <p>Harsh environments and climates, including high temperatures, snow, sandstorms, and rainstorms, are no longer concerns. The Huawei {title} endures all the extremes and stands the test of time.</p>

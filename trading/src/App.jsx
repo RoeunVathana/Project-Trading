@@ -21,6 +21,7 @@ const SmartEnergyController = lazy(() => import("./frontend/ProductHuawei/SmartE
 const SmartPVController = lazy(() => import("./frontend/ProductHuawei/SmartPVController/SmartPVController"));
 const IHybridCoolingGridFormingESS = lazy(() => import("./frontend/ProductHuawei/IHybridCoolingGridFormingESS/IHybridCoolingGridFormingESS"));
 const Accessories = lazy(() => import("./frontend/ProductHuawei/Accessories/Accessories"));
+const MoreAccssorise = lazy(() => import("./frontend/ProductHuawei/moreAccssories/MoreAccssorise"));
 const SmartStringESS = lazy(() => import("./frontend/ProductHuawei/SmartStringESS/SmartStringESS"));
 const SmartGuard = lazy(() => import("./frontend/ProductHuawei/SmartGuard/SmartGuard"));
 const Residentail = lazy(() => import("./frontend/ProductHuawei/Residentail/Residentail"));
@@ -94,6 +95,7 @@ const App = () => {
           <Route path="/product-huawei/:id/learn-more-energy" element={<SmartEnergyController />} />
           <Route path="/product-huawei/:id/learn-more-string-ess" element={<SmartStringESS />} />
           <Route path="/product-huawei/residential-solution" element={<Residentail />} />
+          <Route path="/product-huawei/success-stories" element={<MoreAccssorise />} />
           <Route path="/product-huawei/:id" element={<HuaweiProductRoute />} />
 
           <Route path="/distribution" element={<DistributionPage />} />

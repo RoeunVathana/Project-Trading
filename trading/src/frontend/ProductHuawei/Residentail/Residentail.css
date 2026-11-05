@@ -353,8 +353,18 @@
   border-radius: 3px;
 }
 
+.residential-product-brand {
+  display: block;
+  margin: 20px 12px 0;
+  color: var(--residential-accent);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
 .residential-product-card h3 {
-  margin: 26px 12px 0;
+  margin: 8px 12px 0;
   color: var(--theme-text-strong, #0e1117);
   font-size: 1.18rem;
 }

@@ -81,9 +81,6 @@
 .smart-module-hero-copy > *,
 .smart-module-intro h2,
 .smart-module-intro p,
-.smart-module-story-copy h2,
-.smart-module-story-copy p,
-.smart-module-story-copy strong,
 .smart-module-features > h2,
 .smart-module-final-copy h2,
 .smart-module-final-copy p {
@@ -141,12 +138,18 @@
   grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
   column-gap: clamp(24px, 5vw, 96px);
   align-items: center;
-  min-height: clamp(620px, calc(100vh - 76px), 820px);
+  min-height: calc(100vh - 76px);
+  min-height: calc(100dvh - 76px);
   padding: clamp(48px, 7vh, 92px) clamp(32px, 6vw, 96px);
   background:
+    linear-gradient(90deg, rgba(7, 21, 18, 0.88), rgba(7, 21, 18, 0.36)),
+    var(--smart-module-hero-image),
     radial-gradient(circle at 78% 18%, rgba(57, 119, 101, 0.15), transparent 34%),
     repeating-linear-gradient(102deg, transparent 0 13px, rgba(255, 255, 255, 0.018) 14px 15px, transparent 16px 38px),
     #071512;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 .smart-module-hero-image-wrap {
@@ -170,9 +173,13 @@
 
 :root[data-theme="dark"] .smart-module-hero {
   background:
+    linear-gradient(90deg, rgba(7, 21, 18, 0.88), rgba(7, 21, 18, 0.36)),
+    var(--smart-module-hero-image),
     radial-gradient(circle at 78% 18%, rgba(57, 119, 101, 0.15), transparent 34%),
     repeating-linear-gradient(102deg, transparent 0 13px, rgba(255, 255, 255, 0.018) 14px 15px, transparent 16px 38px),
     #071512;
+  background-position: center;
+  background-size: cover;
 }
 
 :root[data-theme="dark"] .smart-module-hero-image-wrap {
@@ -247,12 +254,18 @@
   grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
   column-gap: clamp(24px, 5vw, 96px);
   align-items: center;
-  min-height: clamp(620px, calc(100vh - 76px), 820px);
+  min-height: calc(100vh - 76px);
+  min-height: calc(100dvh - 76px);
   padding: clamp(48px, 7vh, 92px) clamp(32px, 6vw, 96px);
   background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.3)),
+    var(--smart-module-hero-image) center / cover,
     radial-gradient(circle at 70% 22%, rgba(255, 255, 255, 0.98), transparent 38%),
     repeating-linear-gradient(102deg, transparent 0 13px, rgba(16, 24, 32, 0.025) 14px 15px, transparent 16px 38px),
     linear-gradient(135deg, #ffffff 0%, #f7f8f9 58%, #ffffff 100%);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 :root[data-theme="light"] .smart-module-hero-image-wrap {
@@ -480,7 +493,7 @@
   inset: -18px;
   background:
     linear-gradient(90deg, rgba(0, 119, 214, 0.72), rgba(65, 157, 225, 0.2)),
-    url("https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=2200&q=85") center / cover;
+    var(--smart-module-energy-image) center / cover;
   background-blend-mode: normal, normal;
   filter: blur(2px);
   transform: scale(1.02);
@@ -542,6 +555,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  z-index: 2;
   max-width: none;
   padding-top: 70px;
   padding-bottom: 70px;
@@ -577,17 +591,17 @@
 .smart-module-story-panels {
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.7) 42%, rgba(0, 0, 0, 0.1) 100%),
-    url("https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?auto=format&fit=crop&w=2200&q=85") center / cover;
+    var(--smart-module-panels-image) center / cover;
 }
 
 .smart-module-story-temperature {
   background:
     linear-gradient(90deg, rgba(5, 9, 20, 0.25), rgba(0, 0, 0, 0.91)),
-    url("https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=2200&q=85") center / cover;
+    var(--smart-module-temperature-image) center / cover;
 }
 
 .smart-module-story-temperature .smart-module-story-copy {
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .smart-module-story-temperature .smart-module-story-copy h2,
@@ -598,17 +612,21 @@
 .smart-module-story-safety {
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.18)),
-    url("https://images.unsplash.com/photo-1513828583688-c52646db42da?auto=format&fit=crop&w=2200&q=85") center / cover;
+    var(--smart-module-safety-image) center / cover;
+}
+
+.smart-module-story-safety .smart-module-story-copy {
+  align-items: flex-end;
 }
 
 .smart-module-story-maintenance {
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.9)),
-    url("https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=2200&q=85") center / cover;
+    var(--smart-module-maintenance-image) center / cover;
 }
 
 .smart-module-story-maintenance .smart-module-story-copy {
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .smart-module-story-maintenance .smart-module-story-copy h2,
@@ -619,7 +637,11 @@
 .smart-module-story-quality {
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.2)),
-    url("https://images.unsplash.com/photo-1521618755572-156ae0cdd74d?auto=format&fit=crop&w=2200&q=85") center / cover;
+    var(--smart-module-quality-image) center / cover;
+}
+
+.smart-module-story-quality .smart-module-story-copy {
+  align-items: flex-end;
 }
 
 .smart-module-features {
@@ -679,7 +701,7 @@
   align-items: center;
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.08)),
-    url("https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=2200&q=85") center / cover;
+    var(--smart-module-final-image) center / cover;
   color: #fff;
 }
 
@@ -895,7 +917,9 @@
 
   .smart-module-story-copy,
   .smart-module-story-temperature .smart-module-story-copy,
-  .smart-module-story-maintenance .smart-module-story-copy {
+  .smart-module-story-safety .smart-module-story-copy,
+  .smart-module-story-maintenance .smart-module-story-copy,
+  .smart-module-story-quality .smart-module-story-copy {
     align-items: flex-start;
     padding-top: 70px;
     padding-bottom: 70px;
@@ -905,8 +929,12 @@
   .smart-module-story-copy p,
   .smart-module-story-temperature .smart-module-story-copy h2,
   .smart-module-story-temperature .smart-module-story-copy p,
+  .smart-module-story-safety .smart-module-story-copy h2,
+  .smart-module-story-safety .smart-module-story-copy p,
   .smart-module-story-maintenance .smart-module-story-copy h2,
-  .smart-module-story-maintenance .smart-module-story-copy p {
+  .smart-module-story-maintenance .smart-module-story-copy p,
+  .smart-module-story-quality .smart-module-story-copy h2,
+  .smart-module-story-quality .smart-module-story-copy p {
     width: 100%;
   }
 

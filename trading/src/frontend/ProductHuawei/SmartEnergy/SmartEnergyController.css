@@ -41,7 +41,8 @@
 
 .smart-energy-hero {
   position: relative;
-  min-height: clamp(620px, calc(100vh - 76px), 820px);
+  min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: center;
@@ -281,7 +282,7 @@
   align-items: center;
   background:
     linear-gradient(90deg, rgba(6, 7, 13, 0.3), rgba(6, 7, 13, 0.84) 62%, rgba(6, 7, 13, 0.92)),
-    url("https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=2400&q=88") center / cover;
+    var(--smart-energy-dark-story-image) center / cover;
   color: #fff;
 }
 
@@ -400,7 +401,7 @@
   padding-top: 100px;
   background:
     linear-gradient(90deg, rgba(4, 8, 19, 0.84), rgba(4, 8, 19, 0.1)),
-    url("https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=2400&q=88") center / cover;
+    var(--smart-energy-final-image) center / cover;
   color: #fff;
 }
 

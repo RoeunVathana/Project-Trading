@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchCachedJson } from "../../apiCache";
+import { getHuaweiNavbarImage } from "../productAssets";
 import "./Residentail.css";
 
 const API_BASE_URL = (
@@ -25,6 +26,7 @@ const getCategoryName = (product, categories) => {
 };
 
 const getProductLink = (product) => {
+  if (product.href) return product.href;
   const category = normalizeCategoryName(product.category);
   if (category === "smartguard") return `/product-huawei/${product.id}/learn-more-smart-guard`;
   if (category === "smartenergycontroller") return `/product-huawei/${product.id}/learn-more-energy`;
@@ -32,14 +34,21 @@ const getProductLink = (product) => {
   return `/product-huawei/${product.id}/learn-more`;
 };
 
-const heroImage = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2400&q=88";
+const residentialAsset = (fileName) => (
+  `${import.meta.env.BASE_URL}residential/${encodeURIComponent(fileName)}`
+);
+
+const publicAsset = (fileName) => (
+  `${import.meta.env.BASE_URL}${fileName.replace(/^\/+/, "")}`
+);
+
+const heroImage = residentialAsset("residential10-img.jpg");
 
 const fallbackProducts = [
-  { title: "Smart Charger", description: "Drive with sun power", image: "https://images.unsplash.com/photo-1592833159155-c62df1b65634?auto=format&fit=crop&w=1000&q=88", slug: "smart-charger" },
-  { title: "Smart Guard", description: "Grid goes off, life goes on", image: "https://images.unsplash.com/photo-1558008258-3256797b43f3?auto=format&fit=crop&w=1000&q=88", slug: "smart-guard" },
-  { title: "SmartAssistant", description: "Your personal energy management assistant", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1000&q=88", slug: "smartassistant" },
-  { title: "Smart String ESS", description: "Store more clean energy for every day", image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1000&q=88", slug: "smart-string-ess" },
-  { title: "Smart Energy Controller", description: "One system for a more resilient home", image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1000&q=88", slug: "smart-energy-controller" },
+  { id: "chint-smart-power-breaker", title: "Smart Power Breaker", brand: "CHINT", description: "Low-voltage protection for safer power distribution", image: publicAsset("images/about/production-line.jpg"), href: "/product?collection=chint" },
+  { id: "smart-guard-fallback", title: "Smart Guard", brand: "Huawei", description: "Grid goes off, life goes on", image: getHuaweiNavbarImage("smart-guard"), href: "/product-huawei/smart-guard" },
+  { id: "smart-string-ess-fallback", title: "Smart String ESS", brand: "Huawei", description: "Store more clean energy for every day", image: getHuaweiNavbarImage("smart-string-ess"), href: "/product-huawei/smart-string-ess/learn-more-string-ess" },
+  { id: "smart-pv-controller-fallback", title: "Smart PV Controller", brand: "Huawei", description: "Convert solar power efficiently for the whole home", image: getHuaweiNavbarImage("smart-pv-controller"), href: "/product-huawei/smart-pv-controller" },
 ];
 
 const featureSlides = [
@@ -55,10 +64,31 @@ const servicePoints = [
 ];
 
 const stories = [
-  { title: "A Shining Home, A Shining Community", location: "Gnesta, Sweden", image: "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1200&q=88" },
-  { title: "Green Silesia, Green Needs", location: "Suszec, Silesian Voivodeship, Poland", image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=88" },
-  { title: "It's a New Rooftop for Energy", location: "Guandimiao Village, Kuzhuang Town, Henan Province, China", image: "https://images.unsplash.com/photo-1473445361085-b9a07f55608b?auto=format&fit=crop&w=1200&q=88" },
+  { title: "A Shining Home, A Shining Community", location: "Gnesta, Sweden", image: residentialAsset("residential9-item-img2-new.png") },
+  { title: "Green Silesia, Green Needs", location: "Suszec, Silesian Voivodeship, Poland", image: residentialAsset("residential9-item-img1.jpg") },
+  { title: "It's a New Rooftop for Energy", location: "Guandimiao Village, Kuzhuang Town, Henan Province, China", image: residentialAsset("residential9-item-img3.png") },
 ];
+
+const localResidentialImages = {
+  featureSlides: [
+    "residential6-img1.jpg",
+    "residential6-img2.jpg",
+    "residential6-img3.jpg",
+  ],
+  stories: [
+    "residential9-item-img2-new.png",
+    "residential9-item-img1.jpg",
+    "residential9-item-img3.png",
+  ],
+};
+
+featureSlides.forEach((slide, index) => {
+  slide.image = residentialAsset(localResidentialImages.featureSlides[index]);
+});
+
+stories.forEach((story, index) => {
+  story.image = residentialAsset(localResidentialImages.stories[index]);
+});
 
 const ArrowButton = ({ direction, label, onClick }) => (
   <button type="button" className={`residential-arrow residential-arrow--${direction}`} onClick={onClick} aria-label={label}>
@@ -76,7 +106,11 @@ const Residentail = () => {
   const [catalogProducts, setCatalogProducts] = useState([]);
   const [productLoading, setProductLoading] = useState(true);
   const feature = featureSlides[featureIndex];
-  const products = catalogProducts.length ? catalogProducts : fallbackProducts;
+  const products = useMemo(() => (
+    catalogProducts.length
+      ? [fallbackProducts[0], ...catalogProducts]
+      : fallbackProducts
+  ), [catalogProducts]);
   const visibleProducts = useMemo(() => (
     Array.from({ length: 3 }, (_, index) => products[(productStart + index) % products.length])
   ), [productStart, products]);
@@ -117,6 +151,7 @@ const Residentail = () => {
             return {
               id: product.id,
               title: product.productName || product.name || product.modelCode || category,
+              brand: product.brandName || "Huawei",
               description: product.shortDescription || product.description || category,
               image: toMediaUrl(product.baseImageUrl || product.base_image_url || primaryImage?.imageUrl)
                 || fallbackProducts[index % fallbackProducts.length].image,
@@ -178,7 +213,7 @@ const Residentail = () => {
             <article key={title}><h3>{title}</h3><p>{description}</p></article>
           ))}
         </div>
-        <img src="https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1800&q=88" alt="Solar panels generating clean energy" loading="lazy" />
+        <img src={residentialAsset("residential6-img1.jpg")} alt="Solar panels generating clean energy" loading="lazy" />
       </section>
 
       <section className="residential-products residential-container" aria-labelledby="residential-products-title" aria-busy={productLoading}>
@@ -192,6 +227,7 @@ const Residentail = () => {
             {visibleProducts.map((product) => (
               <article className="residential-product-card" key={product.id || product.slug}>
                 <div className="residential-product-image"><img src={product.image} alt={product.title} loading="lazy" /></div>
+                <small className="residential-product-brand">{product.brand}</small>
                 <h3>{product.title}</h3><p>{product.description}</p>
                 <Link to={product.id ? getProductLink(product) : `/product-huawei/${product.slug}`}>Learn more <span aria-hidden="true">›</span></Link>
               </article>
@@ -236,7 +272,7 @@ const Residentail = () => {
         <div className="residential-story-grid">
           {stories.map((story) => <article key={story.title}><img src={story.image} alt={story.title} loading="lazy" /><h3>{story.title}</h3><p>{story.location}</p></article>)}
         </div>
-        <button type="button" className="residential-small-button">More Stories</button>
+        <Link to="/product-huawei/success-stories" className="residential-small-button">More Stories</Link>
       </section>
 
       <section className="residential-final" style={{ "--residential-final-image": `url("${heroImage}")` }}>

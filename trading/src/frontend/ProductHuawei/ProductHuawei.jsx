@@ -134,6 +134,16 @@ const getLearnMorePath = (product) => {
     product.category?.slug,
   ];
   const categorySlug = String(product.categorySlug || "").toLowerCase();
+  const productText = [
+    product.name,
+    product.productName,
+    product.model,
+    product.modelCode,
+    ...categoryValues,
+  ]
+    .map((value) => (typeof value === "object" ? value?.name || value?.slug : value))
+    .filter(Boolean)
+    .join(" ");
 
   if (categorySlug === "commercial-industrial-smart-pv-controller"
     || categoryValues.some(isSmartPVControllerCategory)) {
@@ -151,7 +161,10 @@ const getLearnMorePath = (product) => {
   if (categoryValues.some(isSmartGuardCategory)) return `/product-huawei/${product.id}/learn-more-smart-guard`;
   if (categoryValues.some(isSmartModuleCategory)) return `/product-huawei/${product.id}/learn-more`;
   if (categoryValues.some(isSmartEnergyCategory)) return `/product-huawei/${product.id}/learn-more-energy`;
-  if (categoryValues.some(isSmartStringESSCategory)) return `/product-huawei/${product.id}/learn-more-string-ess`;
+  if (categoryValues.some(isSmartStringESSCategory)
+    || /smart\s*string\s*(ess|energy\s*storage)/i.test(productText)) {
+    return `/product-huawei/${product.id}/learn-more-string-ess`;
+  }
   // Products without a dedicated page use the Smart Module Controller layout.
   return `/product-huawei/${product.id}/learn-more`;
 };

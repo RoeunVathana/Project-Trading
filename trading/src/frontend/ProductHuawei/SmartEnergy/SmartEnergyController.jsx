@@ -7,7 +7,14 @@ const API_BASE_URL = (
   import.meta.env.VITE_API_URL || "http://localhost:3000"
 ).replace(/\/$/, "");
 
-const HERO_BACKGROUND_IMAGE = "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=2400&q=88";
+const smartEnergyAsset = (fileName) => (
+  `${import.meta.env.BASE_URL}SmartEnergy/${encodeURIComponent(fileName)}`
+);
+
+const HERO_BACKGROUND_IMAGE = smartEnergyAsset("easily.jpg");
+const HERO_PRODUCT_IMAGE = smartEnergyAsset("sec-1.jpg");
+const DARK_STORY_IMAGE = smartEnergyAsset("sec-1.jpg");
+const FINAL_STORY_IMAGE = smartEnergyAsset("home.jpg");
 const NAVBAR_PRODUCT_IMAGE = getHuaweiNavbarImage("smart-energy-controller");
 
 const toMediaUrl = (path) => {
@@ -24,11 +31,11 @@ const getJson = async (path, signal) => {
 };
 
 const fallbackCards = [
-  { title: "More Powerful", description: "Power more home appliances with a smarter and more capable energy controller.", image: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=1400&q=85" },
-  { title: "Active Safety", description: "Intelligent protection helps keep the home energy system safe and stable.", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=85" },
-  { title: "Enhanced Protection", description: "Reliable control and protection for demanding residential energy scenarios.", image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1200&q=85" },
-  { title: "Whole Home Backup", description: "Keep essential appliances running when the grid is unavailable.", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85" },
-  { title: "Future Ready", description: "Designed to grow with storage, solar generation, and future home energy needs.", image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=85" },
+  { title: "More Powerful", description: "Power more home appliances with a smarter and more capable energy controller.", image: smartEnergyAsset("power.png") },
+  { title: "Active Safety", description: "Intelligent protection helps keep the home energy system safe and stable.", image: smartEnergyAsset("swiper-3.jpg") },
+  { title: "Enhanced Protection", description: "Reliable control and protection for demanding residential energy scenarios.", image: smartEnergyAsset("c14caf916e3c409c95bcaaf22ef3e92f.jpg") },
+  { title: "Whole Home Backup", description: "Keep essential appliances running when the grid is unavailable.", image: smartEnergyAsset("sec-1.jpg") },
+  { title: "Future Ready", description: "Designed to grow with storage, solar generation, and future home energy needs.", image: smartEnergyAsset("swiper-2.jpg") },
 ];
 
 const getCategoryName = (product, categories) => product.category?.name
@@ -40,7 +47,7 @@ const fallbackProduct = {
   category: "Smart Energy Controller",
   modelCode: "SUN5000 Series",
   description: "Smart energy control for dependable residential solar installations.",
-  image: NAVBAR_PRODUCT_IMAGE,
+  image: HERO_PRODUCT_IMAGE || NAVBAR_PRODUCT_IMAGE,
   images: [],
 };
 
@@ -72,7 +79,7 @@ const SmartEnergyController = () => {
         setProduct({
           ...productRow,
           category: getCategoryName(productRow, Array.isArray(categoryRows) ? categoryRows : []),
-          image: toMediaUrl(productRow.baseImageUrl || productRow.base_image_url || primaryImage?.imageUrl) || NAVBAR_PRODUCT_IMAGE,
+          image: toMediaUrl(productRow.baseImageUrl || productRow.base_image_url || primaryImage?.imageUrl) || HERO_PRODUCT_IMAGE || NAVBAR_PRODUCT_IMAGE,
           images: images.map((image) => ({ ...image, imageUrl: toMediaUrl(image.imageUrl) })),
         });
       } catch (loadError) {
@@ -176,7 +183,7 @@ const SmartEnergyController = () => {
         ))}
       </section>
 
-      <section className="smart-energy-dark-story" data-energy-reveal>
+      <section className="smart-energy-dark-story" data-energy-reveal style={{ "--smart-energy-dark-story-image": `url("${DARK_STORY_IMAGE}")` }}>
         <div className="smart-energy-story-copy smart-energy-container">
           <h2>Run Your Home on<br />Clean Electricity</h2>
           <p>{description} The increasingly powerful energy controller keeps more home appliances active with higher self-sufficiency in green energy and lower electricity bills. Go green with fewer inverters.</p>
@@ -215,7 +222,7 @@ const SmartEnergyController = () => {
         </div>
       </section>
 
-      <section className="smart-energy-final-story" data-energy-reveal>
+      <section className="smart-energy-final-story" data-energy-reveal style={{ "--smart-energy-final-image": `url("${FINAL_STORY_IMAGE}")` }}>
         <div className="smart-energy-final-copy smart-energy-container">
           <h2>A Home that Always Shines</h2>
           <p>FusionSolar Residential delivers clean energy for homes around the world, helping families create a brighter and more sustainable future.</p>
