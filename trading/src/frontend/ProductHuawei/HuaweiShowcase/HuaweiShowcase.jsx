@@ -21,6 +21,31 @@ const fallbackImages = [
 
 const staticProductImages = HUAWEI_NAVBAR_PRODUCT_IMAGES;
 
+const publicAsset = (folder, fileName) => (
+  `${import.meta.env.BASE_URL}${folder}/${encodeURIComponent(fileName)}`
+);
+
+const smartGuardAssets = {
+  hero: publicAsset("smartguard", "sec2_new_bgi.png"),
+  allocation: publicAsset("smartguard", "sec3_product_bg_pc.png"),
+  cards: [
+    publicAsset("smartguard", "home.jpg"),
+    publicAsset("smartguard", "built-better-power.jpg"),
+    publicAsset("smartguard", "bbb0f7f3967a47c486fbd2144f7da6ed.jpg"),
+    publicAsset("smartguard", "link_channel.png"),
+    publicAsset("smartguard", "sec4_product_bg_pc.png"),
+    publicAsset("smartguard", "sec4_product_bg_pc (1).png"),
+  ],
+  features: [
+    publicAsset("smartguard", "link_channel.png"),
+    publicAsset("smartguard", "sec3_product_bg_pc.png"),
+    publicAsset("smartguard", "bbb0f7f3967a47c486fbd2144f7da6ed.jpg"),
+    publicAsset("smartguard", "built-better-power.jpg"),
+    publicAsset("smartguard", "sec4_product_bg_pc (2).png"),
+  ],
+  final: publicAsset("smartguard", "home.jpg"),
+};
+
 const categoryProductMeta = {
   "commercial-industrial-smart-module-controller": {
     productId: "smart-module-controller",
@@ -62,27 +87,31 @@ const categoryConfigs = {
   "smart-guard": {
     label: "Smart Guard",
     fallbackModel: "SmartGuard-63A-S0/AUS0",
-    heroImage: staticProductImages["smart-guard"],
-    allocationImage: fallbackImages[7],
-    allocationTitle: "Intelligent Allocation",
-    allocationCopy: "The intelligent allocation system prioritizes essential appliances automatically, helping your home stay comfortable and powered through changing grid conditions.",
+    heroTitle: "Whole Home Power Backup, We've Got You Covered.",
+    heroCopy: "Support essential and whole-home loads with a smooth transition between grid power and solar backup.",
+    heroModel: "SmartGuard-63A-S0/AUS0",
+    heroImage: smartGuardAssets.hero,
+    allocationImage: smartGuardAssets.allocation,
+    allocationTitle: "Grid Goes Off, Life Goes On",
+    allocationCopy: "From offering power backup for partial loads to a total power support of 63 A for the whole house, you've witnessed a great leap. No additional switchboard is required to support backup and non-backup loads.",
     cards: [
-      ["Whole Home Backup", "From partial to whole home support", fallbackImages[1]],
-      ["Enduring Backup", "Keep essential loads protected", fallbackImages[2]],
-      ["Bypass Switch", "A secure backup path when you need it", fallbackImages[3]],
-      ["Easy Installation", "Integrated control with minimal circuit modification", fallbackImages[4]],
-      ["Built-in SmartAssistant", "More intelligent scheduling for everyday loads", fallbackImages[5]],
-      ["Seamless Switch", "Switch to backup power faster than a blink", fallbackImages[6]],
+      ["Whole Home Backup", "From Partial to Whole Home Support", smartGuardAssets.cards[0]],
+      ["Enduring Backup", "Intelligent Power Allocation for More Enduring Power Supply", smartGuardAssets.cards[1]],
+      ["Bypass Switch", "More Secure", smartGuardAssets.cards[2]],
+      ["Easy Installation", "Highly Integrated with Minimal Circuit Modification", smartGuardAssets.cards[3]],
+      ["Built-in SmartAssistant", "Intelligent Scheduling", smartGuardAssets.cards[4]],
+      ["Seamless Switch", "Ultra-fast Switchover from Grid to Backup", smartGuardAssets.cards[5]],
     ],
     features: [
-      ["Highly Integrated for Easy Installation", "Say no to tedious assembling. Smart Guard combines communication, measurement, and management functions in one compact box.", fallbackImages[4]],
-      ["Whole Home Power Backup, We’ve Got You Covered.", "Support essential and whole-home loads with a smooth transition between grid power and solar backup.", fallbackImages[1]],
-      ["Bypass Mode for More Secure Backup", "A spare bypass path provides a dependable backup experience even when the main contactor needs service.", fallbackImages[3]],
-      ["Built-in SmartAssistant, for More Intelligent Scheduling", "View and schedule appliance priorities through a clear energy management experience.", fallbackImages[5]],
-      ["Seamless Switch, Faster than a Blink", "Keep household appliances working as if no blackout occurred with an ultra-fast switchover.", fallbackImages[6]],
+      ["Highly Integrated for Easy Installation", "Say no to tedious assembling. Smart Guard is a highly integrated box with communication, measurement, and management functions. You can simply fix it on the wall with minimal circuit modification.", smartGuardAssets.features[0]],
+      ["Whole Home Power Backup, We've Got You Covered.", "Support essential and whole-home loads with a smooth transition between grid power and solar backup.", smartGuardAssets.features[1]],
+      ["Bypass Mode for More Secure Backup", "A spare bypass switch gives you a more secure backup experience. If the contactor is defective, manual bypass is ready to support. Turn on bypass mode to connect loads and power up again.", smartGuardAssets.features[2]],
+      ["Built-in SmartAssistant, for More Intelligent Scheduling", "Your home energy management assistant, SmartAssistant, is pre-integrated in Smart Guard. Home appliances can be flexibly controlled through Shelly sockets, supporting priority sorting and scheduled power usage.", smartGuardAssets.features[3]],
+      ["Seamless Switch, Faster than a Blink", "With a Smart Guard at home, power outages are met with an ultra-fast switchover from grid to solar backup power. Household appliances keep working as if no blackout occurred.", smartGuardAssets.features[4]],
     ],
     finalTitle: "A Home that Always Shines",
-    finalCopy: "FusionSolar Residential delivers clean energy for homes around the world, helping families create a brighter and more sustainable future.",
+    finalCopy: "By the end of 2025, FusionSolar Residential has provided clean energy for 4.2 million homes in over 170 countries.",
+    finalImage: smartGuardAssets.final,
   },
   "smart-string-ess": {
     label: "Smart String ESS",
@@ -402,21 +431,29 @@ const HuaweiShowcase = ({ categorySlug = "smart-string-ess" }) => {
   const title = product.productName || config.label;
   const category = product.category || config.label;
   const model = product.modelCode || config.fallbackModel;
+  const displayTitle = config.heroTitle || title;
+  const displayModel = config.heroModel || model;
   const productImages = product.images || [];
-  const getProductImage = (fallback, index = 0) => productImages[index]?.imageUrl || fallback;
-  const heroImage = product.image || getCategoryProductImage(categorySlug) || config.heroImage;
+  const useLocalCategoryAssets = categorySlug === "smart-guard";
+  const getProductImage = (fallback, index = 0) => useLocalCategoryAssets
+    ? fallback
+    : productImages[index]?.imageUrl || fallback;
+  const heroImage = useLocalCategoryAssets
+    ? config.heroImage
+    : product.image || getCategoryProductImage(categorySlug) || config.heroImage;
 
   return (
     <main className={`huawei-showcase huawei-showcase--${categorySlug}`} style={{ "--showcase-hero-image": `url("${config.heroImage}")` }}>
       <section className="showcase-hero" data-showcase-reveal>
         <div className="showcase-hero-media" data-showcase-reveal="left">
-          <img src={heroImage} alt={title} />
+          <img src={heroImage} alt={displayTitle} />
         </div>
         <div className="showcase-hero-copy" data-showcase-reveal="right" data-showcase-text-reveal="group">
           <div className="showcase-brand">FusionSolar</div>
           <p className="showcase-category">{category}</p>
-          <h1>{title}</h1>
-          <p className="showcase-model">Model: {model} <span className="showcase-new-badge">NEW</span></p>
+          <h1>{displayTitle}</h1>
+          {config.heroCopy && <p className="showcase-hero-description">{config.heroCopy}</p>}
+          <p className="showcase-model">Model: {displayModel} <span className="showcase-new-badge">NEW</span></p>
           <span className="showcase-accent-line" aria-hidden="true" />
         </div>
       </section>
@@ -477,7 +514,7 @@ const HuaweiShowcase = ({ categorySlug = "smart-string-ess" }) => {
         <section
           className={`showcase-feature showcase-feature--${index % 2 === 0 ? "left" : "right"}${index === 0 ? " showcase-feature--light" : ""}`}
           key={featureTitle}
-          style={{ "--showcase-feature-image": `url("${getProductImage(featureImage, index + 1)}")` }}
+          style={{ "--showcase-feature-image": `url("${useLocalCategoryAssets ? smartGuardAssets.features[index] : getProductImage(featureImage, index + 1)}")` }}
           data-showcase-reveal={index % 2 === 0 ? "left" : "right"}
         >
           <div className="showcase-feature-copy showcase-container" data-showcase-text-reveal="group">

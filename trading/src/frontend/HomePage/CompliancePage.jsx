@@ -1,4 +1,3 @@
-import React from "react";
 import "./CompliancePage.css";
 
 const CompliancePage = () => {

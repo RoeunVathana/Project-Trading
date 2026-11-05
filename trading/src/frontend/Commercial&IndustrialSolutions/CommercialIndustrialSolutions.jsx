@@ -1,13 +1,40 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { getHuaweiNavbarImage } from "../ProductHuawei/productAssets";
 import "./CommercialIndustrialSolutions.jsx.css";
 
-const remoteImage = (id, width = 1800) => (
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=86`
+const publicAsset = (fileName) => (
+  `${import.meta.env.BASE_URL}smartPV/${encodeURIComponent(fileName)}`
 );
 
-const heroImage = remoteImage("photo-1508514177221-188b1cf16e9d", 2200);
+const smartPVImages = {
+  hero: publicAsset("kv-pc.jpg"),
+  solutions: {
+    solar: publicAsset("sec-3-pc.png"),
+    storage: publicAsset("sec-4-2-pc.jpg"),
+    microgrid: publicAsset("sec-7-pc.png"),
+    ev: publicAsset("sec-9-1-pc.png"),
+  },
+  products: [
+    publicAsset("sec-3-pc.png"),
+    publicAsset("sec-4-2-pc.jpg"),
+    publicAsset("sec-7-pc.png"),
+    publicAsset("sec-9-1-pc.png"),
+  ],
+  performance: publicAsset("sec-7-pc.png"),
+  stories: [
+    publicAsset("sec-9-1-pc.png"),
+    publicAsset("sec-9-2-pc.png"),
+    publicAsset("sec-9-3-pc.png"),
+  ],
+  audiences: [
+    publicAsset("sec-9-4-pc.png"),
+    publicAsset("sec-9-5-pc.png"),
+  ],
+};
+
+const getHuaweiNavbarImage = () => smartPVImages.performance;
+
+const heroImage = smartPVImages.hero;
 
 const intelligenceModes = {
   day: { label: "Daytime Mode", metric: "84.5", metricLabel: "GENERATION", detail: "Solar generation is covering 100% of load. Charging batteries at 50 kW." },
@@ -20,37 +47,37 @@ const solutionModes = {
     label: "C&I Solar",
     eyebrow: "COMMERCIAL SOLAR",
     title: "Optimize Your Unused Roof Space",
-    image: remoteImage("photo-1508514177221-188b1cf16e9d"),
+    image: smartPVImages.solutions.solar,
     points: [["Advanced MPPT Tracking", "Maximize yield even in shaded industrial environments."], ["Module-Level Monitoring", "Real-time visibility into every panel's performance."], ["Lightweight Design", "Optimized for easy installation on commercial roofs."]],
   },
   storage: {
     label: "Storage",
     eyebrow: "ENERGY STORAGE",
     title: "Store More. Operate with Confidence.",
-    image: remoteImage("photo-1592833159155-c62df1b65634"),
+    image: smartPVImages.solutions.storage,
     points: [["Flexible Dispatch", "Shift energy to the hours your facility needs it most."], ["Thermal Management", "Keep storage assets stable across changing conditions."], ["Scalable Architecture", "Start with the capacity you need and expand with demand."]],
   },
   microgrid: {
     label: "Microgrid",
     eyebrow: "MICROGRID CONTROL",
     title: "Coordinate Every Source and Load",
-    image: remoteImage("photo-1473341304170-971dccb5ac1e"),
+    image: smartPVImages.solutions.microgrid,
     points: [["Unified Energy Flow", "Coordinate PV, storage, grid and critical loads in one view."], ["Resilient Operation", "Move smoothly between grid-connected and backup modes."], ["Clear Decisions", "Turn live site data into a practical operating plan."]],
   },
   ev: {
     label: "EV Charging",
     eyebrow: "FLEET ELECTRIFICATION",
     title: "Charge Fleets without Guesswork",
-    image: remoteImage("photo-1593941707882-a5bba14938c7"),
+    image: smartPVImages.solutions.ev,
     points: [["Demand-Aware Charging", "Schedule charging around production and site capacity."], ["Reliable Availability", "Keep vehicles ready while protecting the facility load."], ["Built to Grow", "Add charging capacity as your fleet transitions to electric."]],
   },
 };
 
 const products = [
-  { title: "Smart Inverters", detail: "Next-generation DC-AC conversion with 99% efficiency.", model: "SUN2000-150K-MG0", image: getHuaweiNavbarImage("smart-pv-controller") },
-  { title: "Battery Modules", detail: "Liquid-cooled LFP batteries for ultra-long life.", model: "LUNA2000-215 Series", image: getHuaweiNavbarImage("hybrid-cooling-grid-forming-ess") },
-  { title: "PV Panels", detail: "Module-level optimization for higher solar yield.", model: "MERC-1100/1300W-P", image: getHuaweiNavbarImage("smart-module-controller", "commercial-industrial-solutions") },
-  { title: "Ultra Chargers", detail: "Smart communications for reliable energy systems.", model: "Smart Dongle - 4G", image: getHuaweiNavbarImage("accessories") },
+  { title: "Smart Inverters", detail: "Next-generation DC-AC conversion with 99% efficiency.", model: "SUN2000-150K-MG0", image: smartPVImages.products[0] },
+  { title: "Battery Modules", detail: "Liquid-cooled LFP batteries for ultra-long life.", model: "LUNA2000-215 Series", image: smartPVImages.products[1] },
+  { title: "PV Panels", detail: "Module-level optimization for higher solar yield.", model: "MERC-1100/1300W-P", image: smartPVImages.products[2] },
+  { title: "Ultra Chargers", detail: "Smart communications for reliable energy systems.", model: "Smart Dongle - 4G", image: smartPVImages.products[3] },
 ];
 
 const performanceModes = {
@@ -60,14 +87,14 @@ const performanceModes = {
 };
 
 const stories = [
-  { sector: "HEAVY INDUSTRY", title: "Global Steel Mill", image: remoteImage("photo-1565610222536-ef125c59da2e", 1000), primary: 2.4, primaryDecimals: 1, primarySuffix: "MW", primaryLabel: "Capacity", secondary: 35, secondarySuffix: "%", secondaryLabel: "Savings" },
-  { sector: "EDUCATION", title: "Pacific University", image: remoteImage("photo-1564981797816-1043664bf78d", 1000), primary: 800, primarySuffix: "kW", primaryLabel: "Capacity", secondary: 12, secondarySuffix: "mo", secondaryLabel: "ROI" },
-  { sector: "MANUFACTURING", title: "Eco-Food Processors", image: remoteImage("photo-1581094794329-c8112a89af12", 1000), primary: 1.5, primaryDecimals: 1, primarySuffix: "MW", primaryLabel: "Capacity", secondary: 420, secondarySuffix: "t", secondaryLabel: "CO₂ Saved" },
+  { sector: "HEAVY INDUSTRY", title: "Global Steel Mill", image: smartPVImages.stories[0], primary: 2.4, primaryDecimals: 1, primarySuffix: "MW", primaryLabel: "Capacity", secondary: 35, secondarySuffix: "%", secondaryLabel: "Savings" },
+  { sector: "EDUCATION", title: "Pacific University", image: smartPVImages.stories[1], primary: 800, primarySuffix: "kW", primaryLabel: "Capacity", secondary: 12, secondarySuffix: "mo", secondaryLabel: "ROI" },
+  { sector: "MANUFACTURING", title: "Eco-Food Processors", image: smartPVImages.stories[2], primary: 1.5, primaryDecimals: 1, primarySuffix: "MW", primaryLabel: "Capacity", secondary: 420, secondarySuffix: "t", secondaryLabel: "CO₂ Saved" },
 ];
 
 const audiences = [
-  { title: "For Business Owners", description: "Decarbonize your operations and lock in energy security for decades to come.", image: remoteImage("photo-1556761175-b413da4baf72", 1200), action: "Learn More", href: "/get-started" },
-  { title: "For Installers", description: "Fast-track your projects with simplified wiring and automated commissioning tools.", image: remoteImage("photo-1509391366360-2e959784a276", 1200), action: "Installer Portal", href: "/contact" },
+  { title: "For Business Owners", description: "Decarbonize your operations and lock in energy security for decades to come.", image: smartPVImages.audiences[0], action: "Learn More", href: "/get-started" },
+  { title: "For Installers", description: "Fast-track your projects with simplified wiring and automated commissioning tools.", image: smartPVImages.audiences[1], action: "Installer Portal", href: "/contact" },
 ];
 
 const FeatureIcon = ({ name }) => {

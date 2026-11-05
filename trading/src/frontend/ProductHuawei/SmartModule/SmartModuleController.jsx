@@ -68,8 +68,12 @@ const SmartModuleController = () => {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const usesLocalAssets = id === "smart-module-controller";
-  const solutionId = new URLSearchParams(location.search).get("solution") || "residential-solution";
+  const usesLocalAssets = id === "smart-module-controller"
+    || id === "commercial-industrial-smart-module-controller";
+  const solutionId = new URLSearchParams(location.search).get("solution")
+    || (id === "commercial-industrial-smart-module-controller"
+      ? "commercial-industrial-solutions"
+      : "residential-solution");
   const navbarProductImage = getHuaweiNavbarImage("smart-module-controller", solutionId);
   const navbarModel = solutionId === "commercial-industrial-solutions"
     ? "MERC-1100/1300W-P"
@@ -115,7 +119,7 @@ const SmartModuleController = () => {
         });
       } catch (loadError) {
         if (loadError.name !== "AbortError") {
-          if (id === "smart-module-controller") {
+          if (usesLocalAssets) {
             setProduct({ ...fallbackProduct, modelCode: navbarModel, image: HERO_PRODUCT_IMAGE });
           } else {
             setError(loadError.message || "Unable to load this Huawei product.");

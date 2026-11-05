@@ -15,11 +15,18 @@ const productPath = (parameters) => {
       "product-huawei-all": "/product-huawei",
     };
 
+    if (huaweiSolutionPaths[parameters.product] && !parameters.categorySlug) {
+      const path = huaweiSolutionPaths[parameters.product];
+      return parameters.solution
+        ? `${path}?solution=${encodeURIComponent(parameters.solution)}`
+        : path;
+    }
+
     // Product links must take precedence over their parent solution page.
     // Category-specific slugs let the Huawei API resolve the first published
     // product from the exact residential or commercial category.
-    if (huaweiSolutionPaths[parameters.product] && !parameters.categorySlug) {
-      const path = huaweiSolutionPaths[parameters.product];
+    if (parameters.product || parameters.categorySlug) {
+      const path = `/product-huawei/${parameters.categorySlug || parameters.product}`;
       return parameters.solution
         ? `${path}?solution=${encodeURIComponent(parameters.solution)}`
         : path;
@@ -33,12 +40,6 @@ const productPath = (parameters) => {
       return "/commercial-industrial-solutions";
     }
 
-    if (parameters.product || parameters.categorySlug) {
-      const path = `/product-huawei/${parameters.categorySlug || parameters.product}`;
-      return parameters.solution
-        ? `${path}?solution=${encodeURIComponent(parameters.solution)}`
-        : path;
-    }
     return "/product-huawei";
   }
 

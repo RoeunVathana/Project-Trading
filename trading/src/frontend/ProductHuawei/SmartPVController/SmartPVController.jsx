@@ -1,11 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { getHuaweiNavbarImage } from "../productAssets";
 import "./SmartPVController.css";
 
-const imageUrl = (id, width = 1600) => (
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=86`
+const smartPVAsset = (fileName) => (
+  `${import.meta.env.BASE_URL}smartPV/${encodeURIComponent(fileName)}`
 );
+
+const SMART_PV_ASSETS = Object.freeze({
+  hero: smartPVAsset("kv-pc.jpg"),
+  performance: smartPVAsset("sec-3-pc.png"),
+  safety: smartPVAsset("sec-7-pc.png"),
+  fault: smartPVAsset("sec-4-2-pc.jpg"),
+  rooftop: smartPVAsset("sec-9-1-pc.png"),
+  industrial: smartPVAsset("sec-9-2-pc.png"),
+  campus: smartPVAsset("sec-9-3-pc.png"),
+  transport: smartPVAsset("sec-9-4-pc.png"),
+  station: smartPVAsset("sec-9-5-pc.png"),
+  facility: smartPVAsset("sec-9-6-pc.png"),
+});
 
 const formatCount = (value, decimals) => Number(value).toLocaleString("en-US", {
   minimumFractionDigits: decimals,
@@ -78,34 +90,34 @@ const benefitCards = [
   {
     title: "Active Safety",
     description: "AI-powered AFCI locates faults quickly and disconnects in 0.5 seconds.",
-    image: imageUrl("photo-1518770660439-4636190af475"),
+    image: SMART_PV_ASSETS.fault,
     className: "pv-benefit-card--large",
   },
   {
     title: "More Energy",
     description: "Multi-peak MPPT helps every string capture more usable solar power.",
-    image: imageUrl("photo-1558008258-3256797b43f3"),
+    image: SMART_PV_ASSETS.performance,
   },
   {
     title: "Long-term Reliability",
     description: "Tested for cold, heat, humidity, salt mist, and demanding daily cycles.",
-    image: imageUrl("photo-1500530855697-b586d89ba3ee"),
+    image: SMART_PV_ASSETS.safety,
     className: "pv-benefit-card--wide",
   },
   {
     title: "Simplified O&M",
     description: "See asset health and locate faults with less time in the field.",
-    image: imageUrl("photo-1497435334941-8c899ee9e8e9"),
+    image: SMART_PV_ASSETS.facility,
   },
   {
     title: "Higher Efficiency",
     description: "Deliver more generation from every installation with less conversion loss.",
-    image: imageUrl("photo-1473341304170-971dccb5ac1e"),
+    image: SMART_PV_ASSETS.industrial,
   },
   {
     title: "Industry Friendly",
     description: "A scalable controller for factories, warehouses, and large rooftops.",
-    image: imageUrl("photo-1581094794329-c8112a89af12"),
+    image: SMART_PV_ASSETS.campus,
   },
 ];
 
@@ -114,25 +126,25 @@ const weatherCards = [
     label: { value: -25, suffix: " C" },
     title: "Freezing tolerance",
     description: "Reliable output in snow, high latitudes, and sudden temperature drops.",
-    image: imageUrl("photo-1483347756197-71ef80e95f73", 1200),
+    image: SMART_PV_ASSETS.rooftop,
   },
   {
     label: { value: 70, suffix: " C" },
     title: "Extreme heat",
     description: "Designed for tropical rooftops, deserts, and hot low-latitude sites.",
-    image: imageUrl("photo-1500534623283-312aade485b7", 1200),
+    image: SMART_PV_ASSETS.industrial,
   },
   {
     label: { value: 66, prefix: "IP" },
     title: "Dust and salt mist",
     description: "A sealed enclosure helps protect the inverter in coastal and dusty environments.",
-    image: imageUrl("photo-1517487881594-2787fef5ebf7", 1200),
+    image: SMART_PV_ASSETS.station,
   },
   {
     label: { value: 24, suffix: "/7" },
     title: "Built for uptime",
     description: "Consistent communication and low maintenance across the service life.",
-    image: imageUrl("photo-1518770660439-4636190af475", 1200),
+    image: SMART_PV_ASSETS.facility,
   },
 ];
 
@@ -140,19 +152,19 @@ const industries = [
   {
     name: "Commercial rooftops",
     description: "Power offices, retail centers, and warehouses with a controller built to scale across large rooftops.",
-    image: imageUrl("photo-1497366811353-6870744d04b2", 1500),
+    image: SMART_PV_ASSETS.rooftop,
     accent: "Distributed solar",
   },
   {
     name: "Industrial campuses",
     description: "Make more of existing infrastructure while keeping generation visible, predictable, and easy to maintain.",
-    image: imageUrl("photo-1565793298595-6a879b1d9492", 1500),
+    image: SMART_PV_ASSETS.campus,
     accent: "High-density generation",
   },
   {
     name: "Parking and transport",
     description: "Turn car parks and transport hubs into reliable clean-energy assets without compromising operations.",
-    image: imageUrl("photo-1506521781263-d8422e82f27a", 1500),
+    image: SMART_PV_ASSETS.transport,
     accent: "Every surface counts",
   },
 ];
@@ -191,7 +203,7 @@ const SmartPVController = () => {
   const location = useLocation();
   const [activeIndustry, setActiveIndustry] = useState(0);
   const [activeRecommendation, setActiveRecommendation] = useState(0);
-  const productImage = location.state?.product?.image || getHuaweiNavbarImage("smart-pv-controller");
+  const productImage = location.state?.product?.image || "";
 
   const currentIndustry = industries[activeIndustry];
   const currentRecommendation = recommendations[activeRecommendation];
@@ -225,7 +237,14 @@ const SmartPVController = () => {
   const currentIndustryStyle = useMemo(() => ({ backgroundImage: `linear-gradient(90deg, rgba(4, 8, 16, .9), rgba(4, 8, 16, .26)), url(${currentIndustry.image})` }), [currentIndustry]);
 
   return (
-    <main className="smart-pv-page">
+    <main
+      className="smart-pv-page"
+      style={{
+        "--pv-hero-image": `url("${SMART_PV_ASSETS.hero}")`,
+        "--pv-performance-image": `url("${SMART_PV_ASSETS.performance}")`,
+        "--pv-accuracy-image": `url("${SMART_PV_ASSETS.safety}")`,
+      }}
+    >
       <section className="pv-hero" data-pv-reveal>
         <div className="pv-hero-glow" aria-hidden="true" />
         <div className="pv-container pv-hero-content">
@@ -243,7 +262,7 @@ const SmartPVController = () => {
           <div className="pv-product-stage" aria-label="SUN2000-150K-MG0 product image">
             <span className="pv-orbit pv-orbit--one" aria-hidden="true" />
             <span className="pv-orbit pv-orbit--two" aria-hidden="true" />
-            <img src={productImage} alt="Huawei SUN2000-150K-MG0 smart PV controller" />
+            {productImage ? <img src={productImage} alt="Huawei SUN2000-150K-MG0 smart PV controller" /> : null}
             <div className="pv-product-label"><span><CountUpNumber value={150} suffix=" kW" /></span><small>Grid-ready output</small></div>
           </div>
         </div>

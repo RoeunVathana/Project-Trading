@@ -54,7 +54,10 @@ const HuaweiProductRoute = () => {
 
   if (id === "smart-string-ess") return <SmartStringESS />;
   if (id === "smart-energy-controller") return <SmartEnergyController />;
-  if (id === "smart-module-controller") return <SmartModuleController />;
+  if (id === "smart-module-controller"
+    || id === "commercial-industrial-smart-module-controller") {
+    return <SmartModuleController />;
+  }
   if (id === "smart-pv-controller" || id === "commercial-industrial-smart-pv-controller") {
     return <SmartPVController />;
   }
