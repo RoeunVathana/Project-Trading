@@ -610,14 +610,14 @@ const Navbar = () => {
               <div className="nav-tree-menu__links">
                 {referenceLinks.map((reference) => (
                   <Link
-                    to={"/reference?category=" + reference.id + "#project-matrix"}
+                    to={"/reference?category=" + reference.id}
                     onClick={closeMenu}
                     key={reference.id}
                   >
                     {reference.label}
                   </Link>
                 ))}
-                <Link to="/reference?category=huawei#project-matrix" onClick={closeMenu}>
+                <Link to="/reference?category=huawei" onClick={closeMenu}>
                   Project Reference (HUAWEI)
                 </Link>
               </div>

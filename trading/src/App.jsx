@@ -7,6 +7,8 @@ const HomePage = lazy(() => import("./frontend/HomePage/HomePage"));
 const ProductPage = lazy(() => import("./frontend/ProductPage/ProductPage"));
 const DistributionPage = lazy(() => import("./frontend/DistributionPage/DistributionPage"));
 const NewPreference = lazy(() => import("./frontend/NewProjectRreference/NewPreference"));
+const ReferenceChint = lazy(() => import("./frontend/PrjectReferenceChint/ReferenceChint"));
+const ReferenceHuawei = lazy(() => import("./frontend/ProjectReferenceHuawei/ReferenceHuawei"));
 const AboutPage = lazy(() => import("./frontend/AboutPage/AboutPage"));
 const ContactPage = lazy(() => import("./frontend/ContactPage/ContactPage"));
 const CompliancePage = lazy(() => import("./frontend/CompliancePage/CompliancePage"));
@@ -47,6 +49,13 @@ const ProductRoute = () => {
   return searchParams.get("collection") === "huawei"
     ? <Navigate to="/product-huawei" replace />
     : <ProductPage />;
+};
+
+const ReferenceRoute = () => {
+  const [searchParams] = useSearchParams();
+  if (searchParams.get("category") === "chint") return <ReferenceChint />;
+  if (searchParams.get("category") === "huawei") return <ReferenceHuawei />;
+  return <NewPreference />;
 };
 
 const HuaweiProductRoute = () => {
@@ -108,7 +117,9 @@ const App = () => {
           <Route path="/instruments-and-meters" element={<InstrumentsandMeters />} />
           <Route path="/commercial-industrial-solutions" element={<CommercialIndustrialSolutions />} />
 
-          <Route path="/reference" element={<NewPreference />} />
+          <Route path="/reference" element={<ReferenceRoute />} />
+          <Route path="/reference-chint" element={<ReferenceChint />} />
+          <Route path="/reference-huawei" element={<ReferenceHuawei />} />
 
           <Route path="/about" element={<AboutPage />} />
 
