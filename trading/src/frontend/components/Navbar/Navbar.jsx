@@ -386,6 +386,12 @@ const Navbar = () => {
         || pathname.startsWith("/product-huawei/");
     }
 
+    if (name === "about") {
+      return pathname === "/about"
+        || pathname === "/profile-company-trading"
+        || pathname === "/profile-company-manufacturing";
+    }
+
     return pathname === "/" + name;
   };
 
