@@ -141,6 +141,68 @@
 .hr-page-size { justify-self: end; }
 .hr-page-size select { min-height: 36px; padding: 7px 9px; border: 1px solid var(--hr-border); border-radius: 3px; background: var(--hr-panel); color: var(--hr-muted); font-size: var(--text-control-size); cursor: pointer; }
 
+.hr-customers {
+  padding-block: 86px 94px;
+  overflow: hidden;
+  border-top: 1px solid var(--hr-border);
+  background: var(--hr-filter);
+  color: var(--hr-ink);
+}
+.hr-customer-heading { max-width: 680px; text-align: center; }
+.hr-customer-eyebrow {
+  display: inline-flex;
+  margin-bottom: 14px !important;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--hr-action) 10%, transparent);
+  color: var(--hr-red);
+  font-size: var(--text-caption-size);
+  font-weight: 800;
+  letter-spacing: .12em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.hr-customer-heading h2 { color: var(--hr-ink); font-size: clamp(28px, 3.2vw, 44px); line-height: 1.12; letter-spacing: -.04em; }
+.hr-customer-heading > p:last-child { max-width: 620px; margin: 12px auto 0 !important; color: var(--hr-muted); font-size: var(--text-small-size); line-height: 1.6 !important; }
+.hr-logo-slider {
+  position: relative;
+  width: 100%;
+  margin-top: 44px;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+.hr-logo-track { display: flex; width: max-content; gap: 16px; padding-inline: 16px; animation: hr-logo-marquee 42s linear infinite; }
+.hr-logo-card {
+  display: grid;
+  place-items: center;
+  position: relative;
+  flex: 0 0 164px;
+  width: 164px;
+  height: 180px;
+  padding: 28px 22px;
+  overflow: hidden;
+  border: 1px solid var(--hr-border);
+  border-radius: 14px;
+  background: var(--hr-panel);
+  box-shadow: 0 10px 22px rgb(20 35 48 / 12%), 0 2px 5px rgb(20 35 48 / 6%);
+  transition: border-color 180ms ease, transform 280ms cubic-bezier(.2, .8, .2, 1), box-shadow 280ms ease;
+}
+.hr-logo-card:hover,
+.hr-logo-card:focus-visible {
+  z-index: 2;
+  border-color: var(--hr-red);
+  box-shadow: 0 18px 36px rgb(217 45 36 / 22%), 0 0 0 4px rgb(217 45 36 / 10%);
+  outline: none;
+  transform: translateY(-8px) scale(1.06);
+}
+.hr-logo-card img { display: block; width: 100%; height: 100%; object-fit: contain; transition: transform 280ms ease, filter 280ms ease; }
+.hr-logo-card:hover img,
+.hr-logo-card:focus-visible img { filter: drop-shadow(0 8px 9px rgb(15 49 88 / 15%)); transform: scale(1.1); }
+.hr-logo-slider:hover .hr-logo-track,
+.hr-logo-slider:focus-within .hr-logo-track { animation-play-state: paused; }
+@keyframes hr-logo-marquee { from { transform: translateX(0); } to { transform: translateX(calc(-50% - 8px)); } }
+
 .hr-dialog { position: fixed; inset: 0; width: min(640px, calc(100% - 32px)); max-height: 90dvh; margin: auto; padding: 0; overflow: auto; border: 1px solid var(--hr-border); border-radius: 10px; background: var(--hr-panel); color: var(--hr-ink); box-shadow: 0 22px 90px rgb(0 0 0 / 35%); }
 .hr-dialog::backdrop { background: rgb(5 12 22 / 75%); backdrop-filter: blur(5px); }
 .hr-dialog-close { position: absolute; top: 12px; right: 12px; z-index: 1; display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 1px solid rgb(255 255 255 / 50%); border-radius: 50%; background: #101827; color: #fff; }
@@ -231,6 +293,10 @@
   .hr-page-button { min-width: 40px; height: 40px; }
   .hr-result-count { font-size: var(--text-caption-size); }
   .hr-page-size select { min-height: 40px; }
+  .hr-customers { padding-block: 64px 70px; }
+  .hr-logo-slider { margin-top: 34px; }
+  .hr-logo-track { gap: 12px; padding-inline: 12px; animation-duration: 34s; }
+  .hr-logo-card { flex-basis: 142px; width: 142px; height: 148px; padding: 24px 14px; }
   .hr-dialog-image { height: 190px; }
   .hr-dialog-body { padding: 22px; }
   .hr-dialog-body > h2 { font-size: 25px; }
@@ -241,4 +307,5 @@
   .huawei-reference-page *,
   .huawei-reference-page *::before,
   .huawei-reference-page *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .hr-logo-track { animation: none !important; }
 }

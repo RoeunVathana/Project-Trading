@@ -5,9 +5,28 @@ import { downloadHuaweiLedger } from "./exportHuaweiLedger";
 import "./ReferenceHuawei.css";
 
 const imageUrl = (name) => `${import.meta.env.BASE_URL}moreAccssories/${encodeURIComponent(name)}`;
+const logoUrl = (name) => `${import.meta.env.BASE_URL}logoCHINT/${encodeURIComponent(name)}`;
 const emptyFilters = { search: "", voltage: "", sector: "", region: "" };
 const sectors = [...new Set(huaweiReferences.map((project) => project.sector))];
 const regions = [...new Set(huaweiReferences.map((project) => project.region))];
+const customerLogos = [
+  "AES logo.svg",
+  "ARCHETYPE GROUP - LOGO.png",
+  "ATE Logo.png",
+  "DBD Engineering LOGO.png",
+  "EDC - Logo.png",
+  "EMC - Logo.png",
+  "GREEN POWER LOGO-01-01.png",
+  "KSR Logo.JPG",
+  "Logo - EGE.png",
+  "Logo - Master MEP.jpg",
+  "Logo - Meng Brother.jpg",
+  "Logo - SOMA Energy.png",
+  "MAUSO - Logo.png",
+  "Mekong Land - Logo.png",
+  "MVEs Logo.JPG",
+  "PATtech - Logo.png",
+];
 
 const Icon = ({ name }) => {
   const shapes = {
@@ -41,6 +60,29 @@ const FilterSelect = ({ label, value, options, onChange }) => (
     <Icon name="down" />
   </label>
 );
+
+const CustomerLogoSlider = () => {
+  const logoTrack = [...customerLogos, ...customerLogos];
+
+  return (
+    <section className="hr-customers" aria-labelledby="hr-customers-title">
+      <div className="hr-container hr-customer-heading">
+        <p className="hr-customer-eyebrow">Our Customers</p>
+        <h2 id="hr-customers-title">Trusted by Our Customers</h2>
+        <p>Contractors, developers and engineering firms that rely on SchneiTec Trading for their projects.</p>
+      </div>
+      <div className="hr-logo-slider" aria-label="Customer logos">
+        <div className="hr-logo-track">
+          {logoTrack.map((logo, index) => (
+            <div className="hr-logo-card" key={`${logo}-${index}`} aria-hidden={index >= customerLogos.length}>
+              <img src={logoUrl(logo)} alt={index < customerLogos.length ? logo.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ") : ""} loading="lazy" decoding="async" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 const ReferenceHuawei = () => {
   const [filters, setFilters] = useState(emptyFilters);
@@ -172,6 +214,8 @@ const ReferenceHuawei = () => {
           <label className="hr-page-size"><span className="hr-sr-only">Projects per page</span><select aria-label="Projects per page" value={pageSize} onChange={(event) => { setPageSize(Number(event.target.value)); setPage(1); }}>{[9, 6, 3].map((size) => <option key={size} value={size}>{size} per page</option>)}</select></label>
         </nav>
       </div>
+
+      <CustomerLogoSlider />
 
       <dialog className="hr-dialog" ref={dialogRef} aria-labelledby="hr-dialog-title" onCancel={() => setSelectedProject(null)} onClick={(event) => {
         if (event.target !== event.currentTarget) return;

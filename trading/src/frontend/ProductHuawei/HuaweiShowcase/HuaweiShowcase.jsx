@@ -26,7 +26,7 @@ const publicAsset = (folder, fileName) => (
 );
 
 const smartGuardAssets = {
-  hero: publicAsset("smartguard", "sec2_new_bgi.png"),
+  hero: publicAsset("iconNavbar", "smartguard-63a-s0-aus0.png"),
   allocation: publicAsset("smartguard", "sec3_product_bg_pc.png"),
   cards: [
     publicAsset("smartguard", "home.jpg"),

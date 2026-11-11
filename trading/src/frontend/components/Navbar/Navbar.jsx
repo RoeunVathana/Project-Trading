@@ -627,8 +627,8 @@ const Navbar = () => {
           {renderDropdown("about", "About Us", (
             <div className="nav-tree-menu">
               <div className="nav-tree-menu__links">
-                <Link to="/about?profile=trd" onClick={closeMenu}>Profile Company SchneiTec Trading</Link>
-                <Link to="/about?profile=man" onClick={closeMenu}>Profile Company Manufacturing</Link>
+                <Link to="/profile-company-trading" onClick={closeMenu}>Profile Company SchneiTec Trading</Link>
+                <Link to="/profile-company-manufacturing" onClick={closeMenu}>Profile Company Manufacturing</Link>
               </div>
             </div>
           ))}

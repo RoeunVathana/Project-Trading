@@ -152,6 +152,155 @@
 .chint-project-grid.is-list .chint-card-copy h3 { font-size: 20px; }
 .chint-project-grid.is-list .chint-card-specs { max-width: 620px; }
 
+.chint-customers {
+  padding-block: 86px 92px;
+  overflow: hidden;
+  background: var(--chint-tint);
+  color: var(--chint-ink);
+}
+
+.chint-customer-heading {
+  max-width: 680px;
+  text-align: center;
+}
+
+.chint-customer-eyebrow {
+  display: inline-flex;
+  margin-bottom: 14px !important;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #00a95c 9%, transparent);
+  color: #009b57;
+  font-size: var(--text-caption-size);
+  font-weight: 800;
+  letter-spacing: .12em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.chint-customer-heading h2 {
+  color: var(--chint-ink);
+  font-size: clamp(28px, 3.2vw, 44px);
+  line-height: 1.12;
+  letter-spacing: -.04em;
+}
+
+.chint-customer-heading > p:last-child {
+  max-width: 620px;
+  margin: 12px auto 0 !important;
+  color: var(--chint-muted);
+  font-size: var(--text-small-size);
+  line-height: 1.6 !important;
+}
+
+.chint-logo-slider {
+  position: relative;
+  width: 100%;
+  margin-top: 44px;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+
+.chint-logo-track {
+  display: flex;
+  width: max-content;
+  gap: 16px;
+  padding-inline: 16px;
+  animation: chint-logo-marquee 42s linear infinite;
+}
+
+.chint-logo-card {
+  display: grid;
+  place-items: center;
+  position: relative;
+  isolation: isolate;
+  flex: 0 0 164px;
+  width: 164px;
+  height: 180px;
+  padding: 28px 22px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  background:
+    linear-gradient(var(--chint-panel), var(--chint-panel)) padding-box,
+    linear-gradient(135deg, var(--chint-line), var(--chint-line)) border-box;
+  box-shadow: 0 10px 22px rgb(26 43 64 / 12%), 0 2px 5px rgb(26 43 64 / 6%);
+  transition: transform 280ms cubic-bezier(.2, .8, .2, 1), box-shadow 280ms ease, background 280ms ease;
+}
+
+.chint-logo-card::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgb(37 126 238 / 18%), transparent 48%, rgb(0 169 92 / 12%));
+  content: "";
+  opacity: 0;
+  transition: opacity 280ms ease;
+}
+
+.chint-logo-card::after {
+  position: absolute;
+  top: -45%;
+  left: -35%;
+  width: 36%;
+  height: 190%;
+  z-index: 2;
+  background: linear-gradient(105deg, transparent, rgb(255 255 255 / 55%), transparent);
+  content: "";
+  pointer-events: none;
+  transform: translateX(-220%) rotate(12deg);
+}
+
+.chint-logo-card:hover,
+.chint-logo-card:focus-visible {
+  z-index: 2;
+  background:
+    linear-gradient(var(--chint-panel), var(--chint-panel)) padding-box,
+    linear-gradient(135deg, #2887f3, #00a95c) border-box;
+  box-shadow: 0 20px 42px rgb(28 91 168 / 25%), 0 0 0 5px rgb(40 135 243 / 11%);
+  outline: none;
+  transform: translateY(-8px) scale(1.07);
+}
+
+.chint-logo-card:hover::before,
+.chint-logo-card:focus-visible::before {
+  opacity: 1;
+}
+
+.chint-logo-card:hover::after,
+.chint-logo-card:focus-visible::after {
+  transition: transform 700ms cubic-bezier(.2, .8, .2, 1);
+  transform: translateX(560%) rotate(12deg);
+}
+
+.chint-logo-card img {
+  display: block;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 280ms cubic-bezier(.2, .8, .2, 1), filter 280ms ease;
+}
+
+.chint-logo-card:hover img,
+.chint-logo-card:focus-visible img {
+  filter: drop-shadow(0 8px 9px rgb(15 49 88 / 15%));
+  transform: scale(1.1);
+}
+
+.chint-logo-slider:hover .chint-logo-track,
+.chint-logo-slider:focus-within .chint-logo-track {
+  animation-play-state: paused;
+}
+
+@keyframes chint-logo-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-50% - 8px)); }
+}
+
 .chint-hubs { min-height: 600px; padding-block: clamp(90px, 14vw, 160px); background: #10182b; color: #fff; }
 .chint-hubs-copy { max-width: 480px; margin-left: 9%; }
 .chint-hubs h2 { color: #fff; font-size: clamp(28px, 2.7vw, 40px); line-height: 1.2; letter-spacing: -.03em; }
@@ -260,6 +409,10 @@
   .chint-project-grid.is-list .chint-card-copy { padding: 22px; }
   .chint-load-more { margin-top: 32px; }
   .chint-load-more .chint-button { width: 100%; min-width: 0; }
+  .chint-customers { padding-block: 64px 70px; }
+  .chint-logo-slider { margin-top: 34px; }
+  .chint-logo-track { gap: 12px; padding-inline: 12px; animation-duration: 34s; }
+  .chint-logo-card { flex-basis: 142px; width: 142px; height: 148px; padding: 24px 14px; }
   .chint-hubs { min-height: 0; padding-block: 70px; }
   .chint-hubs-copy { margin-left: 0; }
   .chint-hubs h2 { font-size: 29px; }
@@ -274,6 +427,7 @@
   .chint-reference-page *,
   .chint-reference-page *::before,
   .chint-reference-page *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+  .chint-logo-track { animation: none !important; }
 }
 
 @media print {

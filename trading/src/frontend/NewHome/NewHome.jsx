@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../components/ThemeContext";
 import "./NewHome.css";
@@ -9,18 +9,21 @@ const heroSlides = [
     title: "CHINT First 1000kV/1000MVA UHV-AC Transformer Passed All Type & Routine Tests in One Attempt",
     description: "Powering reliable infrastructure with smarter, safer and more efficient electrical solutions.",
     image: "/Chint/499478832_1208686280604421_1108528605282731678_n.jpg",
+    video: "/video/Comfirm.mp4",
   },
   {
     label: "SMART ENERGY",
     title: "Building a More Connected and Sustainable Energy Future",
     description: "Discover integrated solutions for homes, businesses, utilities and the industries that keep communities moving.",
     image: "/SmartEnergy/home.jpg",
+    video: "/video/optimized_video_showroom.mp4",
   },
   {
     label: "PRODUCT SPOTLIGHT",
     title: "Reliable Power Distribution for Every Critical Application",
     description: "From low-voltage protection to intelligent monitoring, our solutions help keep power working when it matters most.",
     image: "/Chint/499703606_1208686037271112_6262228968733182399_n.jpg",
+    video: "/video/Comfirm.mp4",
   },
 ];
 
@@ -155,14 +158,6 @@ const NewHome = () => {
   const [activeSlide, setActiveSlide] = useState(0);
   const { theme } = useTheme();
 
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setActiveSlide((current) => (current + 1) % heroSlides.length);
-    }, 7000);
-
-    return () => window.clearInterval(timer);
-  }, []);
-
   const moveSlide = (direction) => {
     setActiveSlide((current) => (current + direction + heroSlides.length) % heroSlides.length);
   };
@@ -175,15 +170,16 @@ const NewHome = () => {
         <div className="new-home-hero__background" key={slide.image} style={{ backgroundImage: `url("${slide.image}")` }} />
         <video
           className="new-home-hero__video"
+          key={slide.video}
           autoPlay
           muted
-          loop
           playsInline
-          preload="metadata"
+          preload="auto"
           poster={slide.image}
           aria-hidden="true"
+          onEnded={() => setActiveSlide((current) => (current + 1) % heroSlides.length)}
         >
-          <source src="/video/optimized_video_showroom.mp4" type="video/mp4" />
+          <source src={slide.video} type="video/mp4" />
         </video>
         <div className="new-home-hero__overlay" aria-hidden="true" />
         <div className="new-home-container new-home-hero__inner">

@@ -12,7 +12,7 @@ const smartEnergyAsset = (fileName) => (
 );
 
 const HERO_BACKGROUND_IMAGE = smartEnergyAsset("easily.jpg");
-const HERO_PRODUCT_IMAGE = smartEnergyAsset("sec-1.jpg");
+const HERO_PRODUCT_IMAGE = `${import.meta.env.BASE_URL}coverPage/SmartGuard.png`;
 const DARK_STORY_IMAGE = smartEnergyAsset("sec-1.jpg");
 const FINAL_STORY_IMAGE = smartEnergyAsset("home.jpg");
 const NAVBAR_PRODUCT_IMAGE = getHuaweiNavbarImage("smart-energy-controller");
@@ -74,12 +74,10 @@ const SmartEnergyController = () => {
         const images = (Array.isArray(imageRows) ? imageRows : [])
           .filter((image) => Number(image.productId) === Number(productId))
           .sort((left, right) => Number(left.displayOrder || 0) - Number(right.displayOrder || 0));
-        const primaryImage = images.find((image) => image.isPrimary) || images[0];
-
         setProduct({
           ...productRow,
           category: getCategoryName(productRow, Array.isArray(categoryRows) ? categoryRows : []),
-          image: toMediaUrl(productRow.baseImageUrl || productRow.base_image_url || primaryImage?.imageUrl) || HERO_PRODUCT_IMAGE || NAVBAR_PRODUCT_IMAGE,
+          image: HERO_PRODUCT_IMAGE,
           images: images.map((image) => ({ ...image, imageUrl: toMediaUrl(image.imageUrl) })),
         });
       } catch (loadError) {

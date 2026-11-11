@@ -12,7 +12,7 @@ const smartModuleAsset = (fileName) => (
 );
 
 const HERO_BACKGROUND_IMAGE = smartModuleAsset("controller2.png");
-const HERO_PRODUCT_IMAGE = smartModuleAsset("product_info2.jpg");
+const HERO_PRODUCT_IMAGE = `${import.meta.env.BASE_URL}iconNavbar/merc-600w-pa0.png`;
 const STORY_ENERGY_IMAGE = smartModuleAsset("product_info_sec2_bg.jpg");
 const STORY_PANELS_IMAGE = smartModuleAsset("product_info1.jpg");
 const STORY_TEMPERATURE_IMAGE = smartModuleAsset("product_info5.jpg");

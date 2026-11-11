@@ -1,6 +1,10 @@
 const encode = new TextEncoder();
-const xml = (value) => String(value ?? "")
-  .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, "")
+const xml = (value) => [...String(value ?? "")]
+  .filter((character) => {
+    const code = character.charCodeAt(0);
+    return code === 0x09 || code === 0x0a || code === 0x0d || code > 0x1f;
+  })
+  .join("")
   .replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[character]);
 
 const crc32 = (bytes) => {

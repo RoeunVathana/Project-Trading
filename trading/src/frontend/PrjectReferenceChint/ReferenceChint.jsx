@@ -4,7 +4,27 @@ import { downloadReferenceDossier } from "./referenceDossier";
 import "./ReferenceChint.css";
 
 const imageUrl = (name) => `${import.meta.env.BASE_URL}moreAccssories/${encodeURIComponent(name)}`;
+const logoUrl = (name) => `${import.meta.env.BASE_URL}logoCHINT/${encodeURIComponent(name)}`;
 const PAGE_SIZE = 6;
+
+const customerLogos = [
+  "AES logo.svg",
+  "ARCHETYPE GROUP - LOGO.png",
+  "ATE Logo.png",
+  "DBD Engineering LOGO.png",
+  "EDC - Logo.png",
+  "EMC - Logo.png",
+  "GREEN POWER LOGO-01-01.png",
+  "KSR Logo.JPG",
+  "Logo - EGE.png",
+  "Logo - Master MEP.jpg",
+  "Logo - Meng Brother.jpg",
+  "Logo - SOMA Energy.png",
+  "MAUSO - Logo.png",
+  "Mekong Land - Logo.png",
+  "MVEs Logo.JPG",
+  "PATtech - Logo.png",
+];
 
 // Reference content from the supplied design. Photography comes from the local image library.
 const featuredProject = {
@@ -100,6 +120,29 @@ const FilterSelect = ({ label, value, options, onChange }) => (
     <Icon name="down" />
   </label>
 );
+
+const CustomerLogoSlider = () => {
+  const logoTrack = [...customerLogos, ...customerLogos];
+
+  return (
+    <section className="chint-customers" aria-labelledby="chint-customers-title">
+      <div className="chint-container chint-customer-heading">
+        <p className="chint-customer-eyebrow">Our Customers</p>
+        <h2 id="chint-customers-title">Trusted by Our Customers</h2>
+        <p>Contractors, developers and engineering firms that rely on SchneiTec Trading for their projects.</p>
+      </div>
+      <div className="chint-logo-slider" aria-label="Customer logos">
+        <div className="chint-logo-track">
+          {logoTrack.map((logo, index) => (
+            <div className="chint-logo-card" key={`${logo}-${index}`} aria-hidden={index >= customerLogos.length}>
+              <img src={logoUrl(logo)} alt={index < customerLogos.length ? logo.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ") : ""} loading="lazy" decoding="async" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 const ReferenceChint = () => {
   const [filters, setFilters] = useState({ sector: "all", region: "all", scale: "all", year: "all" });
@@ -202,6 +245,8 @@ const ReferenceChint = () => {
           {remaining > 0 && <div className="chint-load-more"><button className="chint-button chint-button--outline" type="button" onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>Load More References ({remaining.toLocaleString()} remaining)</button></div>}
         </div>
       </section>
+
+      <CustomerLogoSlider />
 
       <section className="chint-hubs" aria-labelledby="chint-hubs-title">
         <div className="chint-container"><div className="chint-hubs-copy">

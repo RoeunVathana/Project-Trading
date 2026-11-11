@@ -10,9 +10,11 @@ const NewPreference = lazy(() => import("./frontend/NewProjectRreference/NewPref
 const ReferenceChint = lazy(() => import("./frontend/PrjectReferenceChint/ReferenceChint"));
 const ReferenceHuawei = lazy(() => import("./frontend/ProjectReferenceHuawei/ReferenceHuawei"));
 const AboutPage = lazy(() => import("./frontend/AboutPage/AboutPage"));
+const ProfileCompanyTrading = lazy(() => import("./frontend/ProfileCompanyTrading/ProfileCompanyTrading"));
+const ProfileCompanyMufacturing = lazy(() => import("./frontend/ProfileCompanyMufacturing/ProfileCompanyMufacturing"));
 const ContactPage = lazy(() => import("./frontend/ContactPage/ContactPage"));
 const CompliancePage = lazy(() => import("./frontend/CompliancePage/CompliancePage"));
-const GetStartedPage = lazy(() => import("./frontend/GetStartedPage/GetStartedPage"));
+const HomePage = lazy(() => import("./frontend/HomePage/HomePage"));
 const CapabilitiesPage = lazy(() => import("./frontend/CapabilitiesPage/CapabilitiesPage"));
 const ResourcesPage = lazy(() => import("./frontend/ResourcesPage/ResourcesPage"));
 const ProductDetail = lazy(() => import("./frontend/ProductPage/ProductDetail"));
@@ -29,7 +31,6 @@ const SmartGuard = lazy(() => import("./frontend/ProductHuawei/SmartGuard/SmartG
 const Residentail = lazy(() => import("./frontend/ProductHuawei/Residentail/Residentail"));
 const HuaweiShowcase = lazy(() => import("./frontend/ProductHuawei/HuaweiShowcase/HuaweiShowcase"));
 const LowVoltage = lazy(() => import("./frontend/Low-voltage/Low-voltage"));
-const PowerTransmissionandDistribution = lazy(() => import("./frontend/PowerTransmissionandDistribution/PowerTransmissionandDistribution"));
 const InstrumentsandMeters = lazy(() => import("./frontend/InstrumentsandMeters/InstrumentsandMeters"));
 const CommercialIndustrialSolutions = lazy(() => import("./frontend/Commercial&IndustrialSolutions/CommercialIndustrialSolutions"));
 import DashboardLayout from "./dashboard/components/Layout";
@@ -113,7 +114,7 @@ const App = () => {
           <Route path="/distribution" element={<DistributionPage />} />
 
           <Route path="/low-voltage" element={<LowVoltage />} />
-          <Route path="/power-transmission-distribution" element={<PowerTransmissionandDistribution />} />
+          <Route path="/power-transmission-distribution" element={<AboutPage />} />
           <Route path="/instruments-and-meters" element={<InstrumentsandMeters />} />
           <Route path="/commercial-industrial-solutions" element={<CommercialIndustrialSolutions />} />
 
@@ -122,12 +123,14 @@ const App = () => {
           <Route path="/reference-huawei" element={<ReferenceHuawei />} />
 
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/profile-company-trading" element={<ProfileCompanyTrading />} />
+          <Route path="/profile-company-manufacturing" element={<ProfileCompanyMufacturing />} />
 
           <Route path="/contact" element={<ContactPage />} />
 
           <Route path="/compliance" element={<CompliancePage />} />
 
-          <Route path="/get-started" element={<GetStartedPage />} />
+          <Route path="/get-started" element={<HomePage />} />
 
           <Route path="/capabilities/5" element={<CapabilitiesPage />} />
 
