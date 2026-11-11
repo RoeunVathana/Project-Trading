@@ -15,9 +15,9 @@
   --nav-panel: var(--theme-surface-1);
   --nav-panel-raised: var(--theme-surface-1);
   --nav-panel-muted: var(--theme-surface-1);
-  --nav-text: #b8c6cb;
+  --nav-text: #c5d3db;
   --nav-text-strong: #f1f8f8;
-  --nav-text-muted: #7f969d;
+  --nav-text-muted: #a6bac4;
   --nav-border: rgba(180, 212, 218, 0.14);
   --nav-border-strong: rgba(180, 212, 218, 0.24);
   --nav-accent: #4aa5ff;
@@ -61,9 +61,9 @@
   --nav-panel: var(--theme-surface-1);
   --nav-panel-raised: var(--theme-surface-1);
   --nav-panel-muted: var(--theme-surface-1);
-  --nav-text: #526875;
+  --nav-text: #405766;
   --nav-text-strong: #122b38;
-  --nav-text-muted: #738892;
+  --nav-text-muted: #5d7281;
   --nav-border: rgba(25, 71, 91, 0.14);
   --nav-border-strong: rgba(25, 71, 91, 0.24);
   --nav-accent: #0876d8;
@@ -291,10 +291,10 @@
   color: var(--nav-text-muted);
   font: inherit;
   font-family: var(--font-family);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.15em;
-  line-height: 1;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
   text-align: left;
   cursor: pointer;
   transition: color var(--motion-standard), background-color var(--motion-standard);
@@ -340,9 +340,9 @@
   padding: 0 9px;
   border-radius: 7px;
   color: var(--nav-text);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.45;
   text-decoration: none;
 }
 
@@ -431,10 +431,10 @@
   gap: 8px;
   margin: 0 0 8px;
   color: var(--nav-text-muted);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.15em;
-  line-height: 1;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
 }
 
 .nav-menu-eyebrow::before {
@@ -660,10 +660,10 @@
   padding-top: 9px;
   border-top: 1px solid var(--nav-border);
   color: var(--nav-text-muted);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.025em;
-  line-height: 1.45;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.55;
 }
 
 @media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
@@ -1305,7 +1305,7 @@
     min-height: 52px;
     padding: 0 10px;
     border-radius: 13px;
-    font-size: 11px;
+    font-size: 13px;
   }
 
   .theme-toggle,
@@ -1359,7 +1359,7 @@
   }
 
   .product-mega-heading small {
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .navbar-menu .product-mega-product-link,
@@ -1393,7 +1393,7 @@
 
   .navbar-menu > a.mobile-get-started {
     padding: 0 8px;
-    font-size: 10px;
+    font-size: 13px;
   }
 
   .theme-toggle,
@@ -1515,7 +1515,7 @@
 
   .navbar-menu > a.mobile-get-started {
     padding: 0 7px;
-    font-size: 10px;
+    font-size: 13px;
   }
 }
 
@@ -1717,14 +1717,14 @@
 .navbar-menu .product-mega-product-link.has-image strong {
   color: currentColor;
   font-size: 13px;
-  font-weight: 560;
-  line-height: 1.3;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .navbar-menu .product-mega-product-link.has-image small {
   color: var(--nav-text-muted);
   font-size: 12px;
-  line-height: 1.3;
+  line-height: 1.4;
 }
 
 @media (max-width: 1199px) {

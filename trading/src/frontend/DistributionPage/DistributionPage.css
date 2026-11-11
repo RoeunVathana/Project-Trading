@@ -80,7 +80,7 @@
 
     color: var(--theme-accent-text);
 
-    font-size: 9px;
+    font-size: var(--text-caption-size);
     font-weight: 700;
 
     letter-spacing: 1px;
@@ -90,7 +90,7 @@
 .distribution-badge span {
     color: var(--theme-accent-text);
 
-    font-size: 9px;
+    font-size: var(--text-caption-size);
 }
 
 
@@ -142,7 +142,7 @@
 
     border-radius: 4px;
 
-    font-size: 11px;
+    font-size: var(--text-control-size);
     font-weight: 600;
 
     cursor: pointer;
@@ -233,7 +233,7 @@
 
     color: var(--theme-text-muted);
 
-    font-size: 11px;
+    font-size: var(--text-small-size);
     line-height: 1.5;
 }
 
@@ -407,7 +407,7 @@
     place-items: center;
     padding: 24px;
     color: var(--theme-text-muted);
-    font-size: 11px;
+    font-size: var(--text-caption-size);
     line-height: 1.6;
     text-align: center;
 }
@@ -435,7 +435,7 @@
 
     color: var(--theme-accent-text);
 
-    font-size: 9px;
+    font-size: var(--text-caption-size);
     font-weight: 700;
     letter-spacing: 0.7px;
     white-space: nowrap;
@@ -478,7 +478,7 @@
 
 .customer-process-number {
     color: var(--theme-accent-text);
-    font-size: 10px;
+    font-size: var(--text-caption-size);
     font-weight: 700;
     letter-spacing: 1px;
 }
@@ -492,7 +492,7 @@
 
 .customer-process-copy > span {
     color: var(--theme-text-muted);
-    font-size: 8px;
+    font-size: var(--text-caption-size);
     font-weight: 700;
     letter-spacing: 0.8px;
 }
@@ -503,7 +503,7 @@
     overflow: hidden;
 
     color: var(--theme-text-strong);
-    font-size: 13px;
+    font-size: var(--text-small-size);
     font-weight: 700;
     line-height: 1.3;
     text-overflow: ellipsis;
@@ -516,7 +516,7 @@
     overflow: hidden;
 
     color: var(--theme-text-muted);
-    font-size: 9px;
+    font-size: var(--text-small-size);
     line-height: 1.4;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -534,7 +534,7 @@
 
 .customer-process-node > strong small {
     color: var(--theme-text-muted);
-    font-size: 9px;
+    font-size: var(--text-caption-size);
     font-weight: 400;
 }
 
@@ -578,7 +578,7 @@
     border-radius: 10px;
 
     color: var(--theme-text-muted);
-    font-size: 11px;
+    font-size: var(--text-caption-size);
     line-height: 1.6;
     text-align: center;
 }
@@ -607,7 +607,7 @@
 
     color: var(--theme-text-muted);
 
-    font-size: 8px;
+    font-size: var(--text-caption-size);
 
     text-align: right;
 }
@@ -757,7 +757,7 @@
 
     color: var(--theme-accent-text);
 
-    font-size: 8px;
+    font-size: var(--text-caption-size);
     font-weight: 700;
 
     letter-spacing: 1px;
@@ -775,7 +775,7 @@
 
     color: var(--theme-text-strong);
 
-    font-size: 10px;
+    font-size: var(--text-caption-size);
 }
 
 
@@ -852,7 +852,7 @@
 
     background: transparent;
 
-    font-size: 10px;
+    font-size: var(--text-control-size);
     font-weight: 600;
 
     cursor: pointer;
@@ -947,7 +947,7 @@
 
 
     .distribution-hero p {
-        font-size: 12px;
+        font-size: var(--text-small-size);
     }
 
 
@@ -1000,7 +1000,7 @@
 
     .distribution-section-header p,
     .inventory-header p {
-        font-size: 10px;
+        font-size: var(--text-small-size);
     }
 
 
@@ -1098,7 +1098,7 @@
 
 
     .distribution-badge {
-        font-size: 8px;
+        font-size: var(--text-caption-size);
     }
 
 
@@ -1108,7 +1108,7 @@
 
 
     .distribution-hero p {
-        font-size: 11px;
+        font-size: var(--text-small-size);
     }
 
 

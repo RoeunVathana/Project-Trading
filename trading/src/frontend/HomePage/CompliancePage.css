@@ -50,7 +50,7 @@
 .lifecycle-label {
     margin-bottom: 14px;
     color: var(--theme-accent-text);
-    font-size: 13px;
+    font-size: var(--text-small-size);
     font-weight: 700;
     letter-spacing: 2px;
 }
@@ -162,7 +162,7 @@
     margin: 22px 0 15px;
 
     color: var(--theme-accent-text);
-    font-size: 12px;
+    font-size: var(--text-caption-size);
     font-weight: 700;
     letter-spacing: 1px;
 }
@@ -245,13 +245,13 @@
     background: #3887fa;
 
     color: var(--theme-text-strong);
-    font-size: 13px;
+    font-size: var(--text-small-size);
     font-weight: 700;
 }
 
 .lifecycle-period {
     color: var(--theme-text-primary);
-    font-size: 11px;
+    font-size: var(--text-caption-size);
     font-weight: 700;
     letter-spacing: 0.7px;
 }
@@ -511,7 +511,7 @@
 
     .compliance-label,
     .lifecycle-label {
-        font-size: 11px;
+        font-size: var(--text-caption-size);
         letter-spacing: 1.5px;
     }
 
@@ -541,7 +541,7 @@
     }
 
     .compliance-card h3 {
-        font-size: 12px;
+        font-size: var(--text-caption-size);
     }
 
     .compliance-card p {
@@ -602,7 +602,7 @@
         min-height: 48px;
         padding: 0 15px;
 
-        font-size: 13px;
+        font-size: var(--text-control-size);
         letter-spacing: 0.7px;
     }
 }
@@ -647,7 +647,7 @@
     }
 
     .configure-button {
-        font-size: 12px;
+        font-size: var(--text-control-size);
     }
 }
 
@@ -675,10 +675,10 @@
     }
 
     .compliance-card p {
-        font-size: 13px;
+        font-size: var(--text-small-size);
     }
 
     .lifecycle-card p {
-        font-size: 13px;
+        font-size: var(--text-small-size);
     }
 }

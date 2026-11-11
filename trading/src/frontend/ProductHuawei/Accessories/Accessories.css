@@ -239,7 +239,7 @@
   align-items: center;
   gap: 10px;
   color: color-mix(in srgb, var(--accessories-hero-ink) 58%, transparent);
-  font-size: 11px;
+  font-size: var(--text-caption-size);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -264,7 +264,7 @@
 .accessories-kicker {
   margin: 0 0 16px;
   color: var(--accessories-red);
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -475,7 +475,7 @@
 .accessories-footnote {
   margin: 26px 0 0;
   color: var(--accessories-muted);
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   line-height: 1.55;
   text-align: center;
 }
@@ -571,7 +571,7 @@
 
   .accessories-hero-features {
     gap: 10px 14px;
-    font-size: 13px;
+    font-size: var(--text-small-size);
   }
 
   .accessories-hero-features i {

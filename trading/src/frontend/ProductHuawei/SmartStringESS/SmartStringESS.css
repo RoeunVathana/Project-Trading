@@ -8,7 +8,7 @@
   overflow: hidden;
   background: var(--theme-surface-0, #000);
   color: var(--smart-string-text);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -153,7 +153,7 @@
   padding-top: 30px;
   padding-bottom: 42px;
   color: var(--smart-string-text-muted);
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   line-height: 1.5;
 }
 
@@ -332,7 +332,7 @@
   max-width: 570px;
   margin-top: 30px;
   color: var(--smart-string-text-muted);
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   line-height: 1.45;
 }
 
@@ -624,7 +624,7 @@
   }
 
   .smart-string-metrics span {
-    font-size: 13px;
+    font-size: var(--text-small-size);
   }
 
   .smart-string-protection-grid {

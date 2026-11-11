@@ -3,7 +3,7 @@ import { Navigate, Route, Routes, useParams, useSearchParams } from "react-route
 
 import Layout from "./frontend/components/Layout";
 
-const HomePage = lazy(() => import("./frontend/HomePage/HomePage"));
+const NewHome = lazy(() => import("./frontend/NewHomePage/NewHome"));
 const ProductPage = lazy(() => import("./frontend/ProductPage/ProductPage"));
 const DistributionPage = lazy(() => import("./frontend/DistributionPage/DistributionPage"));
 const NewPreference = lazy(() => import("./frontend/NewProjectRreference/NewPreference"));
@@ -93,7 +93,7 @@ const App = () => {
         </Route>
 
         <Route element={<Layout />}>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<NewHome />} />
 
           <Route path="/product" element={<ProductRoute />} />
           <Route

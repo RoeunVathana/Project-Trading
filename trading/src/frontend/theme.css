@@ -1,12 +1,15 @@
 :root {
   color-scheme: dark;
   --font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-display: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: var(--font-family);
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --text-body-size: 16px;
-  --text-body-leading: 1.62;
+  --text-caption-size: 0.75rem;
+  --text-small-size: 0.875rem;
+  --text-control-size: 0.875rem;
+  --text-body-leading: 1.65;
   --text-copy-measure: 68ch;
-  --text-heading-tracking: -0.035em;
+  --text-heading-tracking: -0.028em;
   --motion-fast: 160ms cubic-bezier(0.22, 1, 0.36, 1);
   --motion-standard: 240ms cubic-bezier(0.22, 1, 0.36, 1);
   --motion-page: 640ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -16,9 +19,9 @@
   --theme-home-background: #071512;
   --theme-surface-2: #1b1b1b;
   --theme-surface-3: #252525;
-  --theme-text-strong: #f5f5f5;
-  --theme-text-primary: #d6d6d6;
-  --theme-text-muted: #a3a3a3;
+  --theme-text-strong: #f3f6fa;
+  --theme-text-primary: #d3dde6;
+  --theme-text-muted: #a8b8c7;
   --theme-accent-text: #72b0ff;
   --theme-success-text: #3cdaa0;
   --theme-cyan-text: #00d9e8;
@@ -36,9 +39,9 @@
   --theme-home-background: #ffffff;
   --theme-surface-2: #edf2f8;
   --theme-surface-3: #e3ebf4;
-  --theme-text-strong: #152238;
-  --theme-text-primary: #34445b;
-  --theme-text-muted: #5b6b80;
+  --theme-text-strong: #17283b;
+  --theme-text-primary: #35485e;
+  --theme-text-muted: #53677c;
   --theme-accent-text: #075bbb;
   --theme-success-text: #007a4b;
   --theme-cyan-text: #007783;
@@ -63,7 +66,7 @@ body {
   font-family: var(--font-family);
   font-size: var(--text-body-size);
   line-height: var(--text-body-leading);
-  letter-spacing: -0.006em;
+  letter-spacing: 0;
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -75,9 +78,14 @@ body {
 .page-transition :where(h1, h2, h3, h4, h5, h6) {
   margin-block: 0;
   font-family: var(--font-display);
-  font-weight: 720;
+  font-weight: 700;
   letter-spacing: var(--text-heading-tracking);
   text-wrap: balance;
+}
+
+.page-transition :where(h3, h4, h5, h6) {
+  letter-spacing: -0.018em;
+  line-height: 1.35;
 }
 
 .page-transition :where(p, li, dd, dt, figcaption, blockquote) {
@@ -85,7 +93,7 @@ body {
 }
 
 .page-transition :where(p, li) {
-  line-height: 1.62;
+  line-height: var(--text-body-leading);
 }
 
 .page-transition :where(a, button) {
@@ -94,12 +102,22 @@ body {
 }
 
 .page-transition :where(button, [role="button"]) {
-  letter-spacing: -0.005em;
+  letter-spacing: 0;
 }
 
 .page-transition :where(input, select, textarea) {
-  font-size: 0.95rem;
-  line-height: 1.4;
+  font-size: var(--text-control-size);
+  line-height: 1.5;
+}
+
+.page-transition :where(input, textarea)::placeholder {
+  color: var(--theme-text-muted);
+  opacity: 1;
+}
+
+.page-transition :where([class*="metric"], [class*="stats"], [class*="kpi"]) :where(strong, dd),
+.page-transition :where(table, [class*="specs"], [class*="pagination"]) {
+  font-variant-numeric: tabular-nums;
 }
 
 .page-transition :where(.eyebrow, [class*="-eyebrow"], [class*="-kicker"], [class*="-label"]) {
@@ -112,8 +130,8 @@ body {
 
 @media (max-width: 760px) {
   :root {
-    --text-body-size: 15px;
-    --text-body-leading: 1.58;
+    --text-body-size: 16px;
+    --text-body-leading: 1.6;
     --text-heading-tracking: -0.025em;
   }
 

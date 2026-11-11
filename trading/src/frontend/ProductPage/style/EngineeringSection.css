@@ -44,7 +44,7 @@
 
     color: var(--theme-accent-text);
 
-    font-size: 10px;
+    font-size: var(--text-caption-size);
     font-weight: 700;
 
     letter-spacing: 1.2px;
@@ -108,7 +108,7 @@
 
     font-family: inherit;
 
-    font-size: 11px;
+    font-size: var(--text-control-size);
     font-weight: 700;
 
     cursor: pointer;
@@ -131,7 +131,7 @@
 
     color: var(--theme-text-muted);
 
-    font-size: 10px;
+    font-size: var(--text-caption-size);
 }
 
 
@@ -200,7 +200,7 @@
 
     font-family: inherit;
 
-    font-size: 10px;
+    font-size: var(--text-control-size);
     font-weight: 700;
 
     cursor: pointer;
@@ -293,7 +293,7 @@
     .engineering-consultation p {
         width: 100%;
 
-        font-size: 13px;
+        font-size: var(--text-small-size);
     }
 
     .engineering-consultation-action {
@@ -302,7 +302,7 @@
 
     .engineering-primary-button {
         width: 165px;
-        font-size: 11px;
+        font-size: var(--text-control-size);
     }
 
     .structural-audit {
@@ -319,7 +319,7 @@
 
     .structural-audit p {
         width: 100%;
-        font-size: 13px;
+        font-size: var(--text-small-size);
     }
 }
 
@@ -343,7 +343,7 @@
     }
 
     .engineering-label {
-        font-size: 9px;
+        font-size: var(--text-caption-size);
     }
 
     .engineering-consultation h2 {
@@ -373,11 +373,11 @@
 
         height: 40px;
 
-        font-size: 11px;
+        font-size: var(--text-control-size);
     }
 
     .engineering-consultation-action span {
-        font-size: 10px;
+        font-size: var(--text-caption-size);
     }
 
 
@@ -410,7 +410,7 @@
 
         height: 40px;
 
-        font-size: 11px;
+        font-size: var(--text-control-size);
     }
 }
 
@@ -432,7 +432,7 @@
     }
 
     .engineering-consultation p {
-        font-size: 13px;
+        font-size: var(--text-small-size);
     }
 
     .structural-audit {
@@ -446,7 +446,7 @@
     }
 
     .structural-audit p {
-        font-size: 13px;
+        font-size: var(--text-small-size);
     }
 }
 

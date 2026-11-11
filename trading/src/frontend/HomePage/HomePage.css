@@ -128,7 +128,7 @@
 
     border-left: 3px solid #1680ff;
 
-    font-size: 13px;
+    font-size: var(--text-small-size);
     font-weight: 700;
     letter-spacing: 1.2px;
 
@@ -149,6 +149,11 @@
 
     animation: heroCharLoad 560ms cubic-bezier(0.22, 1, 0.36, 1) var(--char-delay) both;
     will-change: opacity, transform;
+}
+
+.hero-count-word {
+    display: inline-block;
+    white-space: nowrap;
 }
 
 .hero-content h1 {
@@ -245,7 +250,7 @@
 
     color: var(--theme-text-muted);
 
-    font-size: 12px;
+    font-size: var(--text-caption-size);
     font-weight: 600;
     letter-spacing: 0.5px;
 
@@ -289,7 +294,7 @@
 
     color: var(--theme-accent-text);
 
-    font-size: 13px;
+    font-size: var(--text-small-size);
     font-weight: 700;
     letter-spacing: 2px;
 }
@@ -335,7 +340,7 @@
 
     color: var(--theme-text-primary);
 
-    font-size: 13px;
+    font-size: var(--text-small-size);
     font-weight: 500;
     letter-spacing: 0.5px;
 
@@ -438,7 +443,7 @@
 
     color: var(--theme-text-strong);
 
-    font-size: 13px;
+    font-size: var(--text-small-size);
     font-weight: 600;
 }
 
@@ -447,7 +452,7 @@
 
     white-space: nowrap;
 
-    font-size: 12px;
+    font-size: var(--text-caption-size);
     letter-spacing: 0.7px;
 }
 
@@ -480,7 +485,7 @@
 
     color: var(--theme-text-strong);
 
-    font-size: 13px;
+    font-size: var(--text-small-size);
     font-weight: 700;
     letter-spacing: 1px;
 }
@@ -668,7 +673,7 @@
     }
 
     .hero-label {
-        font-size: 11px;
+        font-size: var(--text-caption-size);
         letter-spacing: 0.8px;
     }
 
@@ -694,7 +699,7 @@
     }
 
     .machine-info {
-        font-size: 11px;
+        font-size: var(--text-caption-size);
     }
 
 
@@ -708,7 +713,7 @@
     }
 
     .section-label {
-        font-size: 11px;
+        font-size: var(--text-caption-size);
         letter-spacing: 1.5px;
     }
 
@@ -731,7 +736,7 @@
 
     .hardware-card {
         min-height: 52px;
-        font-size: 13px;
+        font-size: var(--text-small-size);
     }
 
 
@@ -775,7 +780,7 @@
     }
 
     .spec-tag strong {
-        font-size: 12px;
+        font-size: var(--text-caption-size);
     }
 
 
@@ -853,7 +858,7 @@
     }
 
     .hero-label {
-        font-size: 10px;
+        font-size: var(--text-caption-size);
     }
 
     .section-container h2 {
@@ -865,7 +870,7 @@
     }
 
     .hardware-card {
-        font-size: 12px;
+        font-size: var(--text-caption-size);
     }
 
     .spec-content>p {

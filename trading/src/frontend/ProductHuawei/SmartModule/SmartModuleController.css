@@ -2,7 +2,7 @@
   overflow: hidden;
   background: var(--theme-surface-0);
   color: var(--theme-text-strong);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-family);
   transition: background-color 180ms ease, color 180ms ease;
 }
 
@@ -998,7 +998,7 @@
   }
 
   .smart-module-category {
-    font-size: 13px;
+    font-size: var(--text-small-size);
   }
 
   .smart-module-hero-copy h1 {

@@ -134,7 +134,7 @@
 .more-accessories-category {
   margin: 0;
   color: var(--stories-muted);
-  font-size: 13px;
+  font-size: var(--text-small-size);
   line-height: 1.6;
 }
 
@@ -196,7 +196,7 @@
   background: transparent;
   color: var(--stories-muted);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--text-control-size);
   text-align: center;
 }
 
@@ -273,7 +273,7 @@
   padding-block: 0 40px;
   border-bottom: 1px solid var(--stories-border);
   color: var(--stories-muted);
-  font-size: 13px;
+  font-size: var(--text-small-size);
   line-height: 1.6;
 }
 
@@ -367,7 +367,7 @@
   }
 
   .more-accessories-filter {
-    font-size: 13px;
+    font-size: var(--text-small-size);
   }
 
   .more-accessories-results {

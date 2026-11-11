@@ -83,7 +83,7 @@
 .hybrid-ess-kicker {
   margin: 0 0 15px;
   color: var(--ess-accent);
-  font-size: 11px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
 }
 
@@ -162,7 +162,7 @@
 .hybrid-ess-eyebrow {
   margin: 0 0 16px;
   color: rgba(255,255,255,.67);
-  font-size: 11px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
 }
 
@@ -200,7 +200,7 @@
   border-radius: 999px;
   background: rgba(255,255,255,.1);
   color: #fff;
-  font-size: 13px;
+  font-size: var(--text-control-size);
   text-decoration: none;
   backdrop-filter: blur(12px);
   transition: transform 220ms ease, background-color 220ms ease;
@@ -216,7 +216,7 @@
   right: 30px;
   bottom: 30px;
   color: rgba(255,255,255,.55);
-  font-size: 10px;
+  font-size: var(--text-caption-size);
   letter-spacing: .14em;
   text-transform: uppercase;
   writing-mode: vertical-rl;
@@ -314,7 +314,7 @@
   display: block;
   margin-bottom: 22px;
   color: rgba(255,255,255,.6);
-  font-size: 10px;
+  font-size: var(--text-caption-size);
   letter-spacing: .12em;
 }
 
@@ -425,7 +425,7 @@
   bottom: 18px;
   left: 20px;
   color: #fff;
-  font-size: 13px;
+  font-size: var(--text-small-size);
   line-height: 1.5;
   text-shadow: 0 2px 10px rgba(0,0,0,.64);
 }
@@ -586,14 +586,14 @@
 
 .hybrid-ess-mode-grid button strong {
   margin-top: 15px;
-  font-size: 13px;
+  font-size: var(--text-control-size);
   font-weight: 700;
 }
 
 .hybrid-ess-mode-grid button p {
   margin: 10px 0 0;
   color: inherit;
-  font-size: 13px;
+  font-size: var(--text-control-size);
   line-height: 1.5;
 }
 
@@ -651,7 +651,7 @@
 
 .hybrid-ess-inline-stat small {
   color: var(--ess-muted);
-  font-size: 13px;
+  font-size: var(--text-small-size);
 }
 
 .hybrid-ess-install-visual {
@@ -736,7 +736,7 @@
 
 .hybrid-ess-dashboard span {
   color: #c7d4e8;
-  font-size: 11px;
+  font-size: var(--text-caption-size);
 }
 
 .hybrid-ess-dashboard b {
@@ -847,7 +847,7 @@
 .hybrid-ess-recommendation-card p {
   margin: 0;
   color: var(--ess-muted);
-  font-size: 11px;
+  font-size: var(--text-small-size);
   letter-spacing: .01em;
   text-transform: none;
 }
@@ -861,7 +861,7 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--ess-text) 12%, transparent);
   color: var(--ess-text);
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   text-decoration: none;
 }
 
@@ -872,7 +872,7 @@
   gap: 16px;
   margin-top: 34px;
   color: var(--ess-muted);
-  font-size: 12px;
+  font-size: var(--text-caption-size);
 }
 
 .hybrid-ess-recommendation-controls button {
@@ -1068,7 +1068,7 @@
     right: 18px;
     bottom: 16px;
     left: 18px;
-    font-size: 12px;
+    font-size: var(--text-small-size);
   }
 
   .hybrid-ess-section-heading {
@@ -1126,7 +1126,7 @@
   .hybrid-ess-tab-list button,
   .hybrid-ess-tab-layout--reverse .hybrid-ess-tab-list button {
     min-height: 56px;
-    font-size: 13px;
+    font-size: var(--text-control-size);
   }
 
   .hybrid-ess-stat {
@@ -1153,7 +1153,7 @@
   }
 
   .hybrid-ess-mode-grid button p {
-    font-size: 13px;
+    font-size: var(--text-control-size);
   }
 
   .hybrid-ess-split-image {
@@ -1231,7 +1231,7 @@
   .hybrid-ess-selected-recommendation span,
   .hybrid-ess-selected-recommendation p {
     color: var(--ess-muted);
-    font-size: 10px;
+    font-size: var(--text-small-size);
   }
 
   .hybrid-ess-selected-recommendation h3 {

@@ -11,10 +11,10 @@ const readSavedTheme = () => {
       return savedTheme;
     }
 
-    // New visitors start in light mode; an explicit saved choice still wins.
-    return "light";
+    // New visitors start in dark mode; an explicit saved choice still wins.
+    return "dark";
   } catch {
-    return "light";
+    return "dark";
   }
 };
 

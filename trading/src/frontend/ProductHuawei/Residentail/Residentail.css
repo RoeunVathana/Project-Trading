@@ -1,12 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
 .residential-page {
   --residential-accent: #ec1749;
   --residential-gradient: linear-gradient(100deg, #5e94e6 0%, #23c9aa 100%);
   --residential-border: color-mix(in srgb, var(--theme-text-primary, #172333) 13%, transparent);
   background: var(--theme-surface-0, #fff);
   color: var(--theme-text-primary, #172333);
-  font-family: Inter, "Segoe UI", sans-serif;
+  font-family: var(--font-family);
   overflow: hidden;
 }
 
@@ -357,7 +355,7 @@
   display: block;
   margin: 20px 12px 0;
   color: var(--residential-accent);
-  font-size: .72rem;
+  font-size: var(--text-caption-size);
   font-weight: 800;
   letter-spacing: .14em;
   text-transform: uppercase;
@@ -823,7 +821,7 @@
 
   .residential-product-card p {
     margin-top: 18px;
-    font-size: .8rem;
+    font-size: var(--text-small-size);
   }
 
   .residential-feature-panel {

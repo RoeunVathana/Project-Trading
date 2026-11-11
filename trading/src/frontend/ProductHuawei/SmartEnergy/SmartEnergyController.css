@@ -2,7 +2,7 @@
   overflow: hidden;
   background: var(--theme-surface-0);
   color: var(--theme-text-strong);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-family);
 }
 
 :root[data-theme="light"] .smart-energy-page {

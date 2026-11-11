@@ -154,7 +154,7 @@
   border-radius: 4px;
   background: var(--showcase-brand);
   color: #fff;
-  font-size: 11px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
   letter-spacing: 0.04em;
 }
@@ -673,7 +673,7 @@
 
   .showcase-load {
     gap: 8px;
-    font-size: 10px;
+    font-size: var(--text-caption-size);
   }
 
   .showcase-load::before {
@@ -1208,7 +1208,7 @@
 
   .showcase-load {
     gap: 8px;
-    font-size: 10px;
+    font-size: var(--text-caption-size);
   }
 
   .showcase-load::before {
@@ -1564,7 +1564,7 @@
 
   .showcase-category {
     margin-bottom: 10px;
-    font-size: 11px;
+    font-size: var(--text-caption-size);
   }
 
   .showcase-hero h1 {
@@ -1579,7 +1579,7 @@
   .showcase-new-badge {
     min-height: 20px;
     padding: 2px 6px;
-    font-size: 10px;
+    font-size: var(--text-caption-size);
   }
 
   .showcase-card,
@@ -1603,7 +1603,7 @@
   }
 
   .showcase-card-copy p {
-    font-size: 13px;
+    font-size: var(--text-small-size);
     line-height: 1.35;
   }
 

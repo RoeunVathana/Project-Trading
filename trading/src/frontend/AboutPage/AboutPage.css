@@ -59,7 +59,7 @@
   gap: 10px;
   margin: 0;
   color: var(--about-green);
-  font-size: 10px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
   letter-spacing: 2px;
   line-height: 1.5;
@@ -114,7 +114,7 @@
 
 .about-principle-index {
   color: var(--about-green);
-  font-size: 11px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
   letter-spacing: 1px;
 }
@@ -122,7 +122,7 @@
 .about-principles h2 {
   margin: 10px 0 6px;
   color: var(--about-text);
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   font-weight: 750;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -131,7 +131,7 @@
 .about-principles p {
   margin: 0;
   color: var(--about-muted);
-  font-size: 11px;
+  font-size: var(--text-small-size);
   line-height: 1.55;
 }
 
@@ -171,7 +171,7 @@
 
 .about-hero-caption span {
   color: #8ce0b7;
-  font-size: 9px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
   letter-spacing: 1.6px;
 }
@@ -196,7 +196,7 @@
 }
 
 .about-hero-stamp span {
-  font-size: 9px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
   letter-spacing: 1.4px;
 }
@@ -297,7 +297,7 @@
   border: 1px solid rgba(255, 255, 255, 0.32);
   background: rgba(7, 11, 12, 0.72);
   color: #fff;
-  font-size: 11px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
 }
 
@@ -322,7 +322,7 @@
   max-width: 380px;
   margin: 0;
   color: var(--about-muted);
-  font-size: 13px;
+  font-size: var(--text-small-size);
   line-height: 1.65;
 }
 
@@ -436,7 +436,7 @@
   align-items: center;
   gap: 9px;
   color: var(--about-green);
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   font-weight: 850;
   letter-spacing: 1.3px;
 }
@@ -459,7 +459,7 @@
   max-width: 360px;
   margin: 0;
   color: var(--about-muted);
-  font-size: 13px;
+  font-size: var(--text-small-size);
   line-height: 1.7;
 }
 
@@ -509,7 +509,7 @@
   padding: 0 16px;
   border: 1px solid var(--about-green);
   color: var(--about-text);
-  font-size: 13px;
+  font-size: var(--text-control-size);
   font-weight: 750;
   text-decoration: none;
   transition: color 180ms ease, background 180ms ease;
@@ -562,13 +562,13 @@
 
 .about-contact-visual figcaption span {
   color: #8ce0b7;
-  font-size: 9px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
   letter-spacing: 1.6px;
 }
 
 .about-contact-visual figcaption strong {
-  font-size: 11px;
+  font-size: var(--text-caption-size);
   letter-spacing: 1px;
 }
 
@@ -716,7 +716,7 @@
   }
 
   .about-hero-stamp strong {
-    font-size: 13px;
+    font-size: var(--text-small-size);
   }
 
   .about-capabilities,

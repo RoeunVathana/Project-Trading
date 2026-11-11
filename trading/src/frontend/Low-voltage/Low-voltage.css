@@ -5,7 +5,7 @@
   --lv-panel-strong: #152532;
   --lv-ink: #eef5f8;
   --lv-muted: #9eb0bd;
-  --lv-soft-muted: #748997;
+  --lv-soft-muted: #9aafbf;
   --lv-line: #2a3d4c;
   --lv-blue: #4e9bff;
   --lv-blue-strong: #1670d5;
@@ -23,10 +23,10 @@
   --lv-panel: #ffffff;
   --lv-panel-strong: #f7fafc;
   --lv-ink: #203541;
-  --lv-muted: #667b8b;
-  --lv-soft-muted: #8293a0;
+  --lv-muted: #526979;
+  --lv-soft-muted: #5b7080;
   --lv-line: #d8e3ea;
-  --lv-blue: #2b73c9;
+  --lv-blue: #2169b5;
   --lv-blue-strong: #1d64b6;
   --lv-blue-soft: #edf5ff;
   --lv-green: #e7f7ef;
@@ -106,11 +106,15 @@
 }
 
 .lv-hero {
+  min-height: calc(100svh - 76px);
+  display: flex;
+  flex-direction: column;
   background: var(--lv-bg);
   border-bottom: 1px solid var(--lv-line);
 }
 
 .lv-hero-grid {
+  flex: 1;
   min-height: 580px;
   padding-top: 64px;
   display: grid;
@@ -126,7 +130,7 @@
 .lv-eyebrow {
   margin: 0 0 18px;
   color: var(--lv-blue);
-  font-size: 11px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
   letter-spacing: .13em;
   line-height: 1.4;
@@ -170,7 +174,7 @@
   gap: 18px;
   border: 1px solid transparent;
   border-radius: 3px;
-  font-size: 12px;
+  font-size: var(--text-control-size);
   font-weight: 750;
   line-height: 1;
   text-decoration: none;
@@ -224,7 +228,7 @@
   gap: 18px;
   color: var(--lv-soft-muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 9px;
+  font-size: var(--text-caption-size);
   line-height: 1.4;
   letter-spacing: .03em;
   text-transform: uppercase;
@@ -256,7 +260,7 @@
   display: block;
   margin-top: 7px;
   color: var(--lv-soft-muted);
-  font-size: 10px;
+  font-size: var(--text-caption-size);
   line-height: 1.4;
 }
 
@@ -301,7 +305,7 @@
   gap: 18px;
   color: var(--lv-soft-muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 9px;
+  font-size: var(--text-caption-size);
   letter-spacing: .04em;
   text-transform: uppercase;
 }
@@ -321,7 +325,7 @@
   background: var(--lv-blue-strong);
   color: #fff;
   border-radius: 3px;
-  font-size: 13px;
+  font-size: var(--text-small-size);
   font-weight: 700;
 }
 
@@ -361,7 +365,7 @@
 .lv-faq p {
   margin: 10px 0 0;
   color: var(--lv-muted);
-  font-size: 12px;
+  font-size: var(--text-small-size);
   line-height: 1.6;
 }
 
@@ -373,7 +377,7 @@
 .lv-map-note {
   margin: 16px 0 0;
   color: var(--lv-soft-muted);
-  font-size: 10px;
+  font-size: var(--text-caption-size);
   line-height: 1.5;
 }
 
@@ -420,7 +424,7 @@
   padding-top: 20px;
   color: var(--lv-blue);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 9px;
+  font-size: var(--text-caption-size);
   letter-spacing: .04em;
 }
 
@@ -436,7 +440,7 @@
   border-collapse: collapse;
   background: var(--lv-panel);
   color: var(--lv-muted);
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   line-height: 1.5;
 }
 
@@ -451,14 +455,14 @@
 .lv-table thead th {
   color: var(--lv-ink);
   background: var(--lv-panel-strong);
-  font-size: 10px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
 }
 
 .lv-table tbody th {
   width: 32%;
   color: var(--lv-ink);
-  font-size: 11px;
+  font-size: var(--text-caption-size);
   font-weight: 750;
 }
 
@@ -471,7 +475,7 @@
   border-bottom: 0;
   background: var(--lv-green);
   color: var(--lv-blue-strong);
-  font-size: 10px;
+  font-size: var(--text-caption-size);
 }
 
 .lv-table--compact {
@@ -510,7 +514,7 @@
   margin-top: 15px;
   padding-left: 17px;
   color: var(--lv-muted);
-  font-size: 12px;
+  font-size: var(--text-small-size);
   line-height: 1.6;
 }
 
@@ -538,7 +542,7 @@
   margin-bottom: 17px;
   color: var(--lv-blue);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10px;
+  font-size: var(--text-caption-size);
 }
 
 .lv-faq {
@@ -583,7 +587,7 @@
   max-width: 700px;
   margin: 10px 0 0;
   color: var(--lv-muted);
-  font-size: 13px;
+  font-size: var(--text-small-size);
   line-height: 1.55;
 }
 
@@ -659,6 +663,11 @@
 }
 
 @media (max-width: 780px) {
+  .lv-hero {
+    min-height: 0;
+    display: block;
+  }
+
   .lv-container {
     width: min(100% - 44px, 620px);
   }
@@ -752,7 +761,7 @@
   }
 
   .lv-metric-strip span {
-    font-size: 9px;
+    font-size: var(--text-caption-size);
   }
 
   .lv-section {
@@ -777,7 +786,7 @@
   .lv-source-pill {
     width: 100%;
     padding: 12px 14px;
-    font-size: 11px;
+    font-size: var(--text-caption-size);
   }
 
   .lv-info-card {

@@ -90,7 +90,7 @@
 
     color: var(--theme-accent-text);
 
-    font-size: 11px;
+    font-size: var(--text-caption-size);
 
     font-weight: 700;
 
@@ -101,7 +101,7 @@
 .reference-badge span {
     color: var(--theme-accent-text);
 
-    font-size: 12px;
+    font-size: var(--text-caption-size);
 }
 
 
@@ -237,7 +237,7 @@
 
     color: var(--theme-text-primary);
 
-    font-size: 12px;
+    font-size: var(--text-control-size);
 
     cursor: pointer;
 }
@@ -266,7 +266,7 @@
 
     color: var(--theme-text-strong);
 
-    font-size: 12px;
+    font-size: var(--text-control-size);
 
     font-weight: 600;
 
@@ -301,7 +301,7 @@
 
     color: var(--theme-text-primary);
 
-    font-size: 12px;
+    font-size: var(--text-caption-size);
 }
 
 
@@ -312,7 +312,7 @@
 
     color: var(--theme-accent-text);
 
-    font-size: 12px;
+    font-size: var(--text-control-size);
 
     cursor: pointer;
 }
@@ -423,7 +423,7 @@
 
     border-radius: 10px;
 
-    font-size: 9px;
+    font-size: var(--text-caption-size);
 
     font-weight: 700;
 
@@ -472,7 +472,7 @@
 
     color: var(--theme-text-primary);
 
-    font-size: 13px;
+    font-size: var(--text-small-size);
 
     line-height: 1.6;
 }
@@ -496,7 +496,7 @@
 
     color: var(--theme-text-muted);
 
-    font-size: 10px;
+    font-size: var(--text-caption-size);
 
     font-weight: 700;
 
@@ -511,7 +511,7 @@
 
     color: var(--theme-text-strong);
 
-    font-size: 13px;
+    font-size: var(--text-small-size);
 }
 
 
@@ -534,7 +534,7 @@
 
     color: var(--theme-accent-text);
 
-    font-size: 13px;
+    font-size: var(--text-control-size);
 
     font-weight: 600;
 
@@ -594,7 +594,7 @@
 
     color: var(--theme-text-muted);
 
-    font-size: 13px;
+    font-size: var(--text-small-size);
 }
 
 
@@ -609,7 +609,7 @@
 
     color: white;
 
-    font-size: 12px;
+    font-size: var(--text-control-size);
 
     cursor: pointer;
 }
@@ -669,7 +669,7 @@
 
     color: var(--theme-text-strong);
 
-    font-size: 13px;
+    font-size: var(--text-small-size);
 
     font-weight: 700;
 
@@ -684,7 +684,7 @@
 
     color: var(--theme-text-primary);
 
-    font-size: 10px;
+    font-size: var(--text-small-size);
 
     line-height: 1.6;
 }
@@ -769,7 +769,7 @@
 
 
     .reference-badge {
-        font-size: 10px;
+        font-size: var(--text-caption-size);
     }
 
 
@@ -781,7 +781,7 @@
     .reference-hero p {
         max-width: 350px;
 
-        font-size: 13px;
+        font-size: var(--text-small-size);
     }
 
 
@@ -799,7 +799,7 @@
 
 
     .reference-search input {
-        font-size: 13px;
+        font-size: var(--text-control-size);
     }
 
 
@@ -812,14 +812,14 @@
     .reference-selects select {
         height: 40px;
 
-        font-size: 12px;
+        font-size: var(--text-control-size);
     }
 
 
     .reference-filter-btn {
         height: 40px;
 
-        font-size: 12px;
+        font-size: var(--text-control-size);
     }
 
 
@@ -846,22 +846,22 @@
 
 
     .project-location {
-        font-size: 12px;
+        font-size: var(--text-caption-size);
     }
 
 
     .project-label {
-        font-size: 9px;
+        font-size: var(--text-caption-size);
     }
 
 
     .project-sector {
-        font-size: 12px;
+        font-size: var(--text-caption-size);
     }
 
 
     .case-study-btn {
-        font-size: 12px;
+        font-size: var(--text-control-size);
     }
 
 
@@ -898,12 +898,12 @@
 
 
     .reference-stat h3 {
-        font-size: 12px;
+        font-size: var(--text-caption-size);
     }
 
 
     .reference-stat p {
-        font-size: 10px;
+        font-size: var(--text-small-size);
     }
 
 }
@@ -929,7 +929,7 @@
 
 
     .reference-hero p {
-        font-size: 12px;
+        font-size: var(--text-small-size);
     }
 
 
@@ -961,17 +961,17 @@
 
 
     .project-location {
-        font-size: 12px;
+        font-size: var(--text-caption-size);
     }
 
 
     .project-sector {
-        font-size: 12px;
+        font-size: var(--text-caption-size);
     }
 
 
     .case-study-btn {
-        font-size: 12px;
+        font-size: var(--text-control-size);
     }
 
 

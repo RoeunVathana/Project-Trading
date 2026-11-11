@@ -94,7 +94,7 @@
 .huawei-product-category {
   margin: 0;
   color: var(--theme-text-muted);
-  font-size: 13px;
+  font-size: var(--text-small-size);
   line-height: 1.35;
 }
 
@@ -166,7 +166,7 @@
   background: transparent;
   color: var(--huawei-card-text);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--text-small-size);
   line-height: 1.35;
   text-align: left;
   cursor: pointer;
@@ -181,7 +181,7 @@
 
 .huawei-product-page .huawei-category-parent small {
   color: var(--huawei-card-muted);
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   font-weight: 400;
 }
 
@@ -210,7 +210,7 @@
   background: transparent;
   color: var(--huawei-card-muted);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   line-height: 1.35;
   text-align: left;
   cursor: pointer;
@@ -254,7 +254,7 @@
 
 .huawei-product-image-placeholder span,
 .huawei-detail-image-placeholder span {
-  font-size: 11px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
   letter-spacing: 2px;
 }
@@ -364,7 +364,7 @@
 
 .huawei-product-page .huawei-product-category {
   color: var(--huawei-card-muted);
-  font-size: 13px;
+  font-size: var(--text-small-size);
   line-height: 1.4;
 }
 
@@ -460,7 +460,7 @@
 .huawei-product-page .huawei-category-parent {
   min-height: 0;
   padding: 11px 0;
-  font-size: 13px;
+  font-size: var(--text-small-size);
   font-weight: 400;
 }
 
@@ -479,7 +479,7 @@
   min-height: 0;
   padding: 5px 0;
   color: var(--huawei-card-muted);
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   line-height: 1.35;
 }
 
@@ -502,7 +502,7 @@
   margin: 0 0 8px;
   padding: 0;
   border-radius: 0;
-  font-size: 13px;
+  font-size: var(--text-small-size);
   line-height: 1.3;
   transition: none;
 }

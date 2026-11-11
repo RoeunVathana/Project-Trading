@@ -6,14 +6,18 @@ import ImageCover from "../../assets/Homepage/Background.png"
 const AnimatedHeroText = ({ text, delay = 0, className = "" }) => (
   <span className={`hero-count-text ${className}`} aria-label={text}>
     <span aria-hidden="true">
-      {Array.from(text).map((character, index) => (
-        character === " " ? " " : (
-          <span
-            className="hero-count-char"
-            key={`${text}-${index}`}
-            style={{ "--char-delay": `${delay + index * 9}ms` }}
-          >
-            {character}
+      {Array.from(text.matchAll(/\S+|\s+/g), (match) => (
+        /^\s+$/.test(match[0]) ? match[0] : (
+          <span className="hero-count-word" key={match.index}>
+            {Array.from(match[0], (character, index) => (
+              <span
+                className="hero-count-char"
+                key={index}
+                style={{ "--char-delay": `${delay + (match.index + index) * 9}ms` }}
+              >
+                {character}
+              </span>
+            ))}
           </span>
         )
       ))}

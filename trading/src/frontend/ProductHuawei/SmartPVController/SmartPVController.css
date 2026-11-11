@@ -96,7 +96,7 @@
 .pv-kicker {
   margin: 0 0 16px;
   color: var(--theme-accent-text);
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
 }
 
@@ -221,7 +221,7 @@
 .pv-eyebrow {
   margin: 0 0 12px;
   color: var(--theme-accent-text);
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
 }
 
@@ -309,7 +309,7 @@
   border-radius: 12px;
   background: color-mix(in srgb, var(--theme-surface-0) 68%, transparent);
   backdrop-filter: blur(12px);
-  font-size: 11px;
+  font-size: var(--text-caption-size);
 }
 
 .pv-product-label span {
@@ -321,7 +321,7 @@
 
 .pv-product-label small {
   color: color-mix(in srgb, currentColor 68%, transparent);
-  font-size: 10px;
+  font-size: var(--text-caption-size);
   letter-spacing: .02em;
   text-transform: none;
 }
@@ -334,7 +334,7 @@
   align-items: center;
   gap: 12px;
   color: color-mix(in srgb, currentColor 55%, transparent);
-  font-size: 10px;
+  font-size: var(--text-caption-size);
   letter-spacing: .12em;
   text-transform: uppercase;
   transform: rotate(-90deg) translateX(100%);
@@ -455,7 +455,7 @@
   display: block;
   margin-bottom: 24px;
   color: rgba(255,255,255,.62);
-  font-size: 10px;
+  font-size: var(--text-caption-size);
 }
 
 .pv-benefit-card h3 {
@@ -552,7 +552,7 @@
   display: block;
   margin-top: 16px;
   color: rgba(255,255,255,.78);
-  font-size: 12px;
+  font-size: var(--text-caption-size);
 }
 
 .pv-performance-copy {
@@ -647,7 +647,7 @@
   border-radius: 999px;
   background: rgba(43, 108, 182, .16);
   color: #9fd6ff;
-  font-size: 11px;
+  font-size: var(--text-caption-size);
   letter-spacing: .14em;
 }
 
@@ -699,7 +699,7 @@
 
 .pv-inline-stats span {
   color: var(--theme-text-muted);
-  font-size: 11px;
+  font-size: var(--text-caption-size);
 }
 
 .pv-fault {
@@ -742,7 +742,7 @@
   border: 1px solid var(--pv-line);
   border-radius: 999px;
   color: var(--pv-muted);
-  font-size: 10px;
+  font-size: var(--text-caption-size);
 }
 
 .pv-fault-visual {
@@ -800,14 +800,14 @@
   right: 9%;
   bottom: 16%;
   color: rgba(255,255,255,.62);
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   letter-spacing: .18em;
   line-height: 1.45;
 }
 
 .pv-fault-caption b {
   color: #66e7cd;
-  font-size: 10px;
+  font-size: var(--text-caption-size);
 }
 
 .pv-connector {
@@ -929,7 +929,7 @@
   display: block;
   margin-top: 14px;
   color: var(--pv-muted);
-  font-size: 11px;
+  font-size: var(--text-caption-size);
 }
 
 .pv-weather-grid {
@@ -967,7 +967,7 @@
   padding: 7px 10px;
   border: 1px solid rgba(255,255,255,.45);
   border-radius: 999px;
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
 }
 
@@ -981,7 +981,7 @@
   max-width: 390px;
   margin: 8px 0 0;
   color: rgba(255,255,255,.76);
-  font-size: 13px;
+  font-size: var(--text-small-size);
   line-height: 1.45;
 }
 
@@ -1078,7 +1078,7 @@
   display: inline-block;
   margin-bottom: 16px;
   color: #62e4b5;
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -1214,7 +1214,7 @@
 
 .pv-recommendation-copy > span {
   color: var(--theme-accent-text);
-  font-size: 10px;
+  font-size: var(--text-caption-size);
   font-weight: 800;
 }
 
@@ -1236,7 +1236,7 @@
   display: block;
   margin-top: 22px;
   color: var(--theme-text-muted);
-  font-size: 10px;
+  font-size: var(--text-caption-size);
   letter-spacing: .04em;
   text-transform: none;
 }
@@ -1247,7 +1247,7 @@
   padding: 0 17px;
   background: var(--theme-text-strong);
   color: var(--theme-surface-0);
-  font-size: 13px;
+  font-size: var(--text-small-size);
 }
 
 @media (max-width: 960px) {
@@ -1460,7 +1460,7 @@
   }
 
   .pv-inline-stats span {
-    font-size: 9px;
+    font-size: var(--text-caption-size);
   }
 
   .pv-fault-visual,
@@ -1496,7 +1496,7 @@
   }
 
   .pv-reliability-stats div > span {
-    font-size: 9px;
+    font-size: var(--text-caption-size);
   }
 
   .pv-weather-grid {

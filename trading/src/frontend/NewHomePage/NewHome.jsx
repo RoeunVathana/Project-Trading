@@ -1,7 +1,1 @@
-const NewHome = () => {
-  return (
-    <div>NewHome</div>
-  )
-}
-
-export default NewHome
+export { default } from "../NewHome/NewHome";
