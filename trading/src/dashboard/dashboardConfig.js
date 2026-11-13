@@ -3,6 +3,22 @@ export const RESOURCE_KEYS = [
   "huawei", "huaweiCategories", "huaweiImages", "huaweiPdfs",
   "users",
 ];
+export const PERMISSION_ACTIONS = [
+  { value: "create", label: "Create" },
+  { value: "update", label: "Edit" },
+  { value: "delete", label: "Delete" },
+];
+export const PERMISSION_OPTIONS = [
+  ["machines", "Machines"],
+  ["categories", "Categories"],
+  ["gallery", "Machine gallery"],
+  ["specs", "Specifications"],
+  ["pdfs", "Machine PDFs"],
+  ["huawei", "Huawei products"],
+  ["huaweiCategories", "Huawei categories"],
+  ["huaweiImages", "Huawei gallery"],
+  ["huaweiPdfs", "Huawei PDFs"],
+].map(([resource, label]) => ({ resource, label }));
 export const CATEGORY_COLORS = ["#1a788c", "#48a6a0", "#7abcb4", "#e0a05f", "#8b9bd1"];
 export const UPLOAD_LIMITS = {
   image: { bytes: 100 * 1024 * 1024, label: "100 MB" },
@@ -221,6 +237,11 @@ export const RESOURCE_CONFIG = {
     fields: [
       { name: "name", label: "Name", required: true, placeholder: "Alex Morgan" },
       { name: "email", label: "Email", type: "email", required: true, placeholder: "alex@example.com" },
+      { name: "role", label: "Role", type: "select", required: true, defaultValue: "staff", options: [
+        { value: "staff", label: "Staff" },
+        { value: "admin", label: "Admin" },
+      ] },
+      { name: "permissions", label: "Staff permissions", type: "permissions", helpText: "Admins always have full access. Select the actions this staff member may perform." },
       { name: "password", label: "Password", type: "password", requiredOnCreate: true, placeholder: "At least 8 characters" },
       { name: "profileImageFile", label: "Profile image", type: "file", apiField: "image", accept: "image/*", maxSize: UPLOAD_LIMITS.image.bytes, maxSizeLabel: UPLOAD_LIMITS.image.label },
     ],
@@ -302,6 +323,7 @@ export const TABLE_COLUMNS = {
     { key: "image", label: "Profile" },
     { key: "name", label: "Name" },
     { key: "email", label: "Email" },
+    { key: "role", label: "Role" },
   ],
 };
 

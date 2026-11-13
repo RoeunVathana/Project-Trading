@@ -9,6 +9,7 @@ const DashboardTopbar = ({
   theme,
   toggleTheme,
   signOut,
+  openProfile,
   setSidebarOpen,
 }) => {
   const accountName = displayAccountName(account, "back");
@@ -75,6 +76,8 @@ const DashboardTopbar = ({
           <span className="account-avatar">{accountName.slice(0, 1).toUpperCase()}</span>
         )}
         <span className="account-name">{accountName}</span>
+        <span className="account-role">{account?.role === "admin" ? "Admin" : "Staff"}</span>
+        <button type="button" className="account-action account-profile-action" onClick={openProfile}>Profile</button>
         <button type="button" className="account-action" onClick={signOut}>Sign out</button>
       </div>
     </div>

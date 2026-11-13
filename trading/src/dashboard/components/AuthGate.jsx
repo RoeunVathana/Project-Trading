@@ -1,5 +1,23 @@
+import { useState } from "react";
 import SnttLogo from "../../assets/SNTT.png";
 import { UPLOAD_LIMITS } from "../dashboardConfig";
+
+const PasswordVisibilityIcon = ({ visible }) => (
+  <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+    {visible ? (
+      <>
+        <path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0Z" />
+        <circle cx="12" cy="12" r="3" />
+      </>
+    ) : (
+      <>
+        <path d="M10.73 5.08A10.74 10.74 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+        <path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3 7 10 7a9.75 9.75 0 0 0 5.39-1.61" />
+        <line x1="2" y1="2" x2="22" y2="22" />
+      </>
+    )}
+  </svg>
+);
 
 const AuthGate = ({
   checking = false,
@@ -13,6 +31,8 @@ const AuthGate = ({
   theme,
   toggleTheme,
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleProfileImageChange = (event) => {
     const input = event.target;
     const file = input.files?.[0] || null;
@@ -86,7 +106,20 @@ const AuthGate = ({
             )}
             <label className="dashboard-field">
               <span>Password</span>
-              <input type="password" required minLength="8" placeholder={accountMode === "login" ? "Enter your password" : "Create a password (8+ characters)"} value={accountForm.password} onChange={(event) => setAccountForm((current) => ({ ...current, password: event.target.value }))} autoComplete={accountMode === "login" ? "current-password" : "new-password"} />
+              <div className="dashboard-password-input">
+                <input id="dashboard-auth-password" type={showPassword ? "text" : "password"} required minLength="8" placeholder={accountMode === "login" ? "Enter your password" : "Create a password (8+ characters)"} value={accountForm.password} onChange={(event) => setAccountForm((current) => ({ ...current, password: event.target.value }))} autoComplete={accountMode === "login" ? "current-password" : "new-password"} />
+                <button
+                  type="button"
+                  className={`dashboard-password-toggle ${showPassword ? "is-visible" : ""}`}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  aria-controls="dashboard-auth-password"
+                  title={showPassword ? "Hide password" : "Show password"}
+                  onClick={() => setShowPassword((visible) => !visible)}
+                >
+                  <PasswordVisibilityIcon visible={showPassword} />
+                </button>
+              </div>
             </label>
 
             {accountMode === "register" && (

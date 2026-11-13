@@ -12,6 +12,9 @@ const productPath = (parameters) => {
       "smart-energy-controller": "/product-huawei/smart-energy-controller",
       "smart-module-controller": "/product-huawei/smart-module-controller",
       "smart-guard": "/product-huawei/smart-guard",
+      "smart-pv-controller": "/product-huawei/smart-pv-controller",
+      "hybrid-cooling-grid-forming-ess": "/product-huawei/hybrid-cooling-grid-forming-ess",
+      accessories: "/product-huawei/accessories",
       "product-huawei-all": "/product-huawei",
     };
 
@@ -23,6 +26,13 @@ const productPath = (parameters) => {
     }
 
     // Product links must take precedence over their parent solution page.
+    if (huaweiSolutionPaths[parameters.product]) {
+      const path = huaweiSolutionPaths[parameters.product];
+      return parameters.solution
+        ? `${path}?solution=${encodeURIComponent(parameters.solution)}`
+        : path;
+    }
+
     // Category-specific slugs let the Huawei API resolve the first published
     // product from the exact residential or commercial category.
     if (parameters.product || parameters.categorySlug) {
@@ -222,7 +232,7 @@ const Navbar = () => {
     : location.pathname === "/commercial-industrial-solutions"
       ? "commercial-industrial-solutions"
     : location.pathname.startsWith("/product-huawei")
-      ? "residential-solution"
+      ? searchParams.get("solution") || "residential-solution"
       : searchParams.get("solution");
   const routeSolution = routeCollection?.solutions.find(
     (solution) => solution.id === routeSolutionId,

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { fetchCachedJson } from "../apiCache";
+import { searchMatches } from "../searchUtils";
 import "./ProductHuawei.css";
 
 const API_BASE_URL = (
@@ -37,6 +38,13 @@ const getCategoryIds = (product) => {
 const sortHuaweiCategories = (left, right) =>
   Number(left.displayOrder || 0) - Number(right.displayOrder || 0)
   || Number(left.id) - Number(right.id);
+
+const getPaginationItems = (pageCount, currentPage) => {
+  if (pageCount <= 7) return Array.from({ length: pageCount }, (_, index) => index + 1);
+  if (currentPage <= 4) return [1, 2, 3, 4, 5, "ellipsis-end", pageCount];
+  if (currentPage >= pageCount - 3) return [1, "ellipsis-start", pageCount - 4, pageCount - 3, pageCount - 2, pageCount - 1, pageCount];
+  return [1, "ellipsis-start", currentPage - 1, currentPage, currentPage + 1, "ellipsis-end", pageCount];
+};
 
 const buildHuaweiCategoryTree = (categories, products) => {
   const activeCategories = categories.filter((category) => category.isActive !== false);
@@ -239,11 +247,14 @@ const fetchJson = async (path) => {
 
 const HuaweiCatalog = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialSearchQuery = searchParams.get("q") || searchParams.get("search") || "";
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [appliedSearch, setAppliedSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState(initialSearchQuery);
+  const [appliedSearch, setAppliedSearch] = useState(initialSearchQuery);
   const [selectedCategories, setSelectedCategories] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
@@ -338,7 +349,7 @@ const HuaweiCatalog = () => {
     const normalizedSearch = appliedSearch.trim().toLowerCase();
     const activeCategoryIds = Object.keys(selectedCategories).filter((id) => selectedCategories[id]);
     return products.filter((product) => {
-      const searchMatch = !normalizedSearch || product.searchText.includes(normalizedSearch);
+      const searchMatch = searchMatches(product.searchText, normalizedSearch);
       const productCategoryIds = getCategoryIds(product).map((categoryId) => String(categoryId));
       const categoryMatch = !activeCategoryIds.length || activeCategoryIds.some((categoryId) => {
         const scope = categoryScopes.get(categoryId) || [categoryId];
@@ -348,8 +359,16 @@ const HuaweiCatalog = () => {
     });
   }, [appliedSearch, categoryScopes, products, selectedCategories]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / 12));
+  const visiblePage = Math.min(currentPage, totalPages);
+  const paginatedProducts = useMemo(
+    () => filteredProducts.slice((visiblePage - 1) * 12, visiblePage * 12),
+    [filteredProducts, visiblePage],
+  );
+
   const selectCategory = (categoryId) => {
     const key = String(categoryId);
+    setCurrentPage(1);
     setSelectedCategories((current) => (current[key] ? {} : { [key]: true }));
   };
 
@@ -357,6 +376,10 @@ const HuaweiCatalog = () => {
     setSelectedCategories({});
     setSearchTerm("");
     setAppliedSearch("");
+    setCurrentPage(1);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("q");
+    setSearchParams(nextParams, { replace: true });
   };
 
   return (
@@ -403,7 +426,13 @@ const HuaweiCatalog = () => {
               role="search"
               onSubmit={(event) => {
                 event.preventDefault();
-                setAppliedSearch(searchTerm.trim());
+                setCurrentPage(1);
+                const query = searchTerm.trim();
+                setAppliedSearch(query);
+                const nextParams = new URLSearchParams(searchParams);
+                if (query) nextParams.set("q", query);
+                else nextParams.delete("q");
+                setSearchParams(nextParams, { replace: true });
               }}
             >
               <label className="product-search-label" htmlFor="huawei-product-search">SEARCH HUAWEI PRODUCTS</label>
@@ -417,7 +446,7 @@ const HuaweiCatalog = () => {
                   aria-label="Search Huawei products"
                 />
                 <button type="submit">SEARCH</button>
-                {appliedSearch && <button type="button" className="product-search-clear" onClick={() => { setSearchTerm(""); setAppliedSearch(""); }}>CLEAR</button>}
+                {appliedSearch && <button type="button" className="product-search-clear" onClick={() => { setSearchTerm(""); setAppliedSearch(""); setCurrentPage(1); const nextParams = new URLSearchParams(searchParams); nextParams.delete("q"); setSearchParams(nextParams, { replace: true }); }}>CLEAR</button>}
               </div>
             </form>
 
@@ -428,13 +457,13 @@ const HuaweiCatalog = () => {
                   <strong>Browse by solution</strong>
                 </div>
                 <div className="product-popular-list">
-                  <button type="button" className={`product-popular-category ${Object.values(selectedCategories).every((value) => !value) ? "active" : ""}`} onClick={() => setSelectedCategories({})}>All products</button>
+                    <button type="button" className={`product-popular-category ${Object.values(selectedCategories).every((value) => !value) ? "active" : ""}`} onClick={() => { setSelectedCategories({}); setCurrentPage(1); }}>All products</button>
                   {popularCategories.map((category) => (
                     <button
                       type="button"
                       className={`product-popular-category ${selectedCategories[String(category.id)] ? "active" : ""}`}
                       key={category.id}
-                      onClick={() => setSelectedCategories({ [String(category.id)]: true })}
+                      onClick={() => { setSelectedCategories({ [String(category.id)]: true }); setCurrentPage(1); }}
                     >
                       <span>{category.name}</span><small>{category.productCount} products</small>
                     </button>
@@ -443,13 +472,13 @@ const HuaweiCatalog = () => {
               </section>
             )}
 
-            <div className="product-result-header">SHOWING {filteredProducts.length} MATCHING PRODUCTS OF {products.length}</div>
+            <div className="product-result-header">SHOWING {paginatedProducts.length} PRODUCTS ON PAGE {visiblePage} OF {filteredProducts.length} TOTAL</div>
 
             {loading ? (
               <div className="no-products"><h3>LOADING HUAWEI PRODUCTS</h3><p>Fetching products from the Huawei catalog...</p></div>
             ) : filteredProducts.length ? (
               <div className="product-grid">
-                {filteredProducts.map((product) => (
+                {paginatedProducts.map((product) => (
                   <article className="product-card" key={product.id}>
                     <div className="product-image">
                       {product.status && <span className="product-badge">{product.status}</span>}
@@ -471,6 +500,16 @@ const HuaweiCatalog = () => {
             )}
 
             {loadError && <p className="product-load-error" role="alert">{loadError}</p>}
+
+            {!loading && !loadError && totalPages > 1 && (
+              <nav className="product-pagination" aria-label="Huawei product pages">
+                <button type="button" onClick={() => setCurrentPage((page) => page - 1)} disabled={visiblePage === 1} aria-label="Previous page">â€¹</button>
+                {getPaginationItems(totalPages, visiblePage).map((item) => item === "ellipsis-start" || item === "ellipsis-end"
+                  ? <span key={item} aria-hidden="true">â€¦</span>
+                  : <button type="button" key={item} className={item === visiblePage ? "pagination-active" : ""} onClick={() => setCurrentPage(item)} aria-current={item === visiblePage ? "page" : undefined}>{item}</button>)}
+                <button type="button" onClick={() => setCurrentPage((page) => page + 1)} disabled={visiblePage === totalPages} aria-label="Next page">â€º</button>
+              </nav>
+            )}
           </div>
         </div>
       </section>

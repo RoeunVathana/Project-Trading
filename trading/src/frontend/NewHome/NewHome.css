@@ -57,6 +57,11 @@
   --new-home-sustain-image-opacity: 0.2;
 }
 
+.new-home > :not(.new-home-hero) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 620px;
+}
+
 .new-home *,
 .new-home *::before,
 .new-home *::after {
@@ -122,7 +127,7 @@
 .new-home-hero__copy {
   position: relative;
   z-index: 1;
-  width: min(100%, 660px);
+  width: min(100%, 600px);
   animation: new-home-copy-in 650ms ease both;
 }
 
@@ -138,22 +143,22 @@
 }
 
 .new-home-hero h1 {
-  max-width: 660px;
-  margin: 20px 0 0;
+  max-width: 600px;
+  margin: 18px 0 0;
   color: var(--new-home-hero-text);
-  font-size: clamp(2.2rem, 3.4vw, 3.6rem);
+  font-size: clamp(1.9rem, 2.7vw, 2.8rem);
   font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1.04;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
   text-wrap: balance;
   text-shadow: 0 2px 18px color-mix(in srgb, var(--new-home-hero-background) 24%, transparent);
 }
 
 .new-home-hero p {
-  max-width: 540px;
-  margin: 24px 0 0;
+  max-width: 500px;
+  margin: 18px 0 0;
   color: var(--new-home-hero-copy);
-  font-size: 0.95rem;
+  font-size: 0.86rem;
   line-height: 1.6;
 }
 
@@ -177,7 +182,7 @@
 }
 
 .new-home-button--primary {
-  margin-top: 28px;
+  margin-top: 24px;
   background: var(--new-home-blue);
   color: #fff;
 }
@@ -583,12 +588,20 @@
   line-height: 1;
 }
 
-.new-home-stats__grid span {
+.new-home-stats__grid > div > span {
   display: block;
   margin-top: 10px;
   color: color-mix(in srgb, var(--new-home-feature-text) 64%, transparent);
   font-size: 0.75rem;
   letter-spacing: 0.01em;
+}
+
+.new-home-stats__grid strong span {
+  display: inline;
+  margin-top: 0;
+  color: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
 }
 
 .new-home-updates {
@@ -826,7 +839,7 @@
   .new-home-hero__inner { min-height: calc(100svh - 76px); }
 
   .new-home-hero__inner { padding-top: 54px; padding-bottom: 26px; }
-  .new-home-hero h1 { font-size: clamp(2.15rem, 10vw, 3.2rem); }
+  .new-home-hero h1 { font-size: clamp(1.75rem, 7.5vw, 2.55rem); }
   .new-home-hero p { font-size: 14px; }
   .new-home-hero__controls { padding-top: 34px; }
 

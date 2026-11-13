@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { downloadReferenceDossier } from "./referenceDossier";
+import AnimatedNumber from "../components/AnimatedNumber/AnimatedNumber";
 import "./ReferenceChint.css";
 
 const imageUrl = (name) => `${import.meta.env.BASE_URL}moreAccssories/${encodeURIComponent(name)}`;
@@ -47,7 +48,7 @@ const projects = [
   {
     id: "atacama", title: "Atacama Solar PV Park", category: "Renewables", sector: "solar",
     location: "Atacama Desert, Chile", region: "South America", scale: "Utility scale", year: 2025,
-    image: "list (4).jpg", alt: "Rows of photovoltaic panels at a desert solar farm",
+    image: "  ", alt: "Rows of photovoltaic panels at a desert solar farm",
     description: "A 250MW grid-connected solar array featuring high-efficiency inverters and step-up substations.",
     specs: [["Voltage", "1500V DC / 33kV"], ["Hardware", "ASTRO Series"], ["Compliance", "IEEE 1547"]],
   },
@@ -192,7 +193,7 @@ const ReferenceChint = () => {
         </div>
         <div className="chint-stats">
           <div className="chint-container chint-stats-grid">
-            {[["45+ GW", "Cumulative PV Capacity"], ["3,200+", "Substation References"], ["140+", "Global Markets Served"], ["99.98%", "System MTBF Rate"]].map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}
+            {[[45, 0, "+ GW", "Cumulative PV Capacity"], [3200, 0, "+", "Substation References"], [140, 0, "+", "Global Markets Served"], [99.98, 2, "%", "System MTBF Rate"]].map(([value, decimals, suffix, label]) => <div key={label}><strong><AnimatedNumber value={value} decimals={decimals} suffix={suffix} /></strong><span>{label}</span></div>)}
           </div>
         </div>
       </section>

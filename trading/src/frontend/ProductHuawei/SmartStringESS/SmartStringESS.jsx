@@ -228,7 +228,7 @@ const SmartStringESS = () => {
     >
       <section className="smart-string-hero" data-ess-reveal>
         <div className="smart-string-hero-product" data-ess-reveal="left">
-          {product.image ? <img src={product.image} alt={title} /> : <div className="smart-string-product-placeholder">HUAWEI</div>}
+          {product.image ? <img src={product.image} alt={title} fetchPriority="high" decoding="async" /> : <div className="smart-string-product-placeholder">HUAWEI</div>}
         </div>
         <div className="smart-string-hero-copy smart-string-container" data-ess-reveal="right">
           <div className="smart-string-brand"><span aria-hidden="true">Ⅲ</span> FusionSolar</div>
@@ -244,7 +244,7 @@ const SmartStringESS = () => {
 
       <section className="smart-string-charge smart-string-container" data-ess-reveal>
         <h2>Charge and Discharge,<br />Faster than You&apos;ve Ever Expected</h2>
-        <img src={getImage(1)} alt={getAlt(1, "Smart String ESS battery module")} />
+        <img src={getImage(1)} alt={getAlt(1, "Smart String ESS battery module")} loading="lazy" decoding="async" />
         <div className="smart-string-charge-details">
           <p>Independent module-level management enables fast charge and discharge at 3.5 kW for each battery module and the maximum input and output power of 10.5 kW for each energy storage system. The upgrade is from performance to efficiency.</p>
           <div className="smart-string-metrics">
@@ -269,7 +269,7 @@ const SmartStringESS = () => {
       <section className="smart-string-stories smart-string-container" aria-label="Smart String ESS protection features">
         {storyContent.map((story) => (
           <article className={`smart-string-story ${story.layout}`} key={story.title} data-ess-reveal>
-            <img src={getImage(story.imageIndex)} alt={getAlt(story.imageIndex, story.title.replace("\n", " "))} />
+            <img src={getImage(story.imageIndex)} alt={getAlt(story.imageIndex, story.title.replace("\n", " "))} loading="lazy" decoding="async" />
             <div className="smart-string-story-copy">
               <h2>{story.title.split("\n").map((line) => <span key={line}>{line}</span>)}</h2>
               <p>{story.description}</p>
@@ -283,7 +283,7 @@ const SmartStringESS = () => {
         <h2>In the Know, On the Go</h2>
         <div className="smart-string-monitoring-layout">
           <div className="smart-string-monitoring-image">
-            <img src={getImage(7)} alt={getAlt(7, "FusionSolar energy management app")} />
+            <img src={getImage(7)} alt={getAlt(7, "FusionSolar energy management app")} loading="lazy" decoding="async" />
             <p>FusionSolar app displays energy flow with a clear picture, enabling better visual perception of energy yields, storage amount, consumption rate, revenue report and plant operations.</p>
           </div>
           <div className="smart-string-monitoring-list">
@@ -312,7 +312,7 @@ const SmartStringESS = () => {
           <h2>A Home that Always Shines</h2>
           <p>FusionSolar Residential delivers clean energy for homes around the world, helping families create a brighter and more sustainable future.</p>
         </div>
-        <img src={getImage(8)} alt={getAlt(8, "Home powered by smart energy storage")} />
+        <img src={getImage(8)} alt={getAlt(8, "Home powered by smart energy storage")} loading="lazy" decoding="async" />
       </section>
     </main>
   );

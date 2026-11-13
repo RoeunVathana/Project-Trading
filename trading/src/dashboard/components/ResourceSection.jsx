@@ -31,6 +31,9 @@ const ResourceSection = ({
   onCreate,
   onEdit,
   onDelete,
+  canCreate,
+  canUpdate,
+  canDelete,
 }) => {
   const filterKey = `${activeSection}:${search}`;
   const [pageState, setPageState] = useState({ key: filterKey, page: 1 });
@@ -58,7 +61,7 @@ const ResourceSection = ({
         <h1>{activeConfig.title}</h1>
         <p>{activeConfig.description}</p>
       </div>
-      <button type="button" className="dashboard-primary-button" onClick={onCreate}>
+      <button type="button" className="dashboard-primary-button" onClick={onCreate} disabled={!canCreate} title={!canCreate ? "Permission not assigned" : undefined}>
         <span>{"\uFF0B"}</span> Add {activeConfig.singular}
       </button>
     </section>
@@ -118,8 +121,8 @@ const ResourceSection = ({
                       );
                     })}
                     <td data-label="Actions" className="table-actions">
-                      <button type="button" className="row-action edit-action" onClick={() => onEdit(record)} aria-label={`Edit ${recordTitle(activeSection, record)}`} title="Edit">Edit</button>
-                      <button type="button" className="row-action delete-action" onClick={() => onDelete(record)} aria-label={`Delete ${recordTitle(activeSection, record)}`} title="Delete">Delete</button>
+                      <button type="button" className="row-action edit-action" onClick={() => onEdit(record)} disabled={!canUpdate} aria-label={`Edit ${recordTitle(activeSection, record)}`} title={canUpdate ? "Edit" : "Edit permission not assigned"}>Edit</button>
+                      <button type="button" className="row-action delete-action" onClick={() => onDelete(record)} disabled={!canDelete} aria-label={`Delete ${recordTitle(activeSection, record)}`} title={canDelete ? "Delete" : "Delete permission not assigned"}>Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -177,7 +180,7 @@ const ResourceSection = ({
           <span className="empty-state-mark">{activeConfig.icon}</span>
           <strong>{search ? "No matching records" : `No ${activeConfig.title.toLowerCase()} yet`}</strong>
           <p>{search ? "Try another search term." : `Create your first ${activeConfig.singular} to get started.`}</p>
-          {!search && <button type="button" className="dashboard-primary-button" onClick={onCreate}>{"\uFF0B"} Add {activeConfig.singular}</button>}
+          {!search && <button type="button" className="dashboard-primary-button" onClick={onCreate} disabled={!canCreate}>{"\uFF0B"} Add {activeConfig.singular}</button>}
         </div>
       )}
     </section>

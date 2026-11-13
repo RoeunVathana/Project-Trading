@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { huaweiReferences } from "./huaweiReferences";
 import { downloadHuaweiLedger } from "./exportHuaweiLedger";
+import AnimatedNumber from "../components/AnimatedNumber/AnimatedNumber";
 import "./ReferenceHuawei.css";
 
 const imageUrl = (name) => `${import.meta.env.BASE_URL}moreAccssories/${encodeURIComponent(name)}`;
@@ -145,10 +146,10 @@ const ReferenceHuawei = () => {
       <section className="hr-overview" aria-label="Global project overview">
         <div className="hr-container hr-overview-inner">
           <dl className="hr-metrics">
-            <div><dt>Registered Projects</dt><dd>3,284 <small>+142 YTD</small></dd></div>
-            <div><dt>Grid Capacity</dt><dd>78.4 GW</dd></div>
-            <div><dt>Global Reach</dt><dd>140+ Countries</dd></div>
-            <div><dt>Substations (UHV)</dt><dd>1,840+</dd></div>
+            <div><dt>Registered Projects</dt><dd><AnimatedNumber value={3284} /> <small>+142 YTD</small></dd></div>
+            <div><dt>Grid Capacity</dt><dd><AnimatedNumber value={78.4} decimals={1} suffix=" GW" /></dd></div>
+            <div><dt>Global Reach</dt><dd><AnimatedNumber value={140} suffix="+ Countries" /></dd></div>
+            <div><dt>Substations (UHV)</dt><dd><AnimatedNumber value={1840} suffix="+" /></dd></div>
           </dl>
           <div className="hr-overview-actions">
             <button className="hr-button hr-button--primary" type="button" disabled={!filteredProjects.length} onClick={() => downloadHuaweiLedger(filteredProjects)}>Export Ledger (.XLSX)</button>

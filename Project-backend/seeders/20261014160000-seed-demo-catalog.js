@@ -230,11 +230,12 @@ module.exports = {
 
       if (process.env.SEED_ADMIN_PASSWORD) {
         const existingUsers = await selectRows(queryInterface, Sequelize, "Users", transaction);
-        const adminEmail = "admin@example.com";
+        const adminEmail = (process.env.SEED_ADMIN_EMAIL || "admin@example.com").trim().toLowerCase();
         if (!existingUsers.some((user) => user.email.toLowerCase() === adminEmail)) {
           await queryInterface.bulkInsert("Users", [{
             username: "admin",
             email: adminEmail,
+            role: "admin",
             password: await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD, 12),
             profileImage: null,
             createdAt: now,
@@ -303,7 +304,8 @@ module.exports = {
       }, { transaction });
 
       if (process.env.SEED_ADMIN_PASSWORD) {
-        await queryInterface.bulkDelete("Users", { email: "admin@example.com" }, { transaction });
+        const adminEmail = (process.env.SEED_ADMIN_EMAIL || "admin@example.com").trim().toLowerCase();
+        await queryInterface.bulkDelete("Users", { email: adminEmail }, { transaction });
       }
 
       await transaction.commit();

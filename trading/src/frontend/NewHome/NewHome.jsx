@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../components/ThemeContext";
+import AnimatedNumber from "../components/AnimatedNumber/AnimatedNumber";
 import "./NewHome.css";
 
 const heroSlides = [
@@ -115,7 +116,7 @@ const SectionHeading = ({ eyebrow, title, light = false }) => (
 
 const ProductCard = ({ title, description, image, className = "", to }) => (
   <Link className={`new-home-product-card ${className}`} to={to}>
-    <img src={image} alt="" loading="lazy" />
+    <img src={image} alt="" loading="lazy" decoding="async" />
     <span className="new-home-card-shade" aria-hidden="true" />
     <span className="new-home-product-card__content">
       <strong>{title}</strong>
@@ -127,7 +128,7 @@ const ProductCard = ({ title, description, image, className = "", to }) => (
 
 const IndustryCard = ({ title, description, image, className = "", tags = [] }) => (
   <article className={`new-home-industry-card ${className}`}>
-    <img src={image} alt="" loading="lazy" />
+    <img src={image} alt="" loading="lazy" decoding="async" />
     <span className="new-home-card-shade" aria-hidden="true" />
     <div className="new-home-industry-card__content">
       <span className="new-home-industry-card__plus" aria-hidden="true">+</span>
@@ -156,7 +157,25 @@ const QuickIcon = ({ type }) => {
 
 const NewHome = () => {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [videoReady, setVideoReady] = useState(false);
   const { theme } = useTheme();
+
+  useEffect(() => {
+    let idleId;
+    const activateVideo = () => setVideoReady(true);
+    const timeoutId = window.setTimeout(activateVideo, 2000);
+
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(activateVideo, { timeout: 1800 });
+    }
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      if (idleId !== undefined && typeof window.cancelIdleCallback === "function") {
+        window.cancelIdleCallback(idleId);
+      }
+    };
+  }, []);
 
   const moveSlide = (direction) => {
     setActiveSlide((current) => (current + direction + heroSlides.length) % heroSlides.length);
@@ -168,22 +187,24 @@ const NewHome = () => {
     <main className="new-home" data-theme={theme}>
       <section className="new-home-hero" aria-labelledby="new-home-hero-title">
         <div className="new-home-hero__background" key={slide.image} style={{ backgroundImage: `url("${slide.image}")` }} />
-        <video
-          className="new-home-hero__video"
-          key={slide.video}
-          autoPlay
-          muted
-          playsInline
-          preload="auto"
-          poster={slide.image}
-          aria-hidden="true"
-          onEnded={() => setActiveSlide((current) => (current + 1) % heroSlides.length)}
-        >
-          <source src={slide.video} type="video/mp4" />
-        </video>
+        {videoReady && (
+          <video
+            className="new-home-hero__video"
+            key={slide.video}
+            autoPlay
+            muted
+            playsInline
+            preload="metadata"
+            poster={slide.image}
+            aria-hidden="true"
+            onEnded={() => setActiveSlide((current) => (current + 1) % heroSlides.length)}
+          >
+            <source src={slide.video} type="video/mp4" />
+          </video>
+        )}
         <div className="new-home-hero__overlay" aria-hidden="true" />
         <div className="new-home-container new-home-hero__inner">
-          <div className="new-home-hero__copy">
+          <div className="new-home-hero__copy" key={slide.label}>
             <span className="new-home-hero__label">{slide.label}</span>
             <h1 id="new-home-hero-title">{slide.title}</h1>
             <p>{slide.description}</p>
@@ -247,10 +268,10 @@ const NewHome = () => {
             <Link className="new-home-button new-home-button--dark-outline" to="/about">Learn more <Arrow /></Link>
           </div>
           <div className="new-home-stats__grid">
-            <div><strong>140+</strong><span>Countries and regions</span></div>
-            <div><strong>40+</strong><span>Subsidiary corporation</span></div>
-            <div><strong>2300+</strong><span>Global distributors</span></div>
-            <div><strong>70%+</strong><span>International talent localization rate</span></div>
+            <div><strong><AnimatedNumber value={140} suffix="+" /></strong><span>Countries and regions</span></div>
+            <div><strong><AnimatedNumber value={40} suffix="+" /></strong><span>Subsidiary corporation</span></div>
+            <div><strong><AnimatedNumber value={2300} suffix="+" /></strong><span>Global distributors</span></div>
+            <div><strong><AnimatedNumber value={70} suffix="%+" /></strong><span>International talent localization rate</span></div>
           </div>
         </div>
       </section>
@@ -264,7 +285,7 @@ const NewHome = () => {
           <div className="new-home-updates__grid" id="latest-updates">
             {updates.map((update) => (
               <Link className="new-home-update-card" to="/resources" key={update.title}>
-                <img src={update.image} alt="" loading="lazy" />
+                <img src={update.image} alt="" loading="lazy" decoding="async" />
                 <small>{update.date}</small>
                 <h3>{update.title}</h3>
               </Link>

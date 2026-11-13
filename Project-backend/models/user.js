@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const { Model } = require('sequelize');
 
 const PASSWORD_SALT_ROUNDS = 12;
+const USER_ROLES = ['admin', 'staff'];
 
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
@@ -32,6 +33,17 @@ module.exports = (sequelize, DataTypes) => {
       profileImage: {
         type: DataTypes.STRING(500),
         allowNull: true,
+      },
+      role: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        defaultValue: 'staff',
+        validate: { isIn: [USER_ROLES] },
+      },
+      permissions: {
+        type: DataTypes.JSON,
+        allowNull: false,
+        defaultValue: [],
       },
       password: {
         type: DataTypes.STRING(60),

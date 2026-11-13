@@ -4,6 +4,7 @@ export const defaultForm = (config, record) => {
   const values = {};
   config.fields.forEach((field) => {
     if (field.type === "file") values[field.name] = null;
+    else if (field.type === "permissions") values[field.name] = Array.isArray(record?.[field.name]) ? record[field.name] : [];
     else if (field.type === "boolean") values[field.name] = record?.[field.name] ?? field.defaultValue ?? false;
     else if (field.type === "date") values[field.name] = record?.[field.name] ? String(record[field.name]).slice(0, 10) : "";
     else values[field.name] = String(record?.[field.name] ?? field.defaultValue ?? ((field.name === "sortOrder" || field.name === "displayOrder") ? 0 : ""));

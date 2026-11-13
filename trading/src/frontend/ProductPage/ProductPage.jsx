@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./style/ProductPage.css";
 import { fetchCachedJson } from "../apiCache";
+import { searchMatches } from "../searchUtils";
 
 import fallbackProducts from "./DataProduct";
 import EngineeringSection from "./EngineeringSection";
@@ -58,6 +59,13 @@ const MACHINE_TYPE_OPTIONS = [
   { slug: "power-quality-automation", label: "Power Quality & Automation" },
   { slug: "electricity-meter", label: "Electricity Meter" },
 ];
+
+const getPaginationItems = (pageCount, currentPage) => {
+  if (pageCount <= 7) return Array.from({ length: pageCount }, (_, index) => index + 1);
+  if (currentPage <= 4) return [1, 2, 3, 4, 5, "ellipsis-end", pageCount];
+  if (currentPage >= pageCount - 3) return [1, "ellipsis-start", pageCount - 4, pageCount - 3, pageCount - 2, pageCount - 1, pageCount];
+  return [1, "ellipsis-start", currentPage - 1, currentPage, currentPage + 1, "ellipsis-end", pageCount];
+};
 
 const toCardSpecificationRows = (entries) => (entries || [])
   .flatMap((entry) => splitSpecificationValue(entry.value).map((value) => {
@@ -177,18 +185,19 @@ const ProductPage = () => {
   const selectedMachineTypeOption = MACHINE_TYPE_OPTIONS.find(
     (option) => option.slug === productSlug,
   );
+  const initialSearchQuery = searchParams.get("q") || searchParams.get("search") || "";
   const selectedMachineType = selectedMachineTypeOption?.label || "";
   const selectedDivision = collection === "factory" ? "factory" : "chint";
   const productContext = productContexts[collection] || productContexts.chint;
   const [products, setProducts] = useState([]);
-  const [nextPage, setNextPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [totalMachines, setTotalMachines] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [appliedSearch, setAppliedSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState(initialSearchQuery);
+  const [appliedSearch, setAppliedSearch] = useState(initialSearchQuery);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [topCategories, setTopCategories] = useState([]);
   const loadRequestRef = useRef(0);
@@ -216,41 +225,18 @@ const ProductPage = () => {
         if (requestId !== loadRequestRef.current) return;
 
         const totalPages = Number(firstResult.pagination?.totalPages);
-        const pageNumbers = pageToLoad === 1 && Number.isFinite(totalPages)
-          ? Array.from(
-              { length: Math.max(0, totalPages - 1) },
-              (_, index) => index + 2,
-            )
-          : [];
-        const remainingResults = await Promise.all(pageNumbers.map(loadPage));
-        if (requestId !== loadRequestRef.current) return;
-
-        const pageResults = [firstResult, ...remainingResults];
-        const newMachines = pageResults.flatMap((result) => (
-          Array.isArray(result.data) ? result.data.map(toProduct) : []
-        ));
+        const newMachines = (Array.isArray(firstResult.data) ? firstResult.data : [])
+          .map(toProduct);
         const uniqueMachines = [...new Map(
           newMachines.map((machine) => [String(machine.id), machine]),
         ).values()];
         const totalItems = Number(firstResult.pagination?.totalItems);
 
-        setProducts((current) => {
-          if (pageToLoad === 1) return uniqueMachines;
-
-          const loadedIds = new Set(current.map((machine) => machine.id));
-          return [
-            ...current,
-            ...uniqueMachines.filter((machine) => !loadedIds.has(machine.id)),
-          ];
-        });
+        setProducts(uniqueMachines);
+        setCurrentPage(pageToLoad);
+        setTotalPages(Number.isFinite(totalPages) ? Math.max(1, totalPages) : 1);
         setTotalMachines(
           Number.isFinite(totalItems) ? totalItems : uniqueMachines.length,
-        );
-        setNextPage(pageToLoad + (pageNumbers.length + 1));
-        setHasMore(
-          pageToLoad !== 1 && Number.isFinite(totalPages)
-            ? pageToLoad < totalPages
-            : false,
         );
       } catch (error) {
         if (requestId === loadRequestRef.current) {
@@ -309,9 +295,9 @@ const ProductPage = () => {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setProducts([]);
-      setNextPage(1);
+      setCurrentPage(1);
+      setTotalPages(1);
       setTotalMachines(0);
-      setHasMore(true);
       loadMachines(1);
     }, 0);
 
@@ -358,6 +344,7 @@ const ProductPage = () => {
     ================================================= */
 
   const handleFilter = (name) => {
+    setCurrentPage(1);
     setFilters((prev) => ({
       ...prev,
       [name]: !prev[name],
@@ -366,6 +353,7 @@ const ProductPage = () => {
 
   const handleCategoryFilter = (categoryId) => {
     const key = String(categoryId);
+    setCurrentPage(1);
     setFilters((prev) => ({
       ...prev,
       categories: {
@@ -377,7 +365,13 @@ const ProductPage = () => {
 
   const handleProductSearch = (event) => {
     event.preventDefault();
-    setAppliedSearch(searchTerm.trim());
+    setCurrentPage(1);
+    const query = searchTerm.trim();
+    setAppliedSearch(query);
+    const nextParams = new URLSearchParams(searchParams);
+    if (query) nextParams.set("q", query);
+    else nextParams.delete("q");
+    setSearchParams(nextParams, { replace: true });
   };
 
   /* =================================================
@@ -401,8 +395,10 @@ const ProductPage = () => {
     setSelectedCategory("");
     setSearchTerm("");
     setAppliedSearch("");
+    setCurrentPage(1);
     const nextParams = new URLSearchParams(searchParams);
     nextParams.delete("product");
+    nextParams.delete("q");
     setSearchParams(nextParams);
   };
 
@@ -506,8 +502,7 @@ const ProductPage = () => {
   const filteredProducts = useMemo(() => {
     return randomizedProducts
       .filter((product) => {
-        const searchMatch =
-          !normalizedSearch || product.searchText.includes(normalizedSearch);
+        const searchMatch = searchMatches(product.searchText, normalizedSearch);
         const categoryMatch =
           !selectedCategoryKey || product.categoryKey === selectedCategoryKey;
         const productCategoryId = String(product.categoryId || "");
@@ -800,7 +795,7 @@ const ProductPage = () => {
                   <button
                     type="button"
                     className={`product-popular-category ${!selectedCategory ? "active" : ""}`}
-                    onClick={() => setSelectedCategory("")}
+                    onClick={() => { setSelectedCategory(""); setCurrentPage(1); }}
                   >
                     All categories
                   </button>
@@ -809,7 +804,7 @@ const ProductPage = () => {
                       type="button"
                       className={`product-popular-category ${selectedCategory === category.name ? "active" : ""}`}
                       key={category.name}
-                      onClick={() => setSelectedCategory(category.name)}
+                      onClick={() => { setSelectedCategory(category.name); setCurrentPage(1); }}
                     >
                       <span>{category.name}</span>
                       <small>{category.viewCount} views</small>
@@ -823,8 +818,7 @@ const ProductPage = () => {
 
             <div className="product-result-header">
               <span>
-                SHOWING {filteredProducts.length} MATCHING MACHINES OF{" "}
-                {totalMachines}
+                SHOWING {filteredProducts.length} MACHINES ON PAGE {currentPage} OF {totalMachines} TOTAL
               </span>
             </div>
 
@@ -917,20 +911,20 @@ const ProductPage = () => {
               </p>
             )}
 
-            {(hasMore || loadError) && (
+            {loadError ? (
               <div className="product-load-more">
-                <button
-                  type="button"
-                  onClick={() => loadMachines(nextPage)}
-                  disabled={loading}
-                >
-                  {loading
-                    ? "LOADING PRODUCTS..."
-                    : loadError
-                      ? "RETRY LOADING PRODUCTS"
-                      : "LOAD MORE PRODUCTS"}
+                <button type="button" onClick={() => loadMachines(currentPage)} disabled={loading}>
+                  {loading ? "LOADING PRODUCTS..." : "RETRY LOADING PRODUCTS"}
                 </button>
               </div>
+            ) : totalPages > 1 && (
+              <nav className="product-pagination" aria-label="Chint product pages">
+                <button type="button" onClick={() => loadMachines(currentPage - 1)} disabled={loading || currentPage === 1} aria-label="Previous page">â€¹</button>
+                {getPaginationItems(totalPages, currentPage).map((item) => item === "ellipsis-start" || item === "ellipsis-end"
+                  ? <span key={item} aria-hidden="true">â€¦</span>
+                  : <button type="button" key={item} className={item === currentPage ? "pagination-active" : ""} onClick={() => loadMachines(item)} disabled={loading} aria-current={item === currentPage ? "page" : undefined}>{item}</button>)}
+                <button type="button" onClick={() => loadMachines(currentPage + 1)} disabled={loading || currentPage === totalPages} aria-label="Next page">â€º</button>
+              </nav>
             )}
           </div>
         </div>

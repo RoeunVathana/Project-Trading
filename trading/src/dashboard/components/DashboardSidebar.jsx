@@ -17,6 +17,17 @@ const DashboardSidebar = ({
     huawei: activeSection.startsWith("huawei"),
   });
   const accountName = displayAccountName(account, "EFSAN Workspace");
+  const canAccessResource = (resource) => account?.role === "admin"
+    || Array.isArray(account?.permissions)
+      && account.permissions.some((permission) => String(permission).toLowerCase().startsWith(`${resource}:`.toLowerCase()));
+  const visibleNavItems = NAV_ITEMS
+    .map((item) => item.children
+      ? { ...item, children: item.children.filter((child) => canAccessResource(child.key)) }
+      : item)
+    .filter((item) => item.key === "overview"
+      || item.key === "users" && account?.role === "admin"
+      || item.children?.length
+      || canAccessResource(item.key));
 
   return (
   <>
@@ -54,7 +65,7 @@ const DashboardSidebar = ({
 
       <div className="dashboard-nav-label">MAIN MENU</div>
       <nav className="dashboard-nav" aria-label="Dashboard sections">
-        {NAV_ITEMS.map((item) => {
+        {visibleNavItems.map((item) => {
           const childActive = item.children?.some((child) => child.key === activeSection);
           const itemActive = activeSection === item.key || childActive;
 
@@ -69,7 +80,7 @@ const DashboardSidebar = ({
                 onClick={() => {
                   if (item.children) {
                     setOpenGroups((groups) => ({ ...groups, [item.key]: !groups[item.key] }));
-                    if (!itemActive) setCurrentSection(item.key, { closeSidebar: false });
+                    if (!itemActive) setCurrentSection(item.children[0]?.key || item.key, { closeSidebar: false });
                     return;
                   }
                   setCurrentSection(item.key);

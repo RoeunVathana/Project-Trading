@@ -22,10 +22,28 @@ app.use(cors({ origin: corsOrigins.length ? corsOrigins : true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve images statically at /image
-app.use("/image", express.static(path.join(__dirname, "Public/image")));
-app.use("/video", express.static(path.join(__dirname, "Public/video")));
-app.use("/pdf", express.static(path.join(__dirname, "Public/pdf")));
+// Public catalog GETs are safe to reuse briefly between page navigations.
+// Authenticated dashboard requests stay uncached so permission/profile changes
+// are reflected immediately.
+app.use("/api", (req, res, next) => {
+  const isPublicCatalogRequest = !req.path.startsWith("/users");
+  if (req.method === "GET" && isPublicCatalogRequest && !req.get("authorization")) {
+    res.set("Cache-Control", "public, max-age=15, stale-while-revalidate=30");
+  } else {
+    res.set("Cache-Control", "no-store");
+  }
+  next();
+});
+
+// Uploaded media uses unique filenames, so cache it aggressively between visits.
+const mediaStaticOptions = {
+  maxAge: "30d",
+  etag: true,
+  lastModified: true,
+};
+app.use("/image", express.static(path.join(__dirname, "Public/image"), mediaStaticOptions));
+app.use("/video", express.static(path.join(__dirname, "Public/video"), mediaStaticOptions));
+app.use("/pdf", express.static(path.join(__dirname, "Public/pdf"), mediaStaticOptions));
 
 const ProductRoute = require("./routes/Product.route");
 const CategoryRoute = require("./routes/Category.route");
@@ -59,6 +77,35 @@ db.sequelize
       await queryInterface.addColumn("Users", "profileImage", {
         type: db.Sequelize.STRING(500),
         allowNull: true,
+      });
+    }
+    if (!usersTable.role) {
+      await queryInterface.addColumn("Users", "role", {
+        type: db.Sequelize.STRING(20),
+        allowNull: false,
+        defaultValue: "staff",
+      });
+      const usersTableName = queryInterface.quoteTable("Users");
+      const roleColumn = queryInterface.quoteIdentifier("role");
+      const usernameColumn = queryInterface.quoteIdentifier("username");
+      const idColumn = queryInterface.quoteIdentifier("id");
+      await db.sequelize.query(
+        `UPDATE ${usersTableName} SET ${roleColumn} = 'admin' WHERE LOWER(${usernameColumn}) = 'admin'`,
+      );
+      const [admins] = await db.sequelize.query(
+        `SELECT ${idColumn} FROM ${usersTableName} WHERE ${roleColumn} = 'admin' LIMIT 1`,
+      );
+      if (!admins.length) {
+        await db.sequelize.query(
+          `UPDATE ${usersTableName} SET ${roleColumn} = 'admin' WHERE ${idColumn} = (SELECT ${idColumn} FROM ${usersTableName} ORDER BY ${idColumn} ASC LIMIT 1)`,
+        );
+      }
+    }
+    if (!usersTable.permissions) {
+      await queryInterface.addColumn("Users", "permissions", {
+        type: db.Sequelize.JSON,
+        allowNull: false,
+        defaultValue: [],
       });
     }
     const machinesTable = await queryInterface.describeTable("machines");

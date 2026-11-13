@@ -69,6 +69,16 @@ const DashboardPage = () => {
   });
   const deferredSearch = useDeferredValue(search);
   const loadGenerationRef = useRef(0);
+  const canManageUsers = account?.role === "admin";
+  const hasPermission = (resource, action) => {
+    if (account?.role === "admin") return true;
+    const permission = `${resource}:${action}`.toLowerCase();
+    return Array.isArray(account?.permissions)
+      && account.permissions.some((item) => String(item).toLowerCase() === permission);
+  };
+  const canAccessResource = (resource) => account?.role === "admin"
+    || RESOURCE_KEYS.includes(resource) && Array.isArray(account?.permissions)
+      && account.permissions.some((item) => String(item).toLowerCase().startsWith(`${resource}:`.toLowerCase()));
 
   const loadData = useCallback(async () => {
     const loadGeneration = loadGenerationRef.current + 1;
@@ -116,7 +126,7 @@ const DashboardPage = () => {
       ["huaweiCategories", () => requestApi("/api/huawei-categories", { token }).then((result) => result.data || [])],
       ["huaweiImages", () => requestApi("/api/huawei-product-images", { token }).then((result) => result.data || [])],
       ["huaweiPdfs", () => requestApi("/api/huawei-product-pdfs", { token }).then((result) => result.data || [])],
-    ];
+    ].filter(([resource]) => resource !== "users" || canManageUsers);
 
     const coreResourceKeys = new Set(["machines", "categories", "gallery", "pdfs"]);
     const coreLoaders = loaders.filter(([resource]) => coreResourceKeys.has(resource));
@@ -162,7 +172,7 @@ const DashboardPage = () => {
 
     const backgroundResults = await backgroundPromise;
     applyResults(backgroundResults, backgroundLoaders);
-  }, [token]);
+  }, [canManageUsers, token]);
 
   useEffect(() => {
     if (!token || !account) return;
@@ -327,35 +337,71 @@ const DashboardPage = () => {
   }, [activeSection, activeConfig, deferredSearch, records, searchIndex]);
 
   const setCurrentSection = (section, options = {}) => {
+    if (section === "users" && !canManageUsers) {
+      setNotice({
+        type: "error",
+        message: "Only administrators can manage dashboard users.",
+      });
+      return;
+    }
+    if (section !== "overview" && RESOURCE_KEYS.includes(section) && !canAccessResource(section)) {
+      setNotice({
+        type: "error",
+        message: "Ask an administrator to assign permission for this section.",
+      });
+      return;
+    }
     setActiveSection(section);
     setSearch("");
     if (options.closeSidebar !== false) setSidebarOpen(false);
   };
 
-  const requireSignIn = () => {
-    if (token) return true;
-    setNotice({
-      type: "error",
-      message: "Sign in to create, update, or delete records.",
-    });
-    return false;
+  const requirePermission = (resource, action, record = null) => {
+    if (!token) {
+      setNotice({
+        type: "error",
+        message: "Sign in to create, update, or delete records.",
+      });
+      return false;
+    }
+    if (resource === "users" && !canManageUsers && !(action === "update" && String(record?.id) === String(account?.id))) {
+      setNotice({
+        type: "error",
+        message: "Only administrators can manage dashboard users.",
+      });
+      return false;
+    }
+    if (resource !== "users" && !hasPermission(resource, action)) {
+      setNotice({
+        type: "error",
+        message: `Ask an administrator to assign ${action} permission for ${RESOURCE_CONFIG[resource].title}.`,
+      });
+      return false;
+    }
+    return true;
   };
 
   const openCreate = (resource) => {
-    if (!requireSignIn()) return;
+    if (!requirePermission(resource, "create")) return;
     setActiveSection(resource);
     setForm(defaultForm(RESOURCE_CONFIG[resource]));
     setDialog({ resource, record: null });
   };
 
+  const openProfile = () => {
+    if (!account || !requirePermission("users", "update", account)) return;
+    setForm(defaultForm(RESOURCE_CONFIG.users, account));
+    setDialog({ resource: "users", record: account, profileOnly: true });
+  };
+
   const openEdit = (resource, record) => {
-    if (!requireSignIn()) return;
+    if (!requirePermission(resource, "update", record)) return;
     setForm(defaultForm(RESOURCE_CONFIG[resource], record));
     setDialog({ resource, record });
   };
 
   const openDelete = (resource, record) => {
-    if (!requireSignIn()) return;
+    if (!requirePermission(resource, "delete", record)) return;
     setDeleteTarget({ resource, record });
   };
 
@@ -369,13 +415,15 @@ const DashboardPage = () => {
 
   const submitRecord = async (event) => {
     event.preventDefault();
-    if (!dialog || !requireSignIn()) return;
+    const action = dialog?.profileOnly ? "update" : dialog?.record ? "update" : "create";
+    if (!dialog || !requirePermission(dialog.resource, action, dialog.record)) return;
     const { resource, record } = dialog;
     const config = RESOURCE_CONFIG[resource];
-    const payload = {};
+      const payload = {};
     const fileUploads = [];
 
     config.fields.forEach((field) => {
+        if (resource === "users" && !canManageUsers && ["role", "permissions"].includes(field.name)) return;
       const value = form[field.name];
       if (field.type === "file") {
         const selectedFiles = Array.isArray(value) ? value : value ? [value] : [];
@@ -385,7 +433,11 @@ const DashboardPage = () => {
         const normalizedValue = field.normalize === "lowercase" && typeof value === "string"
           ? value.toLowerCase()
           : value;
-        payload[field.name] = field.type === "number" ? Number(normalizedValue) : normalizedValue;
+        payload[field.name] = field.type === "number"
+          ? Number(normalizedValue)
+          : field.type === "permissions"
+            ? JSON.stringify(normalizedValue)
+            : normalizedValue;
       }
     });
 
@@ -420,7 +472,9 @@ const DashboardPage = () => {
     setBusy(true);
     try {
       const endpoint = record
-        ? `${config.endpoint}/${config.recordPath ? config.recordPath(record) : record.id}`
+        ? resource === "users" && !canManageUsers
+          ? "/api/users/me"
+          : `${config.endpoint}/${config.recordPath ? config.recordPath(record) : record.id}`
         : config.createEndpoint || config.endpoint;
       const method = record ? "PUT" : "POST";
       const isBatchCreate = !record && fileUploads.length > 1 && fileUploads.every(({ field }) => field.multiple);
@@ -481,7 +535,7 @@ const DashboardPage = () => {
   };
 
   const removeRecord = async () => {
-    if (!deleteTarget || !requireSignIn()) return;
+    if (!deleteTarget || !requirePermission(deleteTarget.resource, "delete", deleteTarget.record)) return;
     const { resource, record } = deleteTarget;
     const config = RESOURCE_CONFIG[resource];
     setBusy(true);
@@ -742,6 +796,7 @@ const DashboardPage = () => {
           theme={theme}
           toggleTheme={toggleTheme}
           signOut={signOut}
+          openProfile={openProfile}
           setSidebarOpen={setSidebarOpen}
         />
         <main className="dashboard-content">
@@ -765,6 +820,8 @@ const DashboardPage = () => {
               largestCategoryViewCount={largestCategoryViewCount}
               openCreate={openCreate}
               setCurrentSection={setCurrentSection}
+              canManageUsers={canManageUsers}
+              canCreateResource={(resource) => resource === "users" ? canManageUsers : hasPermission(resource, "create")}
             />
           ) : (
             <ResourceSection
@@ -781,6 +838,9 @@ const DashboardPage = () => {
               onCreate={() => openCreate(activeSection)}
               onEdit={(record) => openEdit(activeSection, record)}
               onDelete={(record) => openDelete(activeSection, record)}
+              canCreate={activeSection === "users" ? canManageUsers : hasPermission(activeSection, "create")}
+              canUpdate={activeSection === "users" ? canManageUsers : hasPermission(activeSection, "update")}
+              canDelete={activeSection === "users" ? canManageUsers : hasPermission(activeSection, "delete")}
             />
           )}{" "}
         </main>

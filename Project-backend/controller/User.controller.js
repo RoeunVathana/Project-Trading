@@ -4,6 +4,9 @@ const { Op, col, fn, where } = require("sequelize");
 const { User } = require("../models");
 const { logError } = require("../middlewares/LogError");
 const { getImageUrl, removeImage } = require("../utils/Upload");
+const { normalizePermissions } = require("../middlewares/Authorization");
+
+const USER_ROLES = ["admin", "staff"];
 
 const discardUploadedImage = (req) => {
   if (req.file) removeImage(getImageUrl(req.file));
@@ -15,6 +18,8 @@ const publicUser = (user) => ({
   username: user.username,
   email: user.email,
   profileImage: user.profileImage,
+  role: user.role || "staff",
+  permissions: normalizePermissions(user.permissions),
 });
 
 const createAccessToken = (user) => {
@@ -24,7 +29,7 @@ const createAccessToken = (user) => {
   }
 
   return jwt.sign(
-    { username: user.username, email: user.email },
+    { username: user.username, email: user.email, role: user.role },
     secret,
     {
       subject: String(user.id),
@@ -80,6 +85,21 @@ const parseUserPayload = (body, { requirePassword = false, allowEmpty = false } 
     return { error: "password must contain at least 8 characters." };
   }
 
+  if (Object.prototype.hasOwnProperty.call(body, "role")) {
+    if (typeof body.role !== "string" || !USER_ROLES.includes(body.role.trim().toLowerCase())) {
+      return { error: "role must be either admin or staff." };
+    }
+    values.role = body.role.trim().toLowerCase();
+  }
+
+  if (Object.prototype.hasOwnProperty.call(body, "permissions")) {
+    const permissions = normalizePermissions(body.permissions);
+    if (!Array.isArray(body.permissions) && typeof body.permissions !== "string") {
+      return { error: "permissions must be an array." };
+    }
+    values.permissions = permissions;
+  }
+
   if (Object.keys(values).length === 0 && !allowEmpty) {
     return { error: "Provide at least one supported user field." };
   }
@@ -88,12 +108,12 @@ const parseUserPayload = (body, { requirePassword = false, allowEmpty = false } 
 };
 
 const findDuplicateUser = async (values, ignoredId) => {
-  const duplicateWhere = {
-    [Op.or]: [
-      where(fn("LOWER", col("username")), values.username || ""),
-      where(fn("LOWER", col("email")), values.email || ""),
-    ],
-  };
+  const duplicateChecks = [];
+  if (values.username) duplicateChecks.push(where(fn("LOWER", col("username")), values.username));
+  if (values.email) duplicateChecks.push(where(fn("LOWER", col("email")), values.email));
+  if (!duplicateChecks.length) return null;
+
+  const duplicateWhere = { [Op.or]: duplicateChecks };
   if (ignoredId) duplicateWhere.id = { [Op.ne]: ignoredId };
   return User.findOne({ where: duplicateWhere });
 };
@@ -106,6 +126,15 @@ const register = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Request body must be a JSON object.",
+      });
+    }
+
+    const isBootstrapRegistration = !req.user && (await User.count()) === 0;
+    if (!req.user && !isBootstrapRegistration) {
+      discardUploadedImage(req);
+      return res.status(403).json({
+        success: false,
+        message: "Public registration is closed. Ask an administrator to create your account.",
       });
     }
 
@@ -160,6 +189,15 @@ const register = async (req, res) => {
       });
     }
 
+    const requestedRole = isBootstrapRegistration ? "admin" : (body.role || "staff");
+    if (typeof requestedRole !== "string" || !USER_ROLES.includes(requestedRole.trim().toLowerCase())) {
+      discardUploadedImage(req);
+      return res.status(400).json({
+        success: false,
+        message: "role must be either admin or staff.",
+      });
+    }
+
     const existingUser = await User.findOne({
       where: {
         [Op.or]: [
@@ -181,6 +219,8 @@ const register = async (req, res) => {
       username,
       email,
       password,
+      role: requestedRole.trim().toLowerCase(),
+      permissions: normalizePermissions(body.permissions),
       profileImage: req.file ? getImageUrl(req.file) : null,
     });
     return res.status(201).json({
@@ -276,7 +316,7 @@ const getCurrentUser = async (req, res) => {
 const getUsers = async (_req, res) => {
   try {
     const users = await User.findAll({
-      attributes: ["id", "username", "email", "profileImage"],
+      attributes: ["id", "username", "email", "profileImage", "role", "permissions"],
       order: [["id", "DESC"]],
     });
     return res.status(200).json({ success: true, data: users.map(publicUser) });
@@ -304,6 +344,17 @@ const updateUser = async (req, res) => {
     if (!user) {
       discardUploadedImage(req);
       return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    if (user.role === "admin" && values.role === "staff") {
+      const adminCount = await User.count({ where: { role: "admin" } });
+      if (adminCount <= 1) {
+        discardUploadedImage(req);
+        return res.status(409).json({
+          success: false,
+          message: "The last administrator cannot be changed to staff.",
+        });
+      }
     }
 
     const duplicate = await findDuplicateUser(values, id);
@@ -343,6 +394,16 @@ const deleteUser = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found." });
     }
 
+    if (user.role === "admin") {
+      const adminCount = await User.count({ where: { role: "admin" } });
+      if (adminCount <= 1) {
+        return res.status(409).json({
+          success: false,
+          message: "The last administrator cannot be deleted.",
+        });
+      }
+    }
+
     await user.destroy();
     removeImage(user.profileImage);
     return res.status(200).json({ success: true, message: "User deleted." });
@@ -351,4 +412,23 @@ const deleteUser = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getCurrentUser, getUsers, updateUser, deleteUser };
+const updateCurrentUser = async (req, res) => {
+  req.params.id = req.user?.sub;
+  if (req.body && typeof req.body === "object" && !Array.isArray(req.body)) {
+    const safeBody = { ...req.body };
+    delete safeBody.role;
+    delete safeBody.permissions;
+    req.body = safeBody;
+  }
+  return updateUser(req, res);
+};
+
+module.exports = {
+  register,
+  login,
+  getCurrentUser,
+  getUsers,
+  updateUser,
+  updateCurrentUser,
+  deleteUser,
+};
