@@ -52,6 +52,7 @@
 .hr-metrics > div { min-width: 0; }
 .hr-metrics dt { margin-bottom: 4px; color: #d4e1e4; font-size: var(--text-caption-size); font-weight: 650; line-height: 1.5; text-transform: uppercase; }
 .hr-metrics dd { color: #fff; font-size: clamp(24px, 2.25vw, 36px); font-weight: 730; letter-spacing: -.02em; line-height: 1.2; white-space: nowrap; }
+.hr-metrics dd > span { display: inline; color: inherit; font-size: inherit; font-weight: inherit; letter-spacing: inherit; line-height: inherit; }
 .hr-metrics small { display: inline-block; margin-left: 7px; font-size: var(--text-small-size); font-weight: 650; letter-spacing: 0; }
 .hr-overview-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 10px; }
 .hr-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 14px; border: 1px solid transparent; border-radius: 3px; font-size: var(--text-control-size) !important; font-weight: 650 !important; line-height: 1.35; text-align: center; transition: background-color 180ms ease, border-color 180ms ease; }
