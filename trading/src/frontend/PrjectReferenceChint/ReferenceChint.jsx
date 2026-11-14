@@ -4,8 +4,16 @@ import { downloadReferenceDossier } from "./referenceDossier";
 import AnimatedNumber from "../components/AnimatedNumber/AnimatedNumber";
 import "./ReferenceChint.css";
 
-const imageUrl = (name) => `${import.meta.env.BASE_URL}moreAccssories/${encodeURIComponent(name)}`;
-const logoUrl = (name) => `${import.meta.env.BASE_URL}logoCHINT/${encodeURIComponent(name)}`;
+const imageUrl = (source) => {
+  if (/^https?:\/\//i.test(source)) return source;
+  const assetPath = source.includes("/") ? source : `moreAccssories/${source}`;
+  return `${import.meta.env.BASE_URL}${assetPath.split("/").map(encodeURIComponent).join("/")}`;
+};
+const handleImageError = (event) => {
+  event.currentTarget.onerror = null;
+  event.currentTarget.src = imageUrl("list (4).jpg");
+};
+const logoUrl = (name) => `${import.meta.env.BASE_URL}logoCusytomerCHINT/${encodeURIComponent(name)}`;
 const PAGE_SIZE = 6;
 
 const customerLogos = [
@@ -17,62 +25,46 @@ const customerLogos = [
   "EMC - Logo.png",
   "GREEN POWER LOGO-01-01.png",
   "KSR Logo.JPG",
-  "Logo - EGE.png",
-  "Logo - Master MEP.jpg",
-  "Logo - Meng Brother.jpg",
-  "Logo - SOMA Energy.png",
   "MAUSO - Logo.png",
   "Mekong Land - Logo.png",
   "MVEs Logo.JPG",
   "PATtech - Logo.png",
 ];
 
-// Reference content from the supplied design. Photography comes from the local image library.
+// Reference content from the supplied design. Images are cached locally so every card renders reliably.
+const REFERENCE_IMAGES = Object.freeze({
+  eastCondo: "moreAccssories/chint-reference/east-condo-reference.jpg",
+  samanea: "moreAccssories/chint-reference/samanea-reference.jpg",
+  zinus: "moreAccssories/chint-reference/zinus-reference.jpg",
+  kCement: "moreAccssories/chint-reference/k-cement-reference.jpg",
+  uhs: "moreAccssories/chint-reference/uhs-reference.jpg",
+  westview: "moreAccssories/chint-reference/westview-reference.jpg",
+  kork: "moreAccssories/chint-reference/kork-reference.jpg",
+  edc: "moreAccssories/chint-reference/edc-kampot-reference.jpg",
+  edcSign: "moreAccssories/chint-reference/edc-kampot-sign-reference.jpg",
+  battery: "moreAccssories/chint-reference/battery-reference.jpg",
+  police: "moreAccssories/chint-reference/police-reference.jpg",
+  gyo: "moreAccssories/chint-reference/gyo-reference.jpg",
+  mahaBoengTrea: "moreAccssories/chint-reference/maha-boeng-trea-reference.jpg",
+  mekongLand: "moreAccssories/chint-reference/mekong-land-reference.jpg",
+  kimSoing: "moreAccssories/chint-reference/kim-soing-reference.jpg",
+  gbResidence: "moreAccssories/chint-reference/gb-residence-reference.jpg",
+  bosba: "moreAccssories/chint-reference/bosba-reference.jpg",
+  orienda: "moreAccssories/chint-reference/orienda-reference.jpg",
+  nationalHospital: "moreAccssories/chint-reference/national-hospital-reference.jpg",
+  boreyMl: "moreAccssories/chint-reference/borey-ml-reference.jpg",
+});
+
 const featuredProject = {
-  id: "al-dhafra", title: "500kV Al-Dhafra Ultra-High Voltage Grid Interconnection",
-  location: "Abu Dhabi, United Arab Emirates", region: "Middle East", sector: "substation",
-  category: "Substation", scale: "Utility scale", year: 2023,
-  image: "list (4).jpg", alt: "Large solar arrays stretching across a desert landscape",
-  description: "High-voltage grid infrastructure connecting large-scale energy generation with the wider transmission network.",
-  specs: [["Primary Tech", "GIS (Gas Insulated)"], ["Transformer Capacity", "750MVA Units"], ["Protocol", "IEC 61850"], ["Reliability", "99.999% Uptime"]],
+  id: "east-condo", title: "EAST Condo",
+  location: "Sen Sok", stateCity: "Phnom Penh", region: "Cambodia", sector: "residential",
+  category: "Residential Development", scale: "Residential Development", year: 2025,
+  image: REFERENCE_IMAGES.eastCondo, alt: "High-rise residential condominium in Phnom Penh",
+  description: "Electrical distribution reference for a Phnom Penh condominium development.",
+  specs: [["Products", "MDB 3200A, SDM"], ["Key selling point", "Price, Quality"], ["External publication", "No"]],
 };
 
-const projects = [
-  {
-    id: "copenhagen", title: "Copenhagen Metro Expansion", category: "Rail Infrastructure", sector: "rail",
-    location: "Copenhagen, Denmark", region: "Europe", scale: "Infrastructure", year: 2025,
-    image: "residential9-item-img1.jpg", alt: "Aerial view of a connected residential neighborhood and roads",
-    description: "Low-voltage distribution and smart grid automation for the city's newest suburban extensions.",
-    specs: [["Voltage", "400V / 10kV"], ["Hardware", "NGC3 Series"], ["Compliance", "IEC/EN 61439"]],
-  },
-  {
-    id: "atacama", title: "Atacama Solar PV Park", category: "Renewables", sector: "solar",
-    location: "Atacama Desert, Chile", region: "South America", scale: "Utility scale", year: 2025,
-    image: "  ", alt: "Rows of photovoltaic panels at a desert solar farm",
-    description: "A 250MW grid-connected solar array featuring high-efficiency inverters and step-up substations.",
-    specs: [["Voltage", "1500V DC / 33kV"], ["Hardware", "ASTRO Series"], ["Compliance", "IEEE 1547"]],
-  },
-  {
-    id: "bavaria", title: "Bavaria Automotive Gigafactory", category: "Industrial", sector: "industrial",
-    location: "Bavaria, Germany", region: "Europe", scale: "Commercial & industrial", year: 2025,
-    image: "yoonsteel-energy-storage-list.jpg", alt: "Industrial factory with rooftop solar panels and energy storage",
-    description: "Integrated power management and PLC automation for one of Europe's largest EV production sites.",
-    specs: [["Voltage", "20kV Medium Voltage"], ["Hardware", "CHINT Smartbox"], ["Compliance", "VDE/CE"]],
-  },
-  {
-    id: "sohar", title: "Sohar Port GIS Substation", category: "Substation", sector: "substation",
-    location: "Sohar, Oman", region: "Middle East", scale: "Infrastructure", year: 2024,
-    image: "list (2).jpg", alt: "Solar-powered buildings and energy infrastructure in a mountain community",
-    description: "220kV Gas-Insulated Substation (GIS) ensuring stable power for heavy industrial port operations.",
-    specs: [["Voltage", "220kV HV"], ["Hardware", "ZF12-252 GIS"], ["Compliance", "KEMA Certified"]],
-  },
-  {
-    id: "tokyo", title: "Tokyo Harbor BESS", category: "Energy Storage", sector: "storage",
-    location: "Tokyo, Japan", region: "Asia Pacific", scale: "Utility scale", year: 2024,
-    image: "smart-storage-clean-operations.jpg", alt: "Commercial battery energy storage installation and engineering team",
-    description: "A containerized battery energy storage system for peak shaving and grid frequency regulation.",
-    specs: [["Voltage", "6.6kV AC Interconnection"], ["Hardware", "Powerblock ESS"], ["Compliance", "JIS Compliance"]],
-  },
+/*
   {
     id: "sao-paulo", title: "São Paulo Suburban Rail", category: "Mobility", sector: "rail",
     location: "São Paulo, Brazil", region: "South America", scale: "Infrastructure", year: 2024,
@@ -83,9 +75,148 @@ const projects = [
   featuredProject,
 ];
 
+*/
+const projects = [
+  featuredProject,
+  {
+    id: "samanea-wellness-resort", title: "Samanea Wellness Resort", category: "Hospitality", sector: "hospitality",
+    location: "Ou Saom", stateCity: "Sihanoukville", region: "Cambodia", scale: "Hospitality", year: 2025,
+    image: REFERENCE_IMAGES.samanea, alt: "Green resort landscape in Sihanoukville",
+    description: "Electrical distribution reference for a wellness resort development in Ou Saom.",
+    specs: [["Products", "MDB, ATS 5000A"], ["Key selling point", "Price, Quality"], ["External publication", "No"]],
+  },
+  {
+    id: "zinus-factory", title: "ZINUS Factory", category: "Industrial Facility", sector: "industrial",
+    location: "Kandal Stueng", stateCity: "Kandal", region: "Cambodia", scale: "Commercial & Industrial", year: 2025,
+    image: REFERENCE_IMAGES.zinus, alt: "Industrial factory buildings in Cambodia",
+    description: "Industrial power distribution reference for the ZINUS manufacturing facility.",
+    specs: [["Products", "MDB 2500A"], ["Key selling point", "Price, Quality"], ["External publication", "No"]],
+  },
+  {
+    id: "k-cement-factory", title: "K-Cement Factory", category: "Cement Manufacturing", sector: "industrial",
+    location: "Kampot Province", stateCity: "Kampot Province", region: "Cambodia", scale: "Commercial & Industrial", year: 2025,
+    image: REFERENCE_IMAGES.kCement, alt: "Cement factory in Kampot province",
+    description: "Industrial power reference supporting cement production and reactive power compensation.",
+    specs: [["Products", "MSB 5000A, Cap.Bank 1500KVAR"], ["Key selling point", "Price, Quality"], ["External publication", "No"]],
+  },
+  {
+    id: "uhs", title: "The University of Health Sciences (UHS)", category: "Healthcare Education", sector: "healthcare",
+    location: "Prek Pnov", stateCity: "Phnom Penh", region: "Cambodia", scale: "Healthcare & Education", year: 2026,
+    image: REFERENCE_IMAGES.uhs, alt: "University health sciences building in Phnom Penh",
+    description: "Wiring reference for the University of Health Sciences development.",
+    specs: [["Products", "Wiring"], ["Key selling point", "Price, Quality"], ["External publication", "Yes"]],
+  },
+  {
+    id: "westview-school", title: "Westview Cambodian International School", category: "Education", sector: "education",
+    location: "Sen Sok", stateCity: "Phnom Penh", region: "Cambodia", scale: "Education", year: 2026,
+    image: REFERENCE_IMAGES.westview, alt: "International school campus in Cambodia",
+    description: "Power and capacitor-bank reference for an international school campus.",
+    specs: [["Products", "ATS 1600A, Capacitor Bank 300kvar"], ["Key selling point", "Price, Quality"], ["External publication", "No"]],
+  },
+  {
+    id: "kork-thlork-stadium", title: "Kork Thlork Stadium", category: "Sports Infrastructure", sector: "infrastructure",
+    location: "Muk Kampoul", stateCity: "Kandal Province", region: "Cambodia", scale: "Infrastructure", year: 2026,
+    image: REFERENCE_IMAGES.kork, alt: "Modern sports stadium and surrounding roads",
+    description: "Wiring and low-voltage product reference for a new sports stadium.",
+    specs: [["Products", "Wiring, LV Products"], ["Key selling point", "Price, Quality"], ["External publication", "Yes"]],
+  },
+  {
+    id: "edc-kampot", title: "EDC Kampot", category: "Power Utility", sector: "infrastructure",
+    location: "Kampot Province", stateCity: "Kampot Province", region: "Cambodia", scale: "Infrastructure", year: 2026,
+    image: REFERENCE_IMAGES.edc, alt: "Electricity utility facility in Cambodia",
+    description: "Utility reference for capacitor-bank equipment at EDC Kampot.",
+    specs: [["Products", "Cap.Bank"], ["Key selling point", "Price, Quality"], ["External publication", "No"]],
+  },
+  {
+    id: "edc-kampot-sign", title: "EDC Kampot", category: "Power Utility", sector: "infrastructure",
+    location: "Kampot Province", stateCity: "Kampot Province", region: "Cambodia", scale: "Infrastructure", year: 2026,
+    image: REFERENCE_IMAGES.edcSign, alt: "Electricity of Kampot facility sign",
+    description: "Utility reference for capacitor-bank equipment at EDC Kampot.",
+    specs: [["Products", "Cap.Bank"], ["Key selling point", "Price, Quality"], ["External publication", "No"]],
+  },
+  {
+    id: "control-building-battery", title: "Control Building Battery 400MWH", category: "Energy Storage", sector: "energy",
+    location: "Pursat", stateCity: "Pursat", region: "Cambodia", scale: "Energy Storage", year: 2025,
+    image: REFERENCE_IMAGES.battery, alt: "Battery energy storage containers at a solar facility",
+    description: "Battery storage control-building reference for a large renewable-energy installation.",
+    specs: [["Products", "Socket & Switch NEW2M, Breaker MCB & MCCB"], ["Key selling point", "Price, Quality"], ["External publication", "N/A"]],
+  },
+  {
+    id: "police-accommodation", title: "Police Accommodation Building", category: "Public Facility", sector: "infrastructure",
+    location: "Bavet", stateCity: "Bavet", region: "Cambodia", scale: "Public Facility", year: 2025,
+    image: REFERENCE_IMAGES.police, alt: "Institutional building in Cambodia",
+    description: "Public-facility electrical reference for police accommodation in Bavet.",
+    specs: [["Products", "Breaker MCB"], ["Key selling point", "Price, Quality"], ["External publication", "No"]],
+  },
+  {
+    id: "gyo-grayon", title: "GYO GRAYON SHV PROJECT", category: "Commercial Building", sector: "infrastructure",
+    location: "Sihanouk", stateCity: "Sihanouk", region: "Cambodia", scale: "Commercial & Industrial", year: 2025,
+    image: REFERENCE_IMAGES.gyo, alt: "Commercial building in Sihanoukville",
+    description: "Commercial-building reference for socket, switch, and breaker systems.",
+    specs: [["Products", "Socket & Switch NEW2M, Breaker MCB"], ["Key selling point", "Price, Quality"], ["External publication", "N/A"]],
+  },
+  {
+    id: "maha-boeng-trea", title: "BOREY Maha Boeng Trea", category: "Residential Development", sector: "residential",
+    location: "Kandal, Cambodia", stateCity: "Kandal, Cambodia", region: "Cambodia", scale: "Residential Development", year: 2023,
+    image: REFERENCE_IMAGES.mahaBoengTrea, alt: "Master-planned residential development in Cambodia",
+    description: "Residential development reference for breaker MCB installations.",
+    specs: [["Products", "Breaker MCB"], ["Key selling point", "Price, Quality"], ["External publication", "Yes"]],
+  },
+  {
+    id: "borey-mekong-land", title: "Borey Mekong Land", category: "Residential Development", sector: "residential",
+    location: "Chroy Chnava, Phnom Penh", stateCity: "Phnom Penh, Cambodia", region: "Cambodia", scale: "Residential Development", year: 2023,
+    image: REFERENCE_IMAGES.mekongLand, alt: "Master-planned housing development in Phnom Penh",
+    description: "Residential development reference for MCB and RCBO protection.",
+    specs: [["Products", "MCB, RCBO"], ["Key selling point", "Price, Warrantee, Payment term"], ["External publication", "Yes"]],
+  },
+  {
+    id: "borey-kim-soing", title: "Borey Kim Soing", category: "Residential Development", sector: "residential",
+    location: "Chbar Ampov, Phnom Penh", stateCity: "Phnom Penh, Cambodia", region: "Cambodia", scale: "Residential Development", year: 2023,
+    image: REFERENCE_IMAGES.kimSoing, alt: "Residential development in Phnom Penh",
+    description: "Residential development reference for MCB and RCBO protection.",
+    specs: [["Products", "MCB, RCBO"], ["Key selling point", "Price, Quality, Payment term"], ["External publication", "Yes"]],
+  },
+  {
+    id: "borey-gb-residence", title: "Borey GB Residence", category: "Residential Development", sector: "residential",
+    location: "Dangkor, Phnom Penh", stateCity: "Phnom Penh, Cambodia", region: "Cambodia", scale: "Residential Development", year: 2023,
+    image: REFERENCE_IMAGES.gbResidence, alt: "Borey residential development in Phnom Penh",
+    description: "Residential development reference for MCB and RCBO protection.",
+    specs: [["Products", "MCB, RCBO"], ["Key selling point", "Price, Quality, Payment term"], ["External publication", "Yes"]],
+  },
+  {
+    id: "borey-bosba", title: "Borey Bosba", category: "Residential Development", sector: "residential",
+    location: "Dangkor, Phnom Penh", stateCity: "Phnom Penh, Cambodia", region: "Cambodia", scale: "Residential Development", year: 2023,
+    image: REFERENCE_IMAGES.bosba, alt: "Borey Bosba residential development",
+    description: "Residential development reference for MCB, RCBO, and NEW2M switch systems.",
+    specs: [["Products", "MCB, RCBO, Switch-NEW2M"], ["Key selling point", "Price, Quality, Payment term"], ["External publication", "Yes"]],
+  },
+  {
+    id: "orienda-hospital", title: "Orienda International Hospital", category: "Healthcare", sector: "healthcare",
+    location: "Mean Chey, Phnom Penh", stateCity: "Phnom Penh, Cambodia", region: "Cambodia", scale: "Healthcare", year: 2023,
+    image: REFERENCE_IMAGES.orienda, alt: "Hospital facility in Phnom Penh",
+    description: "Healthcare-facility reference for control-box and MCB equipment.",
+    specs: [["Products", "Control Box (MCB)"], ["Key selling point", "Price, Quality"], ["External publication", "Yes"]],
+  },
+  {
+    id: "national-techo-santipheap", title: "National Techo-Santipheap Hospital", category: "Healthcare", sector: "healthcare",
+    location: "Prek Pnov, Phnom Penh", stateCity: "Phnom Penh, Cambodia", region: "Cambodia", scale: "Healthcare", year: 2023,
+    image: REFERENCE_IMAGES.nationalHospital, alt: "Hospital campus in Cambodia",
+    description: "Healthcare-facility reference for NEW7G and cable systems.",
+    specs: [["Products", "NEW7G, Cable"], ["Key selling point", "Price, Quality"], ["External publication", "Yes"]],
+  },
+  {
+    id: "borey-ml", title: "Borey ML", category: "Residential Development", sector: "residential",
+    location: "Ta Khmao City, Kandal", stateCity: "Kandal, Cambodia", monthYear: "April 2026", region: "Cambodia", scale: "Residential Development", year: 2026,
+    image: REFERENCE_IMAGES.boreyMl, alt: "Townhouse development in Ta Khmao",
+    description: "Residential development reference awaiting final publication confirmation.",
+    specs: [["Products", "MCB, RCCB"], ["Key selling point", "Price, Quality, Service"], ["External publication", "Wait for confirm from owner"]],
+  },
+];
+
 const sectors = [
-  ["all", "All Sectors"], ["solar", "Utility & Solar PV"], ["substation", "T&D / Substations"],
-  ["industrial", "Industrial Automation"], ["rail", "Smart Cities & Rail"], ["storage", "BESS Energy Storage"],
+  ["all", "All Projects"], ["residential", "Residential"], ["industrial", "Industrial"],
+  ["education", "Education"], ["healthcare", "Healthcare"], ["hospitality", "Hospitality"],
+  ["infrastructure", "Infrastructure"], ["energy", "Energy Storage"],
 ];
 const regions = [...new Set(projects.map((project) => project.region))];
 const scales = [...new Set(projects.map((project) => project.scale))];
@@ -110,6 +241,15 @@ const Icon = ({ name }) => {
 const Specs = ({ items, className = "chint-card-specs" }) => (
   <dl className={className}>{items.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
 );
+
+const ProjectFacts = ({ project }) => {
+  const stateCity = project.stateCity || project.location.split(",").slice(1).join(",").trim() || project.location;
+  const monthYear = project.monthYear || project.year;
+  const labelMap = { "Key selling point": "Key Selling Point", "External publication": "Permission for external publication" };
+  const facts = [["Project Location", project.location], ["State & City", stateCity], ["Month & Year", monthYear], ...project.specs.map(([label, value]) => [labelMap[label] || label, value])];
+
+  return <Specs items={facts} />;
+};
 
 const FilterSelect = ({ label, value, options, onChange }) => (
   <label className="chint-select">
@@ -147,7 +287,7 @@ const CustomerLogoSlider = () => {
 
 const ReferenceChint = () => {
   const [filters, setFilters] = useState({ sector: "all", region: "all", scale: "all", year: "all" });
-  const [sort, setSort] = useState("newest");
+  const [sort, setSort] = useState("source");
   const [view, setView] = useState("grid");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -174,14 +314,14 @@ const ReferenceChint = () => {
 
   const filteredProjects = projects.filter((project) => (
     Object.entries(filters).every(([key, value]) => value === "all" || String(project[key]) === value)
-  )).sort((a, b) => sort === "name" ? a.title.localeCompare(b.title) : sort === "oldest" ? a.year - b.year : b.year - a.year);
+  )).sort((a, b) => sort === "source" ? 0 : sort === "name" ? a.title.localeCompare(b.title) : sort === "oldest" ? a.year - b.year : b.year - a.year);
   const visibleProjects = filteredProjects.slice(0, visibleCount);
   const remaining = filteredProjects.length - visibleProjects.length;
 
   return (
     <main className="chint-reference-page" aria-labelledby="chint-reference-title">
       <section className="chint-hero">
-        <img className="chint-hero-image" src={imageUrl("list (4).jpg")} alt="" fetchPriority="high" />
+        <img className="chint-hero-image" src={imageUrl("list (4).jpg")} alt="" fetchPriority="high" onError={handleImageError} />
         <div className="chint-container chint-hero-content">
           <p className="chint-eyebrow">Global Infrastructure Excellence</p>
           <h1 id="chint-reference-title">Empowering the Global Energy<br className="chint-desktop-break" /> Transition in 140+ Countries</h1>
@@ -201,7 +341,7 @@ const ReferenceChint = () => {
       <section className="chint-featured chint-container" aria-labelledby="chint-featured-title">
         <div className="chint-section-heading"><h2 id="chint-featured-title">Featured Strategic Reference</h2><a className="chint-text-link" href="#project-matrix">View Project History<Icon name="arrow" /></a></div>
         <article className="chint-featured-card">
-          <div className="chint-featured-media"><img src={imageUrl(featuredProject.image)} alt={featuredProject.alt} width="1280" height="720" /><span className="chint-featured-badge">Flagship Implementation</span></div>
+          <div className="chint-featured-media"><img src={imageUrl(featuredProject.image)} alt={featuredProject.alt} width="1280" height="720" onError={handleImageError} /><span className="chint-featured-badge">Flagship Implementation</span></div>
           <div className="chint-featured-copy">
             <h3>{featuredProject.title}</h3>
             <p className="chint-location"><Icon name="pin" />{featuredProject.location}</p>
@@ -224,7 +364,7 @@ const ReferenceChint = () => {
                 <FilterSelect label="Delivery Year" options={years} value={filters.year} onChange={(value) => updateFilter("year", value)} />
               </div>
               <div className="chint-view-tools">
-                <label className="chint-sort"><span>Sorted by:</span><select aria-label="Sort references" value={sort} onChange={(event) => { setSort(event.target.value); setVisibleCount(PAGE_SIZE); }}><option value="newest">Newest First</option><option value="oldest">Oldest First</option><option value="name">Project Name</option></select></label>
+                <label className="chint-sort"><span>Sorted by:</span><select aria-label="Sort references" value={sort} onChange={(event) => { setSort(event.target.value); setVisibleCount(PAGE_SIZE); }}><option value="source">Reference Order</option><option value="newest">Newest First</option><option value="oldest">Oldest First</option><option value="name">Project Name</option></select></label>
                 <div className="chint-view-toggle" role="group" aria-label="Project display">
                   {["grid", "list"].map((mode) => <button key={mode} type="button" className={view === mode ? "is-active" : ""} aria-label={`${mode === "grid" ? "Grid" : "List"} view`} aria-pressed={view === mode} onClick={() => setView(mode)}><Icon name={mode} /></button>)}
                 </div>
@@ -237,8 +377,8 @@ const ReferenceChint = () => {
           <div className={`chint-project-grid${view === "list" ? " is-list" : ""}`}>
             {visibleProjects.map((project) => (
               <article className="chint-project-card" key={project.id}>
-                <div className="chint-card-media"><img src={imageUrl(project.image)} alt={project.alt} width="1280" height="720" loading="lazy" decoding="async" /><span className={`chint-category chint-category--${project.sector}`}>{project.category}</span></div>
-                <div className="chint-card-copy"><h3>{project.title}</h3><p className="chint-card-description">{project.description}</p><Specs items={project.specs} /><button className="chint-text-link" type="button" onClick={() => setSelectedProject(project)} aria-label={`Read case study: ${project.title}`}>Quick Access Case Study<Icon name="chevron" /></button></div>
+                <div className="chint-card-media"><img src={imageUrl(project.image)} alt={project.alt} width="1280" height="720" loading="lazy" decoding="async" onError={handleImageError} /><span className={`chint-category chint-category--${project.sector}`}>{project.category}</span></div>
+                <div className="chint-card-copy"><h3>{project.title}</h3><p className="chint-card-description">{project.description}</p><ProjectFacts project={project} /><button className="chint-text-link" type="button" onClick={() => setSelectedProject(project)} aria-label={`Read case study: ${project.title}`}>Quick Access Case Study<Icon name="chevron" /></button></div>
               </article>
             ))}
           </div>
@@ -262,7 +402,7 @@ const ReferenceChint = () => {
       </section>
 
       <dialog className="chint-dialog" ref={dialogRef} aria-labelledby="chint-dialog-title" onCancel={() => setSelectedProject(null)} onClick={(event) => { if (event.target === event.currentTarget) { const bounds = event.currentTarget.getBoundingClientRect(); if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) setSelectedProject(null); } }}>
-        {selectedProject && <><button className="chint-dialog-close" type="button" aria-label="Close case study" onClick={() => setSelectedProject(null)} autoFocus><Icon name="close" /></button><div className="chint-dialog-content"><img className="chint-dialog-image" src={imageUrl(selectedProject.image)} alt={selectedProject.alt} /><p className="chint-eyebrow">{selectedProject.category} / Project Reference</p><h2 id="chint-dialog-title">{selectedProject.title}</h2><p className="chint-location"><Icon name="pin" />{selectedProject.location}</p><p>{selectedProject.description}</p><Specs items={selectedProject.specs} /><Link className="chint-button chint-button--primary" to={`/contact?project=${encodeURIComponent(selectedProject.title)}`}>Discuss a Similar Project<Icon name="arrow" /></Link></div></>}
+        {selectedProject && <><button className="chint-dialog-close" type="button" aria-label="Close case study" onClick={() => setSelectedProject(null)} autoFocus><Icon name="close" /></button><div className="chint-dialog-content"><img className="chint-dialog-image" src={imageUrl(selectedProject.image)} alt={selectedProject.alt} onError={handleImageError} /><p className="chint-eyebrow">{selectedProject.category} / Project Reference</p><h2 id="chint-dialog-title">{selectedProject.title}</h2><p className="chint-location"><Icon name="pin" />{selectedProject.location}</p><p>{selectedProject.description}</p><Specs items={selectedProject.specs} /><Link className="chint-button chint-button--primary" to={`/contact?project=${encodeURIComponent(selectedProject.title)}`}>Discuss a Similar Project<Icon name="arrow" /></Link></div></>}
       </dialog>
     </main>
   );

@@ -6,27 +6,15 @@ import AnimatedNumber from "../components/AnimatedNumber/AnimatedNumber";
 import "./ReferenceHuawei.css";
 
 const imageUrl = (name) => `${import.meta.env.BASE_URL}moreAccssories/${encodeURIComponent(name)}`;
-const logoUrl = (name) => `${import.meta.env.BASE_URL}logoCHINT/${encodeURIComponent(name)}`;
+const logoUrl = (name) => `${import.meta.env.BASE_URL}logoCustomerHauwei/${encodeURIComponent(name)}`;
 const emptyFilters = { search: "", voltage: "", sector: "", region: "" };
 const sectors = [...new Set(huaweiReferences.map((project) => project.sector))];
 const regions = [...new Set(huaweiReferences.map((project) => project.region))];
 const customerLogos = [
-  "AES logo.svg",
-  "ARCHETYPE GROUP - LOGO.png",
-  "ATE Logo.png",
-  "DBD Engineering LOGO.png",
-  "EDC - Logo.png",
-  "EMC - Logo.png",
-  "GREEN POWER LOGO-01-01.png",
-  "KSR Logo.JPG",
   "Logo - EGE.png",
   "Logo - Master MEP.jpg",
   "Logo - Meng Brother.jpg",
   "Logo - SOMA Energy.png",
-  "MAUSO - Logo.png",
-  "Mekong Land - Logo.png",
-  "MVEs Logo.JPG",
-  "PATtech - Logo.png",
 ];
 
 const Icon = ({ name }) => {
@@ -63,8 +51,6 @@ const FilterSelect = ({ label, value, options, onChange }) => (
 );
 
 const CustomerLogoSlider = () => {
-  const logoTrack = [...customerLogos, ...customerLogos];
-
   return (
     <section className="hr-customers" aria-labelledby="hr-customers-title">
       <div className="hr-container hr-customer-heading">
@@ -74,9 +60,9 @@ const CustomerLogoSlider = () => {
       </div>
       <div className="hr-logo-slider" aria-label="Customer logos">
         <div className="hr-logo-track">
-          {logoTrack.map((logo, index) => (
-            <div className="hr-logo-card" key={`${logo}-${index}`} aria-hidden={index >= customerLogos.length}>
-              <img src={logoUrl(logo)} alt={index < customerLogos.length ? logo.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ") : ""} loading="lazy" decoding="async" />
+          {customerLogos.map((logo) => (
+            <div className="hr-logo-card" key={logo}>
+              <img src={logoUrl(logo)} alt={logo.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ")} loading="lazy" decoding="async" />
             </div>
           ))}
         </div>
@@ -92,7 +78,6 @@ const ReferenceHuawei = () => {
   const [compact, setCompact] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const searchRef = useRef(null);
-  const resultsRef = useRef(null);
   const dialogRef = useRef(null);
 
   useEffect(() => {
@@ -135,8 +120,6 @@ const ReferenceHuawei = () => {
   const selectPage = (number) => {
     if (number < 1 || number > pageCount) return;
     setPage(number);
-    resultsRef.current?.scrollIntoView({ block: "start", behavior: "instant" });
-    resultsRef.current?.focus({ preventScroll: true });
   };
   const exportProject = (project) => downloadHuaweiLedger([project], `Huawei-${project.id}-specifications.xlsx`);
 
@@ -183,7 +166,7 @@ const ReferenceHuawei = () => {
         </div>
       </section>
 
-      <div className="hr-container hr-results" id="project-matrix" ref={resultsRef} tabIndex={-1}>
+      <div className="hr-container hr-results" id="project-matrix">
         <p className="hr-sr-only" role="status" aria-atomic="true">Showing {firstResult}–{lastResult} of {filteredProjects.length} projects. Page {page} of {pageCount}.</p>
         <div className={`hr-project-grid${compact ? " is-compact" : ""}`}>
           {visibleProjects.map((project, index) => (

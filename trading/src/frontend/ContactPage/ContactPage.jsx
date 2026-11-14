@@ -68,7 +68,7 @@ const ContactPage = () => {
       "",
       `Description: ${formData.get("description")}`,
     ].join("\n");
-    window.location.href = `mailto:support.us@schentec.com?subject=${encodeURIComponent("Technical inquiry")}&body=${encodeURIComponent(body)}`;
+    window.location.href = `mailto:trading@schneitec.com.kh?subject=${encodeURIComponent("SchneiTec Trading inquiry")}&body=${encodeURIComponent(body)}`;
   };
 
   return (
@@ -77,20 +77,20 @@ const ContactPage = () => {
       <div className="contact-shell">
         <header className="contact-hero">
           <div className="contact-hero__copy">
-            <p className="contact-eyebrow"><span /> Technical communication</p>
-            <h1>Engineering <em>Interface</em>.</h1>
+            <p className="contact-eyebrow"><span /> Contact SchneiTec Trading</p>
+            <h1>Let's build a reliable <em>solution</em>.</h1>
             <p className="contact-hero__intro">
-              Connect with our application specialists or request technical support
-              for your sub-micron systems. Global response teams active across all timezones.
+              Talk with our team about CHINT low-voltage and medium-voltage equipment,
+              Huawei FusionSolar solutions, project support, and after-sales service in Cambodia.
             </p>
           </div>
 
-          <a className="contact-hotline" href="tel:+492891128900">
+          <a className="contact-hotline" href="tel:+85593305040">
             <span className="contact-hotline__icon"><Icon name="phone" /></span>
             <span className="contact-hotline__copy">
-              <span className="contact-label">Global breakdown dispatcher</span>
-              <strong>+49 (0) 711<br />928 000</strong>
-              <small><i /> Immediate support · 24 / 7 / 365</small>
+              <span className="contact-label">Cambodia sales &amp; support</span>
+              <strong>093 30 50 40<br />061 277 881</strong>
+              <small><i /> Call or email our team</small>
             </span>
           </a>
         </header>
@@ -142,9 +142,10 @@ const ContactPage = () => {
                   <span>Machine series</span>
                   <select name="series" defaultValue="">
                     <option value="">Select series...</option>
-                    <option>Precision systems</option>
-                    <option>Automation systems</option>
-                    <option>Measurement systems</option>
+                    <option>CHINT low voltage</option>
+                    <option>CHINT medium voltage</option>
+                    <option>Huawei solar &amp; energy storage</option>
+                    <option>Project support</option>
                     <option>Other / not sure</option>
                   </select>
                 </label>
@@ -166,19 +167,19 @@ const ContactPage = () => {
             </form>
           </section>
 
-          <aside className="contact-sidebar" aria-label="Global support information">
-            <section className="contact-network-card" aria-label="Global technical support availability">
-              <span className="contact-status"><i /> Global technical live</span>
+          <aside className="contact-sidebar" aria-label="SchneiTec Trading support information">
+            <section className="contact-network-card" aria-label="SchneiTec Trading technical support availability">
+              <span className="contact-status"><i /> Cambodia technical live</span>
               <GlobeIllustration />
               <div className="contact-map-tag contact-map-tag--detroit">
-                <strong>Detroit tech center</strong><span>Northville, MI · UTC −04:00</span>
+                <strong>SchneiTec office</strong><span>Phnom Penh · Cambodia</span>
               </div>
               <div className="contact-map-tag contact-map-tag--stuttgart">
-                <strong>Stuttgart HQ</strong><span>Germany · UTC +02:00</span>
+                <strong>Partner network</strong><span>CHINT + Huawei</span>
               </div>
               <div className="contact-network-stats">
-                <div><span>Response time avg.</span><strong>18.4 <small>min</small></strong></div>
-                <div><span>Active engineers</span><strong>142</strong></div>
+                <div><span>Core solutions</span><strong>LV · MV · Solar</strong></div>
+                <div><span>Support coverage</span><strong>Sales + technical</strong></div>
               </div>
             </section>
 
@@ -186,28 +187,27 @@ const ContactPage = () => {
               <article className="contact-office">
                 <span className="contact-office__icon"><Icon name="pin" /></span>
                 <div>
-                  <h3>European headquarters</h3>
-                  <p>Industrial Drive 42, Stuttgart-Ost<br />70190 Stuttgart, Germany</p>
-                  <a href="mailto:hq@schentec.com">hq@schentec.com</a>
-                  <a href="tel:+49711928000">+49 711 928 000</a>
+                  <h3>Head office · Phnom Penh</h3>
+                  <p>អគារលេខ៣៥៨ ជាន់ទី៤ ប្លុក AB<br />ផ្លូវលេខ១៦៩ ភូមិ១ សង្កាត់ស្រះចក<br />ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ</p>
+                  <p>Address: #358, 4th, Block AB, St. 169,<br />Phum 1, Srah Chak, Daun Penh,<br />Phnom Penh, Cambodia</p>
                 </div>
               </article>
               <article className="contact-office">
-                <span className="contact-office__icon"><Icon name="pin" /></span>
+                <span className="contact-office__icon"><Icon name="mail" /></span>
                 <div>
-                  <h3>North American tech center</h3>
-                  <p>800 Engineering Way, Northville<br />Detroit, MI 48167, USA</p>
-                  <a href="mailto:support.us@schentec.com">support.us@schentec.com</a>
-                  <a href="tel:+13135550920">+1 313 555 0920</a>
+                  <h3>Sales &amp; technical support</h3>
+                  <a href="tel:+85593305040">093 30 50 40</a>
+                  <a href="tel:+85561277881">061 277 881</a>
+                  <a href="mailto:trading@schneitec.com.kh">trading@schneitec.com.kh</a>
                 </div>
               </article>
             </div>
 
             <section className="contact-training-card">
               <div className="contact-training-card__copy">
-                <h2>Documentation &amp; training</h2>
-                <p>Access technical manuals, firmware updates, and the SchenTec Academy portal for operator certification.</p>
-                <a href="/resources" className="contact-training-link">Explore academy membership <Icon name="arrow" /></a>
+                <h2>Product support &amp; solutions</h2>
+                <p>Get practical guidance for LV, MV, and solar energy projects from product selection through delivery and after-sales support.</p>
+                <a href="mailto:trading@schneitec.com.kh" className="contact-training-link">Email SchneiTec Trading <Icon name="arrow" /></a>
               </div>
               <Icon className="contact-training-card__icon" name="book" />
             </section>

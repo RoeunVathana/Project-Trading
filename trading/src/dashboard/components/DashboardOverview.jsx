@@ -81,9 +81,11 @@ const DashboardOverview = ({
           <button type="button" className={!isHuawei ? "is-active" : ""} onClick={() => setCatalog("chint")}>CHINT</button>
           <button type="button" className={isHuawei ? "is-active" : ""} onClick={() => setCatalog("huawei")}>HUAWEI</button>
         </div>
-        <button type="button" className="dashboard-primary-button" onClick={() => openCreate(primaryResource)} disabled={!canCreateResource(primaryResource)}>
+        {canCreateResource(primaryResource) && (
+          <button type="button" className="dashboard-primary-button" onClick={() => openCreate(primaryResource)}>
           <span>ï¼‹</span> Add {isHuawei ? "product" : "machine"}
-        </button>
+          </button>
+        )}
       </section>
 
       <section className="dashboard-metrics" aria-label={`${brandLabel} catalog totals`}>

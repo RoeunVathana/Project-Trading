@@ -30,10 +30,12 @@ const ResourceSection = ({
   onImageView,
   onCreate,
   onEdit,
+  onManagePermissions,
   onDelete,
   canCreate,
   canUpdate,
   canDelete,
+  canManagePermissions = false,
 }) => {
   const filterKey = `${activeSection}:${search}`;
   const [pageState, setPageState] = useState({ key: filterKey, page: 1 });
@@ -42,6 +44,7 @@ const ResourceSection = ({
   const pageCount = Math.max(1, Math.ceil(filteredRecords.length / pageSize));
   const currentPage = Math.min(pageState.key === filterKey ? pageState.page : 1, pageCount);
   const paginationItems = getPaginationItems(pageCount, currentPage);
+  const hasRowActions = canUpdate || canDelete || canManagePermissions;
   const visibleRecords = shouldPaginate
     ? filteredRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     : filteredRecords;
@@ -61,9 +64,11 @@ const ResourceSection = ({
         <h1>{activeConfig.title}</h1>
         <p>{activeConfig.description}</p>
       </div>
-      <button type="button" className="dashboard-primary-button" onClick={onCreate} disabled={!canCreate} title={!canCreate ? "Permission not assigned" : undefined}>
-        <span>{"\uFF0B"}</span> Add {activeConfig.singular}
-      </button>
+      {canCreate && (
+        <button type="button" className="dashboard-primary-button" onClick={onCreate}>
+          <span>{"\uFF0B"}</span> Add {activeConfig.singular}
+        </button>
+      )}
     </section>
 
     <section className={`dashboard-panel resource-panel resource-panel-${activeSection}`}>
@@ -81,7 +86,10 @@ const ResourceSection = ({
           <div className="dashboard-table-wrap">
             <table className="dashboard-table">
               <thead>
-                <tr>{TABLE_COLUMNS[activeSection].map((column) => <th key={column.key}>{column.label}</th>)}<th className="table-actions-heading">Actions</th></tr>
+                <tr>
+                  {TABLE_COLUMNS[activeSection].map((column) => <th key={column.key}>{column.label}</th>)}
+                  {hasRowActions && <th className="table-actions-heading">Actions</th>}
+                </tr>
               </thead>
               <tbody>
                 {visibleRecords.map((record) => (
@@ -120,10 +128,13 @@ const ResourceSection = ({
                         </td>
                       );
                     })}
-                    <td data-label="Actions" className="table-actions">
-                      <button type="button" className="row-action edit-action" onClick={() => onEdit(record)} disabled={!canUpdate} aria-label={`Edit ${recordTitle(activeSection, record)}`} title={canUpdate ? "Edit" : "Edit permission not assigned"}>Edit</button>
-                      <button type="button" className="row-action delete-action" onClick={() => onDelete(record)} disabled={!canDelete} aria-label={`Delete ${recordTitle(activeSection, record)}`} title={canDelete ? "Delete" : "Delete permission not assigned"}>Delete</button>
-                    </td>
+                    {hasRowActions && <td data-label="Actions" className="table-actions">
+                      {canUpdate && <button type="button" className="row-action edit-action" onClick={() => onEdit(record)} aria-label={`Edit ${recordTitle(activeSection, record)}`} title="Edit">Edit</button>}
+                      {canManagePermissions && activeSection === "users" && record.role !== "admin" && (
+                        <button type="button" className="row-action permissions-action" onClick={() => onManagePermissions(record)} aria-label={`Manage permissions for ${recordTitle(activeSection, record)}`} title="Manage permissions">Permissions</button>
+                      )}
+                      {canDelete && <button type="button" className="row-action delete-action" onClick={() => onDelete(record)} aria-label={`Delete ${recordTitle(activeSection, record)}`} title="Delete">Delete</button>}
+                    </td>}
                   </tr>
                 ))}
               </tbody>
@@ -180,7 +191,7 @@ const ResourceSection = ({
           <span className="empty-state-mark">{activeConfig.icon}</span>
           <strong>{search ? "No matching records" : `No ${activeConfig.title.toLowerCase()} yet`}</strong>
           <p>{search ? "Try another search term." : `Create your first ${activeConfig.singular} to get started.`}</p>
-          {!search && <button type="button" className="dashboard-primary-button" onClick={onCreate} disabled={!canCreate}>{"\uFF0B"} Add {activeConfig.singular}</button>}
+          {!search && canCreate && <button type="button" className="dashboard-primary-button" onClick={onCreate}>{"\uFF0B"} Add {activeConfig.singular}</button>}
         </div>
       )}
     </section>

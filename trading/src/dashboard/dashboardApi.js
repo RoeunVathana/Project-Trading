@@ -10,11 +10,23 @@ export const savedToken = () => {
   }
 };
 
-export const requestApi = async (path, { method = "GET", body, token = "" } = {}) => {
+export const requestApi = async (
+  path,
+  { method = "GET", body, token = "", signal, timeoutMs = 15_000 } = {},
+) => {
   const headers = {};
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const options = { method, headers };
+  const controller = new AbortController();
+  let timedOut = false;
+  const timeoutId = window.setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
+  const abortRequest = () => controller.abort();
+  signal?.addEventListener("abort", abortRequest, { once: true });
+
+  const options = { method, headers, signal: controller.signal };
   if (body instanceof FormData) {
     options.body = body;
   } else if (body !== undefined) {
@@ -22,12 +34,20 @@ export const requestApi = async (path, { method = "GET", body, token = "" } = {}
     options.body = JSON.stringify(body);
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, options);
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok || result.success === false) {
-    throw new Error(result.message || `Request failed (${response.status}).`);
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, options);
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || result.success === false) {
+      throw new Error(result.message || `Request failed (${response.status}).`);
+    }
+    return result;
+  } catch (error) {
+    if (timedOut) throw new Error("The request timed out. Please try again.", { cause: error });
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+    signal?.removeEventListener("abort", abortRequest);
   }
-  return result;
 };
 
 export const fetchAllMachines = async (token) => {
@@ -37,12 +57,16 @@ export const fetchAllMachines = async (token) => {
 
   if (totalPages <= 1) return machines;
 
-  const remainingPages = await Promise.all(
-    Array.from({ length: totalPages - 1 }, (_, index) =>
-      requestApi(`/api/machines?page=${index + 2}`, { token }),
-    ),
-  );
+  const pageBatchSize = 4;
+  for (let firstPage = 2; firstPage <= totalPages; firstPage += pageBatchSize) {
+    const pageBatch = await Promise.all(
+      Array.from(
+        { length: Math.min(pageBatchSize, totalPages - firstPage + 1) },
+        (_, index) => requestApi(`/api/machines?page=${firstPage + index}`, { token }),
+      ),
+    );
+    pageBatch.forEach((result) => machines.push(...(result.data || [])));
+  }
 
-  remainingPages.forEach((result) => machines.push(...(result.data || [])));
   return machines;
 };

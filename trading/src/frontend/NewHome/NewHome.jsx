@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../components/ThemeContext";
 import AnimatedNumber from "../components/AnimatedNumber/AnimatedNumber";
@@ -157,25 +157,7 @@ const QuickIcon = ({ type }) => {
 
 const NewHome = () => {
   const [activeSlide, setActiveSlide] = useState(0);
-  const [videoReady, setVideoReady] = useState(false);
   const { theme } = useTheme();
-
-  useEffect(() => {
-    let idleId;
-    const activateVideo = () => setVideoReady(true);
-    const timeoutId = window.setTimeout(activateVideo, 2000);
-
-    if (typeof window.requestIdleCallback === "function") {
-      idleId = window.requestIdleCallback(activateVideo, { timeout: 1800 });
-    }
-
-    return () => {
-      window.clearTimeout(timeoutId);
-      if (idleId !== undefined && typeof window.cancelIdleCallback === "function") {
-        window.cancelIdleCallback(idleId);
-      }
-    };
-  }, []);
 
   const moveSlide = (direction) => {
     setActiveSlide((current) => (current + direction + heroSlides.length) % heroSlides.length);
@@ -187,21 +169,19 @@ const NewHome = () => {
     <main className="new-home" data-theme={theme}>
       <section className="new-home-hero" aria-labelledby="new-home-hero-title">
         <div className="new-home-hero__background" key={slide.image} style={{ backgroundImage: `url("${slide.image}")` }} />
-        {videoReady && (
-          <video
-            className="new-home-hero__video"
-            key={slide.video}
-            autoPlay
-            muted
-            playsInline
-            preload="metadata"
-            poster={slide.image}
-            aria-hidden="true"
-            onEnded={() => setActiveSlide((current) => (current + 1) % heroSlides.length)}
-          >
-            <source src={slide.video} type="video/mp4" />
-          </video>
-        )}
+        <video
+          className="new-home-hero__video"
+          key={slide.video}
+          autoPlay
+          muted
+          playsInline
+          preload="auto"
+          poster={slide.image}
+          aria-hidden="true"
+          onEnded={() => setActiveSlide((current) => (current + 1) % heroSlides.length)}
+        >
+          <source src={slide.video} type="video/mp4" />
+        </video>
         <div className="new-home-hero__overlay" aria-hidden="true" />
         <div className="new-home-container new-home-hero__inner">
           <div className="new-home-hero__copy" key={slide.label}>
@@ -262,16 +242,26 @@ const NewHome = () => {
       <section className="new-home-stats">
         <div className="new-home-container new-home-stats__layout">
           <div className="new-home-stats__copy">
-            <h2>Global Operation<br />Localization</h2>
-            <strong>International subsidiaries all over the world</strong>
-            <p>Leading overseas intelligent electrical and clean energy system solutions provider. Deepen localization management and build a world-class enterprise based on a constantly expanding global layout.</p>
-            <Link className="new-home-button new-home-button--dark-outline" to="/about">Learn more <Arrow /></Link>
+            <span className="new-home-stats__eyebrow">Global Footprint</span>
+            <h2>Connecting the world to empower regions</h2>
+            <p>At the heart of our global strategy is a deep commitment to delivering tailored solutions for your individual market needs. By merging international best practices with regional insights, we build a strong, sustainable, and world-class enterprise that grows with the communities we serve.</p>
+            <Link className="new-home-button new-home-button--outline" to="/about">Explore our locations <Arrow /></Link>
+            <div className="new-home-stats__grid">
+              <div><strong><AnimatedNumber value={140} suffix="+" /></strong><span>Countries and regions</span></div>
+              <div><strong><AnimatedNumber value={40} suffix="+" /></strong><span>Regional offices</span></div>
+              <div><strong><AnimatedNumber value={2300} suffix="+" /></strong><span>Global distributors</span></div>
+              <div><strong><AnimatedNumber value={70} suffix="%+" /></strong><span>Talent localization across borders</span></div>
+            </div>
           </div>
-          <div className="new-home-stats__grid">
-            <div><strong><AnimatedNumber value={140} suffix="+" /></strong><span>Countries and regions</span></div>
-            <div><strong><AnimatedNumber value={40} suffix="+" /></strong><span>Subsidiary corporation</span></div>
-            <div><strong><AnimatedNumber value={2300} suffix="+" /></strong><span>Global distributors</span></div>
-            <div><strong><AnimatedNumber value={70} suffix="%+" /></strong><span>International talent localization rate</span></div>
+          <div className="new-home-stats__visual" aria-hidden="true">
+            <div className="new-home-globe">
+              <div className="new-home-globe__sphere">
+                <span className="new-home-globe__land new-home-globe__land--one" />
+                <span className="new-home-globe__land new-home-globe__land--two" />
+                <span className="new-home-globe__land new-home-globe__land--three" />
+              </div>
+              {Array.from({ length: 9 }, (_, index) => <span className={`new-home-globe__marker new-home-globe__marker--${index + 1}`} key={index}><i /></span>)}
+            </div>
           </div>
         </div>
       </section>

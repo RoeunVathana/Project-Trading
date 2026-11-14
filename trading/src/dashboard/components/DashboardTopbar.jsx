@@ -25,6 +25,7 @@ const DashboardTopbar = ({
     huaweiImages: "Huawei gallery",
     huaweiPdfs: "Huawei PDF library",
     users: "users",
+    permissions: "staff permissions",
   }[activeSection] || "records";
 
   return (

@@ -23,6 +23,17 @@ const allowedExtensions = new Set([
   ".tif",
   ".tiff",
 ]);
+const allowedImageMimeTypes = new Map([
+  [".jpg", new Set(["image/jpeg"])],
+  [".jpeg", new Set(["image/jpeg"])],
+  [".png", new Set(["image/png"])],
+  [".gif", new Set(["image/gif"])],
+  [".webp", new Set(["image/webp"])],
+  [".bmp", new Set(["image/bmp", "image/x-ms-bmp"])],
+  [".svg", new Set(["image/svg+xml"])],
+  [".tif", new Set(["image/tiff"])],
+  [".tiff", new Set(["image/tiff"])],
+]);
 const allowedVideoExtensions = new Set([
   ".mp4",
   ".webm",
@@ -39,6 +50,12 @@ const allowedVideoExtensions = new Set([
 fs.mkdirSync(imageDirectory, { recursive: true });
 fs.mkdirSync(videoDirectory, { recursive: true });
 
+const isAllowedImageFile = (file) => {
+  const extension = path.extname(file.originalname).toLowerCase();
+  return allowedExtensions.has(extension)
+    && allowedImageMimeTypes.get(extension)?.has(file.mimetype);
+};
+
 const storage = multer.diskStorage({
   destination: (_req, _file, callback) => callback(null, imageDirectory),
   filename: (_req, file, callback) => {
@@ -51,8 +68,7 @@ const storage = multer.diskStorage({
 const multerUpload = multer({
   storage,
   fileFilter: (_req, file, callback) => {
-    const extension = path.extname(file.originalname).toLowerCase();
-    if (allowedExtensions.has(extension)) return callback(null, true);
+    if (isAllowedImageFile(file)) return callback(null, true);
     return callback(new Error("Only image files are allowed."));
   },
   limits: { fileSize: MAX_IMAGE_FILE_SIZE },
@@ -73,7 +89,7 @@ const machineMediaUpload = multer({
   storage: machineMediaStorage,
   fileFilter: (_req, file, callback) => {
     const extension = path.extname(file.originalname).toLowerCase();
-    if (file.fieldname === "image" && allowedExtensions.has(extension)) {
+    if (file.fieldname === "image" && isAllowedImageFile(file)) {
       return callback(null, true);
     }
 

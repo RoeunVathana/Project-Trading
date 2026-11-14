@@ -4,6 +4,7 @@ export const RESOURCE_KEYS = [
   "users",
 ];
 export const PERMISSION_ACTIONS = [
+  { value: "view", label: "View" },
   { value: "create", label: "Create" },
   { value: "update", label: "Edit" },
   { value: "delete", label: "Delete" },
@@ -241,7 +242,6 @@ export const RESOURCE_CONFIG = {
         { value: "staff", label: "Staff" },
         { value: "admin", label: "Admin" },
       ] },
-      { name: "permissions", label: "Staff permissions", type: "permissions", helpText: "Admins always have full access. Select the actions this staff member may perform." },
       { name: "password", label: "Password", type: "password", requiredOnCreate: true, placeholder: "At least 8 characters" },
       { name: "profileImageFile", label: "Profile image", type: "file", apiField: "image", accept: "image/*", maxSize: UPLOAD_LIMITS.image.bytes, maxSizeLabel: UPLOAD_LIMITS.image.label },
     ],
@@ -271,6 +271,7 @@ export const NAV_ITEMS = [
     })),
   },
   { key: "users", label: RESOURCE_CONFIG.users.title, icon: RESOURCE_CONFIG.users.icon },
+  { key: "permissions", label: "Staff permissions", icon: "P" },
 ];
 
 export const TABLE_COLUMNS = {

@@ -9,6 +9,7 @@ import DashboardSidebar from "./components/DashboardSidebar";
 import DashboardTopbar from "./components/DashboardTopbar";
 import RecordDialogs from "./components/RecordDialogs";
 import ResourceSection from "./components/ResourceSection";
+import StaffPermissionsPage from "./components/StaffPermissionsPage";
 import {
   CATEGORY_COLORS,
   RESOURCE_KEYS,
@@ -55,6 +56,7 @@ const DashboardPage = () => {
   const [form, setForm] = useState({});
   const [busy, setBusy] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [permissionUserId, setPermissionUserId] = useState("");
   const [notice, setNotice] = useState(null);
   const [token, setToken] = useState(savedToken);
   const [account, setAccount] = useState(null);
@@ -76,15 +78,14 @@ const DashboardPage = () => {
     return Array.isArray(account?.permissions)
       && account.permissions.some((item) => String(item).toLowerCase() === permission);
   };
-  const canAccessResource = (resource) => account?.role === "admin"
+  const canAccessResource = useCallback((resource) => account?.role === "admin"
     || RESOURCE_KEYS.includes(resource) && Array.isArray(account?.permissions)
-      && account.permissions.some((item) => String(item).toLowerCase().startsWith(`${resource}:`.toLowerCase()));
+      && account.permissions.some((item) => String(item).toLowerCase().startsWith(`${resource}:`.toLowerCase())), [account]);
 
   const loadData = useCallback(async () => {
     const loadGeneration = loadGenerationRef.current + 1;
     loadGenerationRef.current = loadGeneration;
     setLoading(true);
-    setLoadingResources(new Set(RESOURCE_KEYS));
     const loaders = [
       ["machines", () => fetchAllMachines(token)],
       [
@@ -126,7 +127,8 @@ const DashboardPage = () => {
       ["huaweiCategories", () => requestApi("/api/huawei-categories", { token }).then((result) => result.data || [])],
       ["huaweiImages", () => requestApi("/api/huawei-product-images", { token }).then((result) => result.data || [])],
       ["huaweiPdfs", () => requestApi("/api/huawei-product-pdfs", { token }).then((result) => result.data || [])],
-    ].filter(([resource]) => resource !== "users" || canManageUsers);
+    ].filter(([resource]) => resource === "users" ? canManageUsers : canAccessResource(resource));
+    setLoadingResources(new Set(loaders.map(([resource]) => resource)));
 
     const coreResourceKeys = new Set(["machines", "categories", "gallery", "pdfs"]);
     const coreLoaders = loaders.filter(([resource]) => coreResourceKeys.has(resource));
@@ -172,7 +174,7 @@ const DashboardPage = () => {
 
     const backgroundResults = await backgroundPromise;
     applyResults(backgroundResults, backgroundLoaders);
-  }, [canManageUsers, token]);
+  }, [canAccessResource, canManageUsers, token]);
 
   useEffect(() => {
     if (!token || !account) return;
@@ -220,21 +222,23 @@ const DashboardPage = () => {
   }, [notice]);
 
   const activeConfig = RESOURCE_CONFIG[activeSection];
-  const categoryStats = useMemo(
-    () =>
-      records.categories
-        .map((category) => ({
-          ...category,
-          machineCount: records.machines.filter(
-            (machine) => Number(machine.categoryId) === Number(category.id),
-          ).length,
-          viewCount: records.machines
-            .filter((machine) => Number(machine.categoryId) === Number(category.id))
-            .reduce((total, machine) => total + Number(machine.viewCount || 0), 0),
-        }))
-        .sort((left, right) => right.machineCount - left.machineCount),
-    [records.categories, records.machines],
-  );
+  const categoryStats = useMemo(() => {
+    const totalsByCategory = new Map();
+    records.machines.forEach((machine) => {
+      const categoryId = Number(machine.categoryId);
+      const current = totalsByCategory.get(categoryId) || { machineCount: 0, viewCount: 0 };
+      current.machineCount += 1;
+      current.viewCount += Number(machine.viewCount || 0);
+      totalsByCategory.set(categoryId, current);
+    });
+
+    return records.categories
+      .map((category) => ({
+        ...category,
+        ...(totalsByCategory.get(Number(category.id)) || { machineCount: 0, viewCount: 0 }),
+      }))
+      .sort((left, right) => right.machineCount - left.machineCount);
+  }, [records.categories, records.machines]);
   const topCategoryStats = useMemo(
     () =>
       [...categoryStats].sort(
@@ -337,7 +341,7 @@ const DashboardPage = () => {
   }, [activeSection, activeConfig, deferredSearch, records, searchIndex]);
 
   const setCurrentSection = (section, options = {}) => {
-    if (section === "users" && !canManageUsers) {
+    if (["users", "permissions"].includes(section) && !canManageUsers) {
       setNotice({
         type: "error",
         message: "Only administrators can manage dashboard users.",
@@ -403,6 +407,25 @@ const DashboardPage = () => {
   const openDelete = (resource, record) => {
     if (!requirePermission(resource, "delete", record)) return;
     setDeleteTarget({ resource, record });
+  };
+
+  const openPermissions = (record) => {
+    if (!canManageUsers) {
+      setNotice({
+        type: "error",
+        message: "Only administrators can manage staff permissions.",
+      });
+      return;
+    }
+    setPermissionUserId(record.id);
+    setCurrentSection("permissions");
+  };
+
+  const handlePermissionsSaved = async (updatedUser) => {
+    clearCachedJson();
+    if (updatedUser?.id === account?.id) setAccount(updatedUser);
+    await loadData();
+    setNotice({ type: "success", message: "Staff permissions updated." });
   };
 
   const openView = (resource, record) => {
@@ -823,6 +846,15 @@ const DashboardPage = () => {
               canManageUsers={canManageUsers}
               canCreateResource={(resource) => resource === "users" ? canManageUsers : hasPermission(resource, "create")}
             />
+          ) : activeSection === "permissions" ? (
+            <StaffPermissionsPage
+              users={records.users}
+              token={token}
+              selectedUserId={permissionUserId}
+              onSelectedUserIdChange={setPermissionUserId}
+              onBackToUsers={() => setCurrentSection("users")}
+              onSaved={handlePermissionsSaved}
+            />
           ) : (
             <ResourceSection
               activeSection={activeSection}
@@ -837,10 +869,12 @@ const DashboardPage = () => {
               onImageView={openImageView}
               onCreate={() => openCreate(activeSection)}
               onEdit={(record) => openEdit(activeSection, record)}
+              onManagePermissions={openPermissions}
               onDelete={(record) => openDelete(activeSection, record)}
               canCreate={activeSection === "users" ? canManageUsers : hasPermission(activeSection, "create")}
               canUpdate={activeSection === "users" ? canManageUsers : hasPermission(activeSection, "update")}
               canDelete={activeSection === "users" ? canManageUsers : hasPermission(activeSection, "delete")}
+              canManagePermissions={activeSection === "users" && canManageUsers}
             />
           )}{" "}
         </main>

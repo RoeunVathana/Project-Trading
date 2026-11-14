@@ -3,7 +3,7 @@ const { User } = require("../models");
 const { logError } = require("./LogError");
 
 const USER_ROLES = Object.freeze(["admin", "staff"]);
-const PERMISSION_ACTIONS = Object.freeze(["create", "update", "delete"]);
+const PERMISSION_ACTIONS = Object.freeze(["view", "create", "update", "delete"]);
 const PERMISSION_RESOURCES = Object.freeze([
   "machines",
   "categories",

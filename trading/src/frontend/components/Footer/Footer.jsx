@@ -76,7 +76,8 @@ const Footer = () => (
         <div className="footer-contact-grid">
           <div className="footer-contact-item">
             <span>Phone</span>
-            <a href="tel:+85593305040">093 305 040</a>
+            <a href="tel:+85593305040">093 30 50 40</a>
+            <a href="tel:+85561277881">061 277 881</a>
           </div>
           <div className="footer-contact-item">
             <span>Mailbox</span>

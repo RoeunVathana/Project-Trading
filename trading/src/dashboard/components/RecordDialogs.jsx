@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { PERMISSION_ACTIONS, PERMISSION_OPTIONS, RESOURCE_CONFIG, TABLE_COLUMNS } from "../dashboardConfig";
+import { RESOURCE_CONFIG, TABLE_COLUMNS } from "../dashboardConfig";
 import { publicFileUrl, recordTitle } from "../dashboardUtils";
 
 const handleFileChange = (event, field, setForm) => {
@@ -192,7 +192,6 @@ const RecordDialogs = ({
   onCancelDelete,
   onConfirmDelete,
 }) => {
-  const permissionsLocked = dialog?.resource === "users" && form.role === "admin";
   const dialogLayer = (
     <>
       {imageTarget && <ImagePreviewDialog imageTarget={imageTarget} onCloseImage={onCloseImage} />}
@@ -218,40 +217,6 @@ const RecordDialogs = ({
                         <textarea value={form[field.name] || ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: field.normalize === "lowercase" ? event.target.value.toLowerCase() : event.target.value }))} placeholder={field.placeholder} rows={field.rows || 3} />
                         {field.helpText && <small className="dashboard-field-hint">{field.helpText}</small>}
                       </>
-                    ) : field.type === "permissions" ? (
-                      <div className="dashboard-permissions-field">
-                        <div className="dashboard-permission-grid">
-                          {PERMISSION_OPTIONS.map(({ resource, label }) => (
-                            <fieldset className="dashboard-permission-group" key={resource}>
-                              <legend>{label}</legend>
-                              <div className="dashboard-permission-actions">
-                                {PERMISSION_ACTIONS.map((action) => {
-                                  const permission = `${resource}:${action.value}`.toLowerCase();
-                                  const checked = Array.isArray(form[field.name]) && form[field.name].map((item) => String(item).toLowerCase()).includes(permission);
-                                  return (
-                                    <label key={permission} className="dashboard-permission-option">
-                                      <input
-                                        type="checkbox"
-                                        checked={checked}
-                                        disabled={permissionsLocked}
-                                        onChange={(event) => setForm((current) => {
-                                          const currentPermissions = Array.isArray(current[field.name]) ? current[field.name] : [];
-                                          const nextPermissions = event.target.checked
-                                            ? [...new Set([...currentPermissions, permission])]
-                                            : currentPermissions.filter((item) => String(item).toLowerCase() !== permission);
-                                          return { ...current, [field.name]: nextPermissions };
-                                        })}
-                                      />
-                                      <span>{action.label}</span>
-                                    </label>
-                                  );
-                                })}
-                              </div>
-                            </fieldset>
-                          ))}
-                        </div>
-                        <small className="dashboard-field-hint">{permissionsLocked ? "Administrators automatically have full access." : field.helpText}</small>
-                      </div>
                     ) : field.type === "select" ? (
                       <select value={form[field.name] || ""} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} required={field.required}>
                         <option value="">Select {field.label.toLowerCase()}</option>

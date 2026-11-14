@@ -26,6 +26,7 @@ const DashboardSidebar = ({
       : item)
     .filter((item) => item.key === "overview"
       || item.key === "users" && account?.role === "admin"
+      || item.key === "permissions" && account?.role === "admin"
       || item.children?.length
       || canAccessResource(item.key));
 

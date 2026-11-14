@@ -16,11 +16,38 @@ const corsOrigins = (process.env.CORS_ORIGINS || "")
 if (process.env.NODE_ENV === "production" && !process.env.TOKEN_SECRET) {
   throw new Error("TOKEN_SECRET must be configured in production.");
 }
+if (process.env.NODE_ENV === "production" && !corsOrigins.length) {
+  throw new Error("CORS_ORIGINS must be configured in production.");
+}
 
 // Middleware
-app.use(cors({ origin: corsOrigins.length ? corsOrigins : true }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.disable("x-powered-by");
+app.use((req, res, next) => {
+  res.set({
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  });
+  if (process.env.NODE_ENV === "production") {
+    res.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  }
+  next();
+});
+app.use(cors({
+  origin: (origin, callback) => {
+    const allowAllInDevelopment = process.env.NODE_ENV !== "production" && !corsOrigins.length;
+    if (!origin || allowAllInDevelopment || corsOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("CORS origin is not allowed."));
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: false,
+}));
+app.use(express.json({ limit: "2mb", strict: true }));
+app.use(express.urlencoded({ extended: false, limit: "1mb" }));
 
 // Public catalog GETs are safe to reuse briefly between page navigations.
 // Authenticated dashboard requests stay uncached so permission/profile changes
@@ -67,6 +94,21 @@ HuaweiRoute(app);
 HuaweiCategoryRoute(app);
 HuaweiCatalogRoute(app);
 
+app.use((error, _req, res, next) => {
+  if (res.headersSent) return next(error);
+  if (error?.type === "entity.too.large") {
+    return res.status(413).json({ success: false, message: "Request body is too large." });
+  }
+  if (error?.message === "CORS origin is not allowed.") {
+    return res.status(403).json({ success: false, message: "Origin is not allowed." });
+  }
+  void logError("UnhandledRequest", error);
+  return res.status(Number(error?.status) >= 400 ? Number(error.status) : 500).json({
+    success: false,
+    message: "Unable to process the request.",
+  });
+});
+
 // Sync database
 db.sequelize
   .sync()
@@ -85,10 +127,11 @@ db.sequelize
         allowNull: false,
         defaultValue: "staff",
       });
-      const usersTableName = queryInterface.quoteTable("Users");
-      const roleColumn = queryInterface.quoteIdentifier("role");
-      const usernameColumn = queryInterface.quoteIdentifier("username");
-      const idColumn = queryInterface.quoteIdentifier("id");
+      const { queryGenerator } = queryInterface;
+      const usersTableName = queryGenerator.quoteTable("Users");
+      const roleColumn = queryGenerator.quoteIdentifier("role");
+      const usernameColumn = queryGenerator.quoteIdentifier("username");
+      const idColumn = queryGenerator.quoteIdentifier("id");
       await db.sequelize.query(
         `UPDATE ${usersTableName} SET ${roleColumn} = 'admin' WHERE LOWER(${usernameColumn}) = 'admin'`,
       );

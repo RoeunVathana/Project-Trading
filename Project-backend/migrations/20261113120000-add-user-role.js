@@ -19,10 +19,13 @@ module.exports = {
       });
     }
 
-    const usersTable = queryInterface.quoteTable('Users');
-    const roleColumn = queryInterface.quoteIdentifier('role');
-    const usernameColumn = queryInterface.quoteIdentifier('username');
-    const idColumn = queryInterface.quoteIdentifier('id');
+    // Sequelize exposes identifier quoting through the dialect query generator,
+    // not directly on QueryInterface.
+    const { queryGenerator } = queryInterface;
+    const usersTable = queryGenerator.quoteTable('Users');
+    const roleColumn = queryGenerator.quoteIdentifier('role');
+    const usernameColumn = queryGenerator.quoteIdentifier('username');
+    const idColumn = queryGenerator.quoteIdentifier('id');
 
     await queryInterface.sequelize.query(
       `UPDATE ${usersTable} SET ${roleColumn} = 'admin' WHERE LOWER(${usernameColumn}) = 'admin'`,
