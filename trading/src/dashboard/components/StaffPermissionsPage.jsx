@@ -78,6 +78,15 @@ const StaffPermissionsPage = ({
     updateStatus({ message: "", error: "" });
   };
 
+  const applyViewOnlyPermissions = () => {
+    const viewOnlyPermissions = PERMISSION_OPTIONS.map(({ resource }) => `${resource}:view`);
+    setPermissionDrafts((current) => ({
+      ...current,
+      [selectedUserKey]: viewOnlyPermissions,
+    }));
+    updateStatus({ message: "View-only access selected. Click Save permissions to apply it.", error: "" });
+  };
+
   const savePermissions = async (event) => {
     event.preventDefault();
     if (!selectedUser) return;
@@ -167,6 +176,7 @@ const StaffPermissionsPage = ({
                                 type="checkbox"
                                 aria-label={`${action.label} ${label}`}
                                 checked={hasPermission(resource, action.value)}
+                                title={`${action.label} ${label}`}
                                 onChange={(event) => togglePermission(resource, action.value, event.target.checked)}
                               />
                               <span className="dashboard-permission-icon" title={`${action.label} ${label}`}>
@@ -189,6 +199,9 @@ const StaffPermissionsPage = ({
               )}
 
               <div className="dashboard-permissions-actions">
+                <button type="button" className="dashboard-secondary-button" onClick={applyViewOnlyPermissions} disabled={busy}>
+                  View only all
+                </button>
                 <button type="button" className="dashboard-secondary-button" onClick={resetPermissions} disabled={busy}>
                   Reset
                 </button>

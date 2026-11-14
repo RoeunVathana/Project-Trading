@@ -598,17 +598,28 @@ const DashboardPage = () => {
           body: registrationBody,
           token,
         });
+
+        setAccountMode("login");
+        setAccountForm({
+          name: "",
+          email: "",
+          identifier: accountForm.email,
+          password: "",
+          profileImage: null,
+        });
+        setNotice({
+          type: "success",
+          message: "Account created successfully. Please sign in to continue.",
+        });
+        return;
       }
 
       const loginResult = await requestApi("/api/users/login", {
         method: "POST",
-        body:
-          accountMode === "register"
-            ? { email: accountForm.email, password: accountForm.password }
-            : {
-                identifier: accountForm.identifier,
-                password: accountForm.password,
-              },
+        body: {
+          identifier: accountForm.identifier,
+          password: accountForm.password,
+        },
         token,
       });
       const nextToken = loginResult.data.token;
@@ -703,16 +714,30 @@ const DashboardPage = () => {
       return record.sortOrder ?? 0;
     }
     if (key === "video") {
-      return record.video ? (
-        <a
-          className="dashboard-video-link"
-          href={publicFileUrl(record.video)}
-          target="_blank"
-          rel="noreferrer"
-          onClick={(event) => event.stopPropagation()}
-        >
-          Watch video
-        </a>
+      const videoPath = record.video || record.videoUrl;
+      return videoPath ? (
+        <div className="dashboard-video-cell">
+          <video
+            className="dashboard-video-preview"
+            src={publicFileUrl(videoPath)}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-label={`Preview video for ${recordTitle(resource, record)}`}
+            onClick={(event) => event.stopPropagation()}
+          />
+          <a
+            className="dashboard-video-link"
+            href={publicFileUrl(videoPath)}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(event) => event.stopPropagation()}
+          >
+            Open video
+          </a>
+        </div>
       ) : (
         <span className="table-muted">No video</span>
       );
@@ -794,6 +819,7 @@ const DashboardPage = () => {
         submitAccount={submitAccount}
         busy={busy}
         error={notice?.type === "error" ? notice.message : ""}
+        success={notice?.type === "success" ? notice.message : ""}
         theme={theme}
         toggleTheme={toggleTheme}
       />

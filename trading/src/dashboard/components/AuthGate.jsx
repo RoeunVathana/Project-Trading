@@ -28,6 +28,7 @@ const AuthGate = ({
   submitAccount,
   busy,
   error,
+  success,
   theme,
   toggleTheme,
 }) => {
@@ -85,6 +86,7 @@ const AuthGate = ({
           </div>
 
           {error && <div className="dashboard-auth-error" role="alert">{error}</div>}
+          {success && <div className="dashboard-auth-success" role="status">{success}</div>}
 
           <form className="dashboard-auth-form" onSubmit={submitAccount}>
             {accountMode === "register" ? (

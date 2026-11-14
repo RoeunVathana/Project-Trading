@@ -826,6 +826,11 @@ img.account-avatar {
   width: 12%;
 }
 
+.resource-panel-machines .dashboard-table th:nth-child(9),
+.resource-panel-machines .dashboard-table td:nth-child(9) {
+  width: 12%;
+}
+
 .resource-panel-machines .dashboard-table th:last-child,
 .resource-panel-machines .dashboard-table td:last-child {
   width: 10%;
@@ -1252,6 +1257,23 @@ img.account-avatar {
 
 .dashboard-video-link:hover {
   text-decoration: underline;
+}
+
+.dashboard-video-cell {
+  display: grid;
+  justify-items: start;
+  gap: 5px;
+  min-width: 84px;
+}
+
+.dashboard-video-preview {
+  display: block;
+  width: 82px;
+  height: 48px;
+  border: 1px solid var(--theme-border);
+  border-radius: 4px;
+  background: #0d1b1e;
+  object-fit: cover;
 }
 
 .status-pill {
@@ -3222,6 +3244,17 @@ img.profile-avatar {
   border-radius: 8px;
   background: rgba(198, 83, 83, 0.08);
   color: var(--dash-danger, #c65353);
+  font-size: var(--text-small-size);
+  line-height: 1.5;
+}
+
+.dashboard-auth-success {
+  margin-top: 20px;
+  padding: 11px 13px;
+  border: 1px solid rgba(25, 155, 119, 0.3);
+  border-radius: 8px;
+  background: rgba(25, 155, 119, 0.08);
+  color: var(--dash-success, #167b60);
   font-size: var(--text-small-size);
   line-height: 1.5;
 }
